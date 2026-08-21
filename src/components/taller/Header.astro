@@ -14,7 +14,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (href: string) => `${base}${href}`;
 ---
 
-<header class="taller-header" id="taller-header">
+<header
+  class="taller-header"
+  id="taller-header"
+  style={`--header-bg:${taller.theme.headerBackground};--header-top-bg:${taller.theme.headerTopBackground}`}
+>
   <div class="taller-header__full" id="taller-header-full" style={`--logo-color: ${taller.logo.color}`}>
     <span class="taller-header__corner taller-header__corner--left" aria-hidden="true"></span>
     <span class="taller-header__corner taller-header__corner--right" aria-hidden="true"></span>
@@ -144,7 +148,7 @@ const withBase = (href: string) => `${base}${href}`;
      cualquier otro contenido. El header fijo/compacto es el único que
      queda pegado arriba, y sólo se activa pasado un umbral de scroll. */
   .taller-header__full {
-    background: var(--paper);
+    background: var(--header-top-bg);
     position: relative;
     overflow: hidden;
     z-index: 50;
@@ -320,7 +324,7 @@ const withBase = (href: string) => `${base}${href}`;
     border: var(--border-w) solid var(--ink);
     border-bottom-width: calc(var(--border-w) * 2);
     border-radius: 999px;
-    background: #fff;
+    background: var(--header-bg);
   }
   .taller-header__nav-list a {
     text-decoration: none;
@@ -353,7 +357,7 @@ const withBase = (href: string) => `${base}${href}`;
     left: 0;
     right: 0;
     z-index: 200;
-    background: #fff;
+    background: var(--header-bg);
     color: var(--ink);
     border-bottom: calc(var(--border-w) * 2) solid var(--ink);
     transform: translateY(-100%);
@@ -475,7 +479,7 @@ const withBase = (href: string) => `${base}${href}`;
       left: 0;
       right: 0;
       top: 100%;
-      background: #fff;
+      background: var(--header-bg);
       border-bottom: var(--border-w) solid var(--ink);
       padding: 0.4rem 0;
       border-radius: 0;

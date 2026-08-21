@@ -1,9 +1,10 @@
 ---
 import '../styles/global.css';
-import { site } from '../config/site';
+import { site, taller } from '../config/site';
 import Header from '../components/taller/Header.astro';
 import AnnouncementBar from '../components/taller/AnnouncementBar.astro';
 import Footer from '../components/taller/Footer.astro';
+import ColorSchemeStyles from '../components/ColorSchemeStyles.astro';
 
 interface Props {
   title?: string;
@@ -22,8 +23,9 @@ const pageTitle = title ? `${title} — Bujía` : 'Bujía Project Music';
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <ColorSchemeStyles />
   </head>
-  <body>
+  <body style={`--page-background:${taller.theme.pageBackground}`}>
     <AnnouncementBar />
     <Header />
 

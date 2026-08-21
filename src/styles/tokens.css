@@ -1,8 +1,10 @@
 /* ─────────────────────────────────────────────────────────────────────
-   Tokens: variables generadas a partir de src/config/site.ts en tiempo
-   de build (ver BaseLayout.astro, que las inyecta como <style> inline).
-   Este archivo trae los valores por default y la estructura de clases
-   ".scheme-rosa/acido/azul/negro" que usan los componentes de sección.
+   Tokens: valores por default de --ink/--accent/--paper. Las clases
+   ".scheme-<nombre>" (rosa, acido, azul, negro, kraft, etc) que las
+   pisan se generan a partir de `colorSchemes` (src/config/site.ts) —
+   ver src/components/ColorSchemeStyles.astro, incluido en los layouts.
+   Para agregar/editar un esquema de color, tocá site.ts, no este
+   archivo.
    ───────────────────────────────────────────────────────────────────── */
 
 :root {
@@ -13,25 +15,4 @@
   --radius: 18px;
   --font-body: 'Space Mono', ui-monospace, monospace;
   --font-head: 'Space Mono', ui-monospace, monospace;
-}
-
-.scheme-rosa {
-  --ink: #1a1a1a;
-  --accent: #ff2f92;
-  --paper: #fff0f6;
-}
-.scheme-acido {
-  --ink: #1a1a1a;
-  --accent: #d4ff2f;
-  --paper: #f7ffe0;
-}
-.scheme-azul {
-  --ink: #1a1a1a;
-  --accent: #2f6bff;
-  --paper: #eaf1ff;
-}
-.scheme-negro {
-  --ink: #ffffff;
-  --accent: #ffcc00;
-  --paper: #111111;
 }

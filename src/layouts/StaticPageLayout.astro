@@ -10,6 +10,7 @@
 // tocar este archivo ni el .astro de la ruta.
 import TallerLayout from './TallerLayout.astro';
 import TallerCover from '../components/taller/TallerCover.astro';
+import type { ColorSchemeName } from '../config/site';
 
 interface Props {
   title: string;
@@ -17,7 +18,7 @@ interface Props {
   tag?: string;
   subtitle?: string;
   credit?: string;
-  colorScheme?: 'rosa' | 'acido' | 'azul' | 'negro';
+  colorScheme?: ColorSchemeName;
 }
 
 const { title, description, tag, subtitle, credit, colorScheme } = Astro.props;

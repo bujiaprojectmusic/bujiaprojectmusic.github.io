@@ -2,6 +2,8 @@
 // Imagen a la izquierda o derecha con el texto del post fluyendo
 // alrededor. Metela en medio de tus párrafos de MDX.
 // Uso: <ImageSide src="/img/pastilla.jpg" alt="Pastilla rebobinada" side="left" caption="Rebobinado a mano" />
+import { withBase } from '../../utils/withBase';
+
 interface Props {
   src: string;
   alt: string;
@@ -13,7 +15,7 @@ const { src, alt, side = 'left', caption, width = '42%' } = Astro.props;
 ---
 
 <figure class:list={['img-side', `img-side--${side}`]} style={`--img-side-w: ${width}`}>
-  <img src={src} alt={alt} loading="lazy" />
+  <img src={withBase(src)} alt={alt} loading="lazy" />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 

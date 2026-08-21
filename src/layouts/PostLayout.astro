@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import type { ColorSchemeName } from '../config/site';
 
 interface Props {
   title: string;
@@ -7,7 +8,7 @@ interface Props {
   date: Date;
   volume?: number;
   fanzine: boolean;
-  colorScheme: 'rosa' | 'acido' | 'azul' | 'negro';
+  colorScheme: ColorSchemeName;
   tags: string[];
   cover?: string;
   coverAlt?: string;

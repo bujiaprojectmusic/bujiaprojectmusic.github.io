@@ -3,8 +3,10 @@
 // por su propio salto de página vía la prop `pageBreak`, nunca aplicando
 // la clase de salto al título mismo (el clip-path rompe con `break-before`).
 // Uso: <SectionTitle scheme="rosa" pageBreak>Taller</SectionTitle>
+import type { ColorSchemeName } from '../config/site';
+
 interface Props {
-  scheme?: 'rosa' | 'acido' | 'azul' | 'negro';
+  scheme?: ColorSchemeName;
   pageBreak?: boolean;
 }
 const { scheme = 'negro', pageBreak = false } = Astro.props;

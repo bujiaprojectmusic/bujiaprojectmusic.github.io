@@ -3,6 +3,8 @@
 // sello de "COPIA" en la esquina — estética de zine hecho en la
 // fotocopiadora del trabajo.
 // Uso: <Xerox src="/img/ampli.jpg" alt="Ampli desarmado" caption="Ampli desarmado" />
+import { withBase } from '../../utils/withBase';
+
 interface Props {
   src: string;
   alt: string;
@@ -13,7 +15,7 @@ const { src, alt, caption } = Astro.props;
 
 <figure class="xerox-photo">
   <span class="xerox-photo__frame">
-    <img src={src} alt={alt} loading="lazy" />
+    <img src={withBase(src)} alt={alt} loading="lazy" />
     <span class="xerox-photo__grain" aria-hidden="true" />
     <span class="xerox-photo__stamp">Copia</span>
   </span>

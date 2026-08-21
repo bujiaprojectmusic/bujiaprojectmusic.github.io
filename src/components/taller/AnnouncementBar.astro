@@ -11,7 +11,12 @@ const showNav = messages.length > 1;
 
 {
   enabled && messages.length > 0 && (
-    <div class="ann-bar" id="ann-bar" data-autoplay-ms={autoplayMs || 0}>
+    <div
+      class="ann-bar"
+      id="ann-bar"
+      data-autoplay-ms={autoplayMs || 0}
+      style={`--ann-bar-bg:${taller.theme.announcementBackground}`}
+    >
       <div class="container ann-bar__in">
         {showNav && (
           <button type="button" class="ann-bar__btn" id="ann-bar-prev" aria-label="Mensaje anterior">
@@ -39,7 +44,7 @@ const showNav = messages.length > 1;
 
 <style>
   .ann-bar {
-    background: #000;
+    background: var(--ann-bar-bg);
     color: #fff;
   }
   .ann-bar__in {

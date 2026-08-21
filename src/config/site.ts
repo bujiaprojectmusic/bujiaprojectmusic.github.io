@@ -15,8 +15,8 @@ export const site = {
 };
 
 export const social = {
-  instagram: '',
-  whatsapp: '',
+  instagram: 'https://instagram.com/bujiaprojectmusic',
+  whatsapp: 'https://wa.me/message/PRMKHTDNWYD3I1',
   discord: '',
   email: '',
 };
@@ -35,12 +35,32 @@ export const taller = {
   // 'catalog' | 'journal'.
   homeSections: ['hero', 'about', 'guitars', 'catalog', 'journal'] as const,
 
+  // Colores de "chrome" del sitio: el fondo general detrás de todas las
+  // secciones y el de las piezas fijas (header, barra de anuncios,
+  // footer) que NO siguen el colorScheme de cada sección. Cambiá los hex
+  // acá — no hace falta tocar ningún archivo .css.
+  theme: {
+    // Fondo de las páginas del taller, visible en los huecos entre
+    // secciones (arriba del hero, entre catálogo y journal, etc).
+    pageBackground: '#F1F0EB',
+    // Franja de arriba del todo del header (logo + redes + menú), la
+    // primera que se ve al entrar al sitio.
+    headerTopBackground: '#F1F0EB',
+    // Píldora del menú, header fijo al hacer scroll y submenú desplegable.
+    headerBackground: '#ffffff',
+    // Barra de anuncios arriba del header.
+    announcementBackground: '#000000',
+    // Footer.
+    footerBackground: '#000000',
+  },
+
   logo: {
-    // Si `image` tiene un path (relativo a /public, ej. "/img/logo.svg"),
-    // se usa esa imagen. Si se deja vacío, se usa `text` con el estilo
+    // Si `image` tiene un path (relativo a la carpeta public/, ej.
+    // "/img/logo.svg" — sin el prefijo "/public"), se usa esa imagen.
+    // Si se deja vacío, se usa `text` con el estilo
     // "cursiva en óvalo" del diseño como placeholder.
     text: 'Bujía',
-    image: '/public/img/logo.png',
+    image: '/img/logo.png',
     alt: 'Bujía Project Music',
     href: '/',
     // Color del óvalo y del texto placeholder (independiente del --accent
@@ -61,7 +81,7 @@ export const taller = {
     { label: 'Home', href: '/' },
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Servicios', href: '/catalogo' },
-    { label: 'Blog', href: '/archive' },
+    //{ label: 'Blog', href: '/archive' },
   ],
 
   // Buscador (ícono de lupa) en el header completo.
@@ -99,7 +119,7 @@ export const taller = {
   about: {
     enabled: true,
     // Esquema de color (rosa | acido | azul | negro).
-    colorScheme: 'negro' as const,
+    colorScheme: 'carbon' as const,
   },
 
   // Sección "Guitarras que construimos" — modelos + precios, con su
@@ -123,14 +143,14 @@ export const taller = {
   // /catalogo, con el listado completo).
   catalog: {
     enabled: true,
-    title: 'Nuestros productos',
+    title: 'Nuestros servicios',
     subtitle: 'Conoce los servicios que ofrecemos para tu instrumento',
     limit: 6,
     ctaLabel: 'Ver todo',
     ctaHref: '/catalogo',
     // Esquema de color de la sección (rosa | acido | azul | negro, ver
     // colorSchemes acá abajo).
-    colorScheme: 'rosa' as const,
+    colorScheme: 'taller' as const,
   },
 
   // Sección "Desde el taller" debajo del catálogo, con novedades/posts.
@@ -138,12 +158,17 @@ export const taller = {
   // la home antes del botón "Ver todos" (que linkea a /archive, con el
   // listado completo).
   journal: {
-    enabled: true,
+    enabled: false,
     title: 'Desde el taller',
     subtitle: 'Sesiones, reparaciones y cosas que armamos por acá',
     limit: 4,
     ctaLabel: 'Ver todos',
     ctaHref: '/archive',
+    // El "pizarrón" donde vive esta sección: fondo verde oscuro con
+    // textura de tiza, para que no se pierda contra el fondo cream del
+    // resto del sitio. Cambiá los hex acá.
+    background: '#1f3d2b',
+    ink: '#fdf8e7',
   },
 
   // Barra de anuncios arriba del header: franja negra angosta con
@@ -188,10 +213,12 @@ export const taller = {
   },
 };
 
-// Los 4 esquemas de color punk (rosa / ácido / azul / negro) que ya usás
-// en los snippets de Ghost para los títulos de sección tipo sticker.
-// Cambiá los hex acá y se propagan a todo el sitio (--ink / --accent / --paper
-// de cada esquema están definidos en src/styles/tokens.css).
+// Esquemas de color punk (rosa / ácido / azul / negro / kraft / etc) para
+// los títulos de sección tipo sticker y las portadas del taller. Cambiá
+// los hex acá y se propagan solos a todo el sitio: las clases CSS
+// ".scheme-<nombre>" se generan a partir de este objeto (ver
+// ColorSchemeStyles.astro), así que para agregar un esquema nuevo basta
+// con agregarlo acá abajo.
 export const colorSchemes = {
   rosa: {
     ink: '#1a1a1a',
@@ -212,6 +239,82 @@ export const colorSchemes = {
     ink: '#ffffff',
     accent: '#ffcc00',
     paper: '#111111',
+  },
+  bujia: {
+    ink: '#171512',
+    accent: '#e94b3c',
+    paper: '#f3e8c8',
+  },
+
+  // Fanzine fotocopiado clásico.
+  // Prácticamente blanco y negro con amarillo de marcador.
+  xerox: {
+    ink: '#111111',
+    accent: '#f5c518',
+    paper: '#f4f0e6',
+  },
+
+  // Flyer punk impreso sobre papel amarillo.
+  flyer: {
+    ink: '#111111',
+    accent: '#e33b32',
+    paper: '#f2c94c',
+  },
+
+  // Cutting mat / mesa de trabajo.
+  // Perfecto para "Desde el taller".
+  taller: {
+    ink: '#f5edda',
+    accent: '#f5c518',
+    paper: '#234638',
+  },
+
+  // Rojo deslavado de impresión.
+  // Muy bueno para bloques agresivos y CTA.
+  rojo: {
+    ink: '#171512',
+    accent: '#f3d34a',
+    paper: '#df4b3f',
+  },
+
+  // Papel azul de fotocopia / flyer.
+  // Inspirado también en el overol de Bujía.
+  overol: {
+    ink: '#111111',
+    accent: '#f4c430',
+    paper: '#78a9b8',
+  },
+
+  // Papel kraft/cartón.
+  // Muy taller, empaques, etiquetas y manuales.
+  kraft: {
+    ink: '#191713',
+    accent: '#d94738',
+    paper: '#c8a66a',
+  },
+
+  // Fotocopia invertida.
+  // Para secciones muy punk sin ser negro puro.
+  carbon: {
+    ink: '#f2ead8',
+    accent: '#e94b3c',
+    paper: '#191919',
+  },
+
+  // Papel naranja de flyer barato.
+  // Úsalo poco porque llama muchísimo la atención.
+  naranja: {
+    ink: '#161616',
+    accent: '#e83f35',
+    paper: '#ef8d32',
+  },
+
+  // Fanzine verdoso / papel reciclado.
+  // Más apagado y editorial.
+  oliva: {
+    ink: '#171713',
+    accent: '#e94b3c',
+    paper: '#c7ca8b',
   },
 } as const;
 

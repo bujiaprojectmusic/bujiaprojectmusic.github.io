@@ -8,6 +8,8 @@
 //   { src: '/img/proceso-2.jpg', alt: 'Lijando', caption: 'Tres horas de lija' },
 //   { src: '/img/proceso-3.jpg', alt: 'Pintado' },
 // ]} />
+import { withBase } from '../../utils/withBase';
+
 interface GalleryImage {
   src: string;
   alt: string;
@@ -23,7 +25,7 @@ const tilts = [-3, 2, -1.5, 3, -2.5, 1.5];
 <div class="gallery">
   {images.map((img, i) => (
     <figure class="gallery__item" style={`--tilt:${tilts[i % tilts.length]}deg`}>
-      <img src={img.src} alt={img.alt} loading="lazy" />
+      <img src={withBase(img.src)} alt={img.alt} loading="lazy" />
       {img.caption && <figcaption>{img.caption}</figcaption>}
     </figure>
   ))}

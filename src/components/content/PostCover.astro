@@ -5,12 +5,14 @@
 //
 // Uso en MDX:
 // <PostCover variant="stamp" title="Diario de taller" tag="Vol. 04" colorScheme="acido" />
+import type { ColorSchemeName } from '../../config/site';
+
 interface Props {
   title: string;
   subtitle?: string;
   tag?: string;
   variant?: 'sticker' | 'stamp' | 'tape' | 'xerox' | 'flyer';
-  colorScheme?: 'rosa' | 'acido' | 'azul' | 'negro';
+  colorScheme?: ColorSchemeName;
 }
 const { title, subtitle, tag, variant = 'sticker', colorScheme } = Astro.props;
 ---

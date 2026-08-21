@@ -1,4 +1,14 @@
 import { defineCollection, z } from 'astro:content';
+import { colorSchemes } from '../config/site';
+
+// Nombres de esquema de color válidos en el frontmatter (rosa, acido,
+// azul, negro, kraft, etc) — se toman directo de `colorSchemes` en
+// site.ts, así que agregar un esquema nuevo ahí alcanza para poder
+// usarlo acá sin tocar este archivo.
+const colorSchemeNames = Object.keys(colorSchemes) as [
+  keyof typeof colorSchemes,
+  ...(keyof typeof colorSchemes)[],
+];
 
 // Colección "posts": cada volumen del fanzine (o cualquier entrada de blog)
 // es un archivo .mdx acá adentro. El frontmatter reemplaza los campos que
@@ -16,7 +26,7 @@ const posts = defineCollection({
     // el propio MDX vía <Portada>, <SectionTitle>, etc — igual que el tag
     // #fanzine en Ghost). false = post normal tipo blog.
     fanzine: z.boolean().default(false),
-    colorScheme: z.enum(['rosa', 'acido', 'azul', 'negro']).default('negro'),
+    colorScheme: z.enum(colorSchemeNames).default('negro'),
     tags: z.array(z.string()).default([]),
     description: z.string().optional(),
     cover: z.string().optional(),
@@ -96,9 +106,9 @@ const about = defineCollection({
     // que la home no se vea repetitiva (como "¿Qué es...?" vs "Cómo
     // construimos...").
     imagePosition: z.enum(['left', 'right']).default('left'),
-    // Esquema de color de este bloque en particular (rosa | acido | azul |
-    // negro). Si no se pone, usa taller.about.colorScheme (site.ts).
-    colorScheme: z.enum(['rosa', 'acido', 'azul', 'negro']).optional(),
+    // Esquema de color de este bloque en particular (ver `colorSchemes`
+    // en site.ts). Si no se pone, usa taller.about.colorScheme (site.ts).
+    colorScheme: z.enum(colorSchemeNames).optional(),
     // Texto chico arriba del botón, ej. "Conoce aquí más sobre nosotrxs:".
     ctaEyebrow: z.string().optional(),
     ctaLabel: z.string().optional(),
@@ -146,7 +156,7 @@ const pages = defineCollection({
     tag: z.string().optional(),
     subtitle: z.string().optional(),
     credit: z.string().optional(),
-    colorScheme: z.enum(['rosa', 'acido', 'azul', 'negro']).default('rosa'),
+    colorScheme: z.enum(colorSchemeNames).default('rosa'),
   }),
 });
 

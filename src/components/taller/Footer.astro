@@ -23,7 +23,7 @@ const contactRows = contact.enabled
 const year = new Date().getFullYear();
 ---
 
-<footer class="taller-footer">
+<footer class="taller-footer" style={`--footer-bg:${taller.theme.footerBackground}`}>
   {
     newsletter.enabled && (
       <div class="taller-footer__row taller-footer__row--newsletter">
@@ -100,7 +100,7 @@ const year = new Date().getFullYear();
 
 <style>
   .taller-footer {
-    background: #000;
+    background: var(--footer-bg);
     color: #fff;
     margin-top: 4rem;
     border-top: 6px solid #ff2f92;

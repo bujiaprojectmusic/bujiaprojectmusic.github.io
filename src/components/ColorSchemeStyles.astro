@@ -1,0 +1,17 @@
+---
+// Genera las clases ".scheme-<nombre>" (--ink / --accent / --paper) para
+// TODOS los esquemas definidos en `colorSchemes` (src/config/site.ts).
+// Se incluye una vez en cada layout de página (BaseLayout, TallerLayout)
+// así agregar un esquema nuevo en site.ts alcanza — no hay que tocar CSS
+// a mano en ningún lado.
+import { colorSchemes } from '../config/site';
+
+const rules = Object.entries(colorSchemes)
+  .map(
+    ([name, { ink, accent, paper }]) =>
+      `.scheme-${name}{--ink:${ink};--accent:${accent};--paper:${paper};}`
+  )
+  .join('\n');
+---
+
+<style is:global set:html={rules}></style>

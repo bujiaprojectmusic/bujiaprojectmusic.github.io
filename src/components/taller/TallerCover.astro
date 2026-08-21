@@ -10,12 +10,14 @@
 // <TallerCover tag="Catálogo" title="Nuestro catálogo" subtitle="Productos y servicios hechos a mano">
 //   ...contenido de la página...
 // </TallerCover>
+import type { ColorSchemeName } from '../../config/site';
+
 interface Props {
   tag?: string;
   title: string;
   subtitle?: string;
   credit?: string;
-  colorScheme?: 'rosa' | 'acido' | 'azul' | 'negro';
+  colorScheme?: ColorSchemeName;
 }
 
 const { tag, title, subtitle, credit, colorScheme = 'rosa' } = Astro.props;

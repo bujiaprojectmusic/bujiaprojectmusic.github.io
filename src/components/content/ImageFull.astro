@@ -2,6 +2,8 @@
 // Imagen grande a todo el ancho, tipo portada. Para fotos que merecen
 // protagonismo (el resultado final de un proyecto, una foto de grupo, etc).
 // Uso: <ImageFull src="/img/telecaster-final.jpg" alt="Telecaster terminada" caption="Terminada, mayo 2026" />
+import { withBase } from '../../utils/withBase';
+
 interface Props {
   src: string;
   alt: string;
@@ -11,7 +13,7 @@ const { src, alt, caption } = Astro.props;
 ---
 
 <figure class="img-full">
-  <img src={src} alt={alt} loading="lazy" />
+  <img src={withBase(src)} alt={alt} loading="lazy" />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
