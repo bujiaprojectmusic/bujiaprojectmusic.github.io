@@ -4,6 +4,7 @@ import { site, taller } from '../config/site';
 import Header from '../components/taller/Header.astro';
 import AnnouncementBar from '../components/taller/AnnouncementBar.astro';
 import Footer from '../components/taller/Footer.astro';
+import BackToTop from '../components/taller/BackToTop.astro';
 import ColorSchemeStyles from '../components/ColorSchemeStyles.astro';
 
 interface Props {
@@ -36,5 +37,6 @@ const pageTitle = title ? `${title} — Bujía` : 'Bujía Project Music';
     </main>
 
     <Footer />
+    <BackToTop />
   </body>
 </html>
