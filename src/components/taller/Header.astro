@@ -420,11 +420,25 @@ const withBase = (href: string) => `${base}${href}`;
   /* ── Mobile ─────────────────────────────────────────────────────── */
   @media (max-width: 720px) {
     .taller-header__top {
-      grid-template-columns: auto 1fr auto;
-      gap: 0.6rem;
+      /* En mobile las redes sociales salen del grid (quedan flotando
+         fijas, ver abajo), así que sólo queda el logo: se centra solo. */
+      display: flex;
+      justify-content: center;
     }
+    /* Las redes sociales dejan de competir con el logo por espacio en la
+       fila de arriba: se convierten en una píldora flotante fija, pegada
+       al borde derecho, que se mantiene visible mientras se scrollea. */
     .taller-header__social {
-      gap: 0.6rem;
+      position: fixed;
+      right: 14px;
+      bottom: 20px;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 0.6rem 0.5rem;
+      background: var(--header-bg);
+      border: var(--border-w) solid var(--ink);
+      border-radius: 999px;
+      z-index: 210;
     }
     .taller-header__logo--pill {
       padding: 0.25em 1.1em;
