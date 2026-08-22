@@ -396,6 +396,17 @@ const withBase = (href: string) => `${base}${href}`;
     padding-bottom: 1.2rem;
   }
 
+  /* En desktop el header fijo es angosto, así que el inset de 24px del
+     .container se ve exagerado: el menú y el ícono de home quedan muy
+     adentro. Achicamos ese margen para que se sientan pegados al borde
+     sin tocarlo del todo. */
+  @media (min-width: 721px) {
+    .taller-header__fixed-in {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+  }
+
   /* Logo chico centrado del header fijo: sólo se ve en mobile (ver media
      query abajo), donde reemplaza al menú-pill que en desktop ocupa el
      centro. Sin esto la barra fija quedaba con un hueco vacío en medio. */
