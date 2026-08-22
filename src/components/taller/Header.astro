@@ -25,6 +25,17 @@ const withBase = (href: string) => `${base}${href}`;
     <span class="taller-header__edge-dot" aria-hidden="true"></span>
 
     <div class="container taller-header__top">
+      <button
+        type="button"
+        class="taller-header__menu-btn taller-header__menu-btn--top"
+        id="taller-menu-btn"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+        aria-controls="taller-nav-list"
+      >
+        <Icon name="menu" class="taller-icon" />
+      </button>
+
       {
         taller.social.length > 0 && (
           <ul class="taller-header__social">
@@ -74,16 +85,6 @@ const withBase = (href: string) => `${base}${href}`;
     <div class="taller-header__zigzag" aria-hidden="true"></div>
 
     <nav class="container taller-header__nav" aria-label="Menú principal">
-      <button
-        type="button"
-        class="taller-header__menu-btn"
-        id="taller-menu-btn"
-        aria-label="Abrir menú"
-        aria-expanded="false"
-        aria-controls="taller-nav-list"
-      >
-        <Icon name="menu" class="taller-icon" />
-      </button>
       <ul class="taller-header__nav-list" id="taller-nav-list">
         {taller.nav.map((item) => (
           <li>
@@ -467,11 +468,12 @@ const withBase = (href: string) => `${base}${href}`;
 
   /* ── Mobile ─────────────────────────────────────────────────────── */
   @media (max-width: 720px) {
-    .taller-header__top {
-      /* En mobile las redes sociales salen del grid (quedan flotando
-         fijas, ver abajo), así que sólo queda el logo: se centra solo. */
-      display: flex;
-      justify-content: center;
+    /* El burger button se muda a esta fila (ver markup) para que el header
+       completo quede en una sola fila: menú a la izquierda, logo centrado.
+       Las redes sociales ya salieron del grid (quedan flotando, abajo), así
+       que la columna 1 la ocupa el botón y la 3 queda vacía (utils). */
+    .taller-header__menu-btn--top {
+      justify-self: start;
     }
     /* Las redes sociales dejan de competir con el logo por espacio en la
        fila de arriba: se convierten en una píldora flotante fija, pegada
@@ -512,11 +514,12 @@ const withBase = (href: string) => `${base}${href}`;
     .taller-header__full {
       overflow: visible;
     }
+    /* El botón de menú ya no vive acá (se movió a .taller-header__top),
+       así que esta fila sólo contiene el dropdown (oculto por defecto):
+       sin padding propio para no sumar altura extra al header. */
     .taller-header__nav {
       position: relative;
-      justify-content: flex-start;
-      padding-top: 0.8rem;
-      padding-bottom: 1rem;
+      padding: 0;
     }
     .taller-header__nav-list {
       position: absolute;
