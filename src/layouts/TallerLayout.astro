@@ -4,6 +4,7 @@ import { site, taller } from '../config/site';
 import Header from '../components/taller/Header.astro';
 import AnnouncementBar from '../components/taller/AnnouncementBar.astro';
 import Footer from '../components/taller/Footer.astro';
+import BackToTop from '../components/taller/BackToTop.astro';
 import ColorSchemeStyles from '../components/ColorSchemeStyles.astro';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 }
 
 const { title, description = site.description } = Astro.props;
-const pageTitle = title ? `${title} — Bujía` : 'Bujía Project Music';
+const pageTitle = title ? `${site.title} - ${title}` : site.title;
 ---
 
 <!doctype html>
@@ -22,7 +23,9 @@ const pageTitle = title ? `${title} — Bujía` : 'Bujía Project Music';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <link rel="icon" type="image/png" sizes="32x32" href={`${import.meta.env.BASE_URL}favicon-32x32.png`} />
+    <link rel="icon" type="image/png" sizes="16x16" href={`${import.meta.env.BASE_URL}favicon-16x16.png`} />
+    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
     <ColorSchemeStyles />
   </head>
   <body style={`--page-background:${taller.theme.pageBackground}`}>
@@ -34,5 +37,6 @@ const pageTitle = title ? `${title} — Bujía` : 'Bujía Project Music';
     </main>
 
     <Footer />
+    <BackToTop />
   </body>
 </html>

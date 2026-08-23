@@ -1,0 +1,73 @@
+---
+// Botón flotante "volver arriba": aparece pasado un umbral de scroll (el
+// mismo threshold que activa el header fijo) y sube la página con scroll
+// suave. Vive en su propio componente porque se monta una sola vez en el
+// layout, sea cual sea la página, y no depende del estado del header.
+import { taller } from '../../config/site';
+import Icon from './Icon.astro';
+---
+
+<button
+  type="button"
+  class="back-to-top"
+  id="taller-back-to-top"
+  aria-label="Volver arriba"
+  style={`--header-bg:${taller.theme.headerBackground}`}
+>
+  <Icon name="arrow-up" class="taller-icon" />
+</button>
+
+<style>
+  .back-to-top {
+    position: fixed;
+    left: 14px;
+    bottom: 20px;
+    z-index: 210;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--header-bg, #fff);
+    border: var(--border-w) solid var(--ink);
+    border-radius: 999px;
+    color: var(--ink);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .back-to-top.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .back-to-top :global(.taller-icon) {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+</style>
+
+<script>
+  function setupBackToTop() {
+    const btn = document.getElementById('taller-back-to-top');
+    if (!btn) return;
+
+    const SHOW_THRESHOLD = 400;
+
+    const onScroll = () => {
+      btn.classList.toggle('is-visible', window.scrollY > SHOW_THRESHOLD);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  setupBackToTop();
+  document.addEventListener('astro:page-load', setupBackToTop);
+</script>

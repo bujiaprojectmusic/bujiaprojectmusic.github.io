@@ -20,43 +20,90 @@ const entries = await Promise.all(
 ---
 
 {
-  entries.map((entry) => (
-    <section class={`about-section scheme-${entry.data.colorScheme ?? taller.about.colorScheme}`}>
-      <div
-        class:list={['container-wide', 'about-section__in', { 'about-section__in--reverse': entry.data.imagePosition === 'right' }]}
-      >
+  entries.map((entry) => {
+    const bgVars = [
+      `--about-bg-image:url(${withBase(entry.data.backgroundImage || entry.data.image)})`,
+      entry.data.backgroundOverlayColor && `--about-bg-color:${entry.data.backgroundOverlayColor}`,
+      entry.data.backgroundOverlayOpacity != null && `--about-bg-opacity:${entry.data.backgroundOverlayOpacity}%`,
+      entry.data.backgroundOverlayColorMobile && `--about-bg-color-mobile:${entry.data.backgroundOverlayColorMobile}`,
+      entry.data.backgroundOverlayOpacityMobile != null &&
+        `--about-bg-opacity-mobile:${entry.data.backgroundOverlayOpacityMobile}%`,
+    ]
+      .filter(Boolean)
+      .join(';');
+
+    return (
+      <section class={`about-section scheme-${entry.data.colorScheme ?? taller.about.colorScheme}`} style={bgVars}>
+        <div class="about-section__bg" aria-hidden="true" />
+
         <div
-          class="about-section__img"
-          role="img"
-          aria-label={entry.data.imageAlt || ''}
-          style={`background-image:url(${withBase(entry.data.image)})`}
-        />
+          class:list={['container-wide', 'about-section__in', { 'about-section__in--reverse': entry.data.imagePosition === 'right' }]}
+        >
+          <div
+            class="about-section__img"
+            role="img"
+            aria-label={entry.data.imageAlt || ''}
+            style={`background-image:url(${withBase(entry.data.image)})`}
+          />
 
-        <div class="about-section__body">
-          <h2 class="about-section__title">{entry.data.title}</h2>
-          <div class="about-section__content">
-            <entry.Content />
-          </div>
-
-          {entry.data.ctaLabel && entry.data.ctaHref && (
-            <div class="about-section__cta">
-              {entry.data.ctaEyebrow && <p class="about-section__eyebrow">{entry.data.ctaEyebrow}</p>}
-              <PunkButton href={withBase(entry.data.ctaHref)} label={entry.data.ctaLabel} />
+          <div class="about-section__body">
+            <h2 class="about-section__title">{entry.data.title}</h2>
+            <div class="about-section__content">
+              <entry.Content />
             </div>
-          )}
+
+            {entry.data.ctaLabel && entry.data.ctaHref && (
+              <div class="about-section__cta">
+                {entry.data.ctaEyebrow && <p class="about-section__eyebrow">{entry.data.ctaEyebrow}</p>}
+                <PunkButton href={withBase(entry.data.ctaHref)} label={entry.data.ctaLabel} />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
-  ))
+      </section>
+    );
+  })
 }
 
 <style>
   .about-section {
+    position: relative;
     background: var(--paper);
     color: var(--ink);
     padding: 3.5rem 0;
+    overflow: hidden;
+    /* Tinte sobre la imagen de fondo: color + porcentaje son variables
+       independientes (no un solo rgba) para que se puedan pisar por
+       separado desde el frontmatter de cada bloque (about/*.md). En
+       desktop la imagen de fondo sólo se asoma alrededor del recuadro,
+       así que por default lleva un tinte oscuro para no competir con
+       él. En mobile ocupa toda la sección detrás del texto, así que por
+       default no lleva tinte (0%, transparente) — subilo por entrada si
+       una foto en particular no contrasta bien con las letras. */
+    --about-bg-color: #000000;
+    --about-bg-opacity: 55%;
+    --about-bg-color-mobile: transparent;
+    --about-bg-opacity-mobile: 0%;
   }
+  .about-section__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--about-bg-image);
+    background-size: cover;
+    background-position: center;
+    pointer-events: none;
+  }
+  .about-section__bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--about-bg-color) var(--about-bg-opacity), transparent);
+  }
+
   .about-section__in {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: 1fr 1.1fr;
     gap: 2.5rem;
@@ -72,6 +119,9 @@ const entries = await Promise.all(
     order: 1;
   }
 
+  /* Recuadro tipo marco de cine/escenario para la imagen en desktop:
+     borde grueso + sombra dura corrida en el color de acento, mismo
+     lenguaje que las tarjetas de catálogo/journal. */
   .about-section__img {
     aspect-ratio: 4 / 5;
     background-color: rgba(127, 127, 127, 0.15);
@@ -79,6 +129,7 @@ const entries = await Promise.all(
     background-position: center;
     border: var(--border-w) solid var(--ink);
     border-radius: var(--radius);
+    box-shadow: 10px 10px 0 var(--accent);
   }
 
   .about-section__title {
@@ -113,9 +164,21 @@ const entries = await Promise.all(
   }
 
   @media (max-width: 820px) {
+    /* En mobile no hay recuadro: la misma imagen pasa a ser el fondo a
+       toda la sección, sin tinte por default (ver --about-bg-*-mobile
+       arriba), y el texto flota encima. */
+    .about-section {
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+    }
+    .about-section__bg::after {
+      background: color-mix(in srgb, var(--about-bg-color-mobile) var(--about-bg-opacity-mobile), transparent);
+    }
     .about-section__in,
     .about-section__in--reverse {
       grid-template-columns: 1fr;
+      width: 100%;
     }
     /* En mobile siempre imagen primero, sin importar imagePosition. */
     .about-section__in--reverse .about-section__img,
@@ -123,7 +186,7 @@ const entries = await Promise.all(
       order: initial;
     }
     .about-section__img {
-      aspect-ratio: 16 / 10;
+      display: none;
     }
   }
 </style>

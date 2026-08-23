@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { title, description = site.description } = Astro.props;
-const pageTitle = title ? `${title} — ${site.title}` : site.title;
+const pageTitle = title ? `${site.title} - ${title}` : site.title;
 ---
 
 <!doctype html>

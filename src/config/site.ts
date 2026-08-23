@@ -81,7 +81,7 @@ export const taller = {
     { label: 'Home', href: '/' },
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Servicios', href: '/catalogo' },
-    //{ label: 'Blog', href: '/archive' },
+    { label: 'Blog', href: '/archive' },
   ],
 
   // Buscador (ícono de lupa) en el header completo.
@@ -158,7 +158,7 @@ export const taller = {
   // la home antes del botón "Ver todos" (que linkea a /archive, con el
   // listado completo).
   journal: {
-    enabled: false,
+    enabled: true,
     title: 'Desde el taller',
     subtitle: 'Sesiones, reparaciones y cosas que armamos por acá',
     limit: 4,

@@ -109,6 +109,20 @@ const about = defineCollection({
     // Esquema de color de este bloque en particular (ver `colorSchemes`
     // en site.ts). Si no se pone, usa taller.about.colorScheme (site.ts).
     colorScheme: z.enum(colorSchemeNames).optional(),
+    // Imagen de fondo de la sección entera (detrás del recuadro/marco en
+    // desktop, a pantalla completa en mobile). Si no se pone, usa `image`.
+    backgroundImage: z.string().optional(),
+    // Color y opacidad de la capa que oscurece/tiñe la imagen de fondo en
+    // desktop, donde sólo se ve detrás del recuadro (por default un
+    // negro semitransparente, para que no compita con el recuadro).
+    backgroundOverlayColor: z.string().optional(),
+    backgroundOverlayOpacity: z.number().min(0).max(100).optional(),
+    // Lo mismo pero en mobile, donde la imagen de fondo ocupa toda la
+    // sección (sin recuadro) y queda detrás del texto. Por default no
+    // hay tinte (0%, transparente): subilo acá si el texto no contrasta
+    // lo suficiente contra esa foto en particular.
+    backgroundOverlayColorMobile: z.string().optional(),
+    backgroundOverlayOpacityMobile: z.number().min(0).max(100).optional(),
     // Texto chico arriba del botón, ej. "Conoce aquí más sobre nosotrxs:".
     ctaEyebrow: z.string().optional(),
     ctaLabel: z.string().optional(),

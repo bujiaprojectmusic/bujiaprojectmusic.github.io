@@ -12,7 +12,8 @@ interface Props {
     | 'share'
     | 'menu'
     | 'close'
-    | 'calendar';
+    | 'calendar'
+    | 'arrow-up';
   class?: string;
 }
 
@@ -114,6 +115,20 @@ const { name, class: className } = Astro.props;
     <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
       <line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+    </svg>
+  )
+}
+{
+  name === 'arrow-up' && (
+    <svg class={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="12" y1="19" x2="12" y2="5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      <path
+        d="M6 11 12 5l6 6"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
     </svg>
   )
 }
