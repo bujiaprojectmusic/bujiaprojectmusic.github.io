@@ -1,0 +1,444 @@
+---
+title: 'Mi primer pedal DIY'
+date: 2026-08-26
+tag: 'Pedales'
+cover: '/img/posts/spark-boost/spark-boost-cover.png'
+excerpt: 'De una protoboard y muchas pruebas nació Spark Boost, nuestro primer pedal hecho en el taller.'
+author: 'Uriel'
+enabled: true
+---
+
+import PostCover from '../../components/content/PostCover.astro';
+import ImageFull from '../../components/content/ImageFull.astro';
+import ImageSide from '../../components/content/ImageSide.astro';
+import Gallery from '../../components/content/Gallery.astro';
+import Xerox from '../../components/content/Xerox.astro';
+import Quote from '../../components/content/Quote.astro';
+import Note from '../../components/content/Note.astro';
+import Divider from '../../components/content/Divider.astro';
+import Columnas from '../../components/Columnas.astro';
+import Polaroid from '../../components/Polaroid.astro';
+
+<PostCover
+  variant="sticker"
+  title="MI PRIMER PEDAL DIY"
+  tag="PEDALES"
+  subtitle="De la protoboard al Spark Boost"
+  colorScheme="acido"
+/>
+
+## Qué onda lectores de Bujía
+
+Mi nombre es **Uriel** y desde hace aproximadamente 3 meses estoy en el
+taller de Bujía Project Music para la elaboración y experimentación de
+pedales.
+
+Este proyecto empezó a partir de una plática con Richard y Ale sobre gear.
+
+Desde hace varios años mi gusto por el gear musical se ha incrementado.
+Estar investigando, escuchando, leyendo y sobre todo viendo la gran
+cantidad de pedales de guitarra y bajo que hoy existen es un hobby que
+me gusta hacer día con día.
+
+Desde los primeros fuzz hasta las modulaciones más modernas y raras.
+
+Entonces, junto al equipo de Bujía, platicamos sobre hacer pedales dentro
+del taller, que fueran propios y, ¿por qué no?, también experimentar.
+
+Y desde ahí pusimos manos a la obra.
+
+<Divider variant="tape" />
+
+## Empezar por algo sencillo
+
+Comenzamos investigando qué necesitábamos para fabricar un pedal.
+
+Para iniciar elegimos algo relativamente sencillo: **un Boost**.
+
+Este tipo de pedal consiste en un efecto para guitarra o bajo cuya función
+principal es amplificar el volumen de la señal del instrumento sin alterar
+significativamente su tono original.
+
+Lo elegimos por la sencillez de su circuito y porque nos pareció una buena
+forma de empezar a adentrarnos en el mundo de la manufactura de pedales.
+
+<Quote>
+Había que empezar por algún lado. El Boost fue nuestra puerta de entrada.
+</Quote>
+
+### Los primeros componentes
+
+Comenzamos checando los componentes que necesitábamos, así como las
+herramientas que íbamos a ocupar para su manufactura.
+
+- Resistencias.
+- Capacitores.
+- Potenciómetros.
+- Jacks de 1/4".
+- Jack de alimentación de 9V.
+- Switch 3PDT.
+- Placas de cobre.
+- Transistores.
+
+Y para fabricar nuestros circuitos decidimos hacer nuestras propias
+**PCBs utilizando la CNC del taller**.
+
+<Gallery images={[
+  {
+    src: '/img/posts/spark-boost/cnc-taller.jpg',
+    alt: 'CNC utilizada en Bujía Project Music para fabricar PCBs',
+    caption: 'La CNC también terminó haciendo pedales.'
+  },
+  {
+    src: '/img/posts/spark-boost/cnc-taller-02.jpg',
+    alt: 'CNC del taller durante las pruebas para fabricar circuitos',
+    caption: 'Preparando las primeras pruebas.'
+  },
+]} />
+
+<Divider variant="zigzag" />
+
+## Antes de cortar cobre: protoboard
+
+Una vez que tuvimos los insumos suficientes conseguimos el circuito que
+íbamos a seguir para armar el pedal.
+
+Antes de fabricar cualquier PCB comenzamos haciendo pruebas en una
+**protoboard**.
+
+Seguimos el circuito y fuimos modificando algunos valores del diseño
+original para probar cómo respondía.
+
+<ImageFull
+  src="/img/posts/spark-boost/circuito-boost.png"
+  alt="Diagrama del circuito utilizado como base para el pedal Boost"
+  caption="El circuito con el que empezó todo."
+/>
+
+<Polaroid
+  src="/img/posts/spark-boost/protoboard.jpg"
+  alt="Primera prueba del Boost montada sobre una protoboard"
+  caption="Antes de ser pedal, fue esto."
+  tilt={-2}
+/>
+
+La protoboard nos permitió mover componentes, cambiar valores y probar el
+circuito sin tener que fabricar una placa nueva cada vez.
+
+Una vez que logramos que funcionara como queríamos, ya podíamos pasar al
+siguiente problema:
+
+**hacer nuestra propia PCB.**
+
+<Divider variant="stars" />
+
+## Diseñando la PCB en KiCad
+
+Una vez terminadas las pruebas en protoboard, procedimos a diseñar el
+circuito en **KiCad**.
+
+Aquí nos pusimos a investigar cómo podríamos acomodar el circuito, dónde
+colocar cada componente y también medir todo para que pudiera entrar
+dentro del case del pedal.
+
+<ImageSide
+  src="/img/posts/spark-boost/kicad.jpg"
+  alt="Diseño de la PCB del Spark Boost en KiCad"
+  side="right"
+  caption="Haciendo que todo quepa."
+/>
+
+Ya no se trataba solamente de que el circuito funcionara.
+
+También tenía que poder construirse.
+
+Había que pensar dónde iban las resistencias, capacitores, transistor,
+potenciómetro y conexiones.
+
+Y sobre todo:
+
+**que todo entrara en la caja.**
+
+<div style="clear:both" />
+
+<Divider variant="dashed" />
+
+## Ahora sí: cortar cobre
+
+Una vez que tuvimos la PCB diseñada en KiCad, pasamos al programa que
+utilizamos para generar el trabajo de corte de la CNC.
+
+En el diseño incluimos los surcos que haría la máquina para separar las
+pistas de cobre y crear las conexiones entre los componentes.
+
+Y aquí empezaron otras pruebas.
+
+<ImageFull
+  src="/img/posts/spark-boost/pcb-diseno.jpg"
+  alt="Diseño de las pistas de la PCB del Boost"
+  caption="Del diseño a una placa que realmente pudiéramos fabricar."
+/>
+
+<Gallery images={[
+  {
+    src: '/img/posts/spark-boost/pcb-cnc-01.jpg',
+    alt: 'Primera prueba de PCB fabricada utilizando la CNC',
+    caption: 'Primeros intentos.'
+  },
+  {
+    src: '/img/posts/spark-boost/pcb-cnc-02.jpg',
+    alt: 'Pruebas de aislamiento de pistas de cobre utilizando la CNC',
+    caption: 'Cobre, CNC y paciencia.'
+  },
+]} />
+
+Teníamos que configurar todo para que la CNC quitara suficiente cobre
+para aislar las pistas, pero sin perforar completamente la placa.
+
+Tampoco podía quitar demasiado, porque necesitábamos conservar suficiente
+cobre para poder soldar los componentes.
+
+<Note variant="warning" title="Aquí aprendimos a prueba y error">
+
+Profundidad, altura de la placa, herramienta, nivelado...
+
+Pequeños cambios hacían una diferencia enorme.
+
+Hubo varias PCBs que simplemente no funcionaron.
+
+</Note>
+
+Después de diversas pruebas y fallos pudimos fabricar una PCB funcional
+que nos permitiera soldar nuestros componentes.
+
+<Quote>
+La primera PCB buena se siente mucho mejor después de varias malas.
+</Quote>
+
+<Divider variant="tape" />
+
+## Del circuito al pedal
+
+Teniendo nuestra PCB completada, comenzamos a soldar todos los componentes
+que ya habíamos probado anteriormente en la protoboard.
+
+Después procedimos con los demás componentes:
+
+- Jacks de entrada y salida.
+- Alimentación de 9V.
+- Potenciómetro.
+- LED.
+- Switch de pie 3PDT.
+
+<Polaroid
+  src="/img/posts/spark-boost/pcb-componentes.jpg"
+  alt="PCB del Boost con sus componentes instalados"
+  caption="Ya empieza a parecer un pedal."
+  tilt={3}
+/>
+
+Y entonces apareció otra pregunta.
+
+## ¿Dónde metemos todo esto?
+
+Para el case queríamos usar **cigarreras de metal**.
+
+La idea era reutilizar algunas que ya teníamos guardadas y convertirlas
+en el gabinete del pedal.
+
+Y sí llegamos a intentarlo.
+
+<Gallery images={[
+  {
+    src: '/img/posts/spark-boost/cigarrera-prototipo.jpg',
+    alt: 'Primer prototipo del Boost utilizando una cigarrera como gabinete',
+    caption: 'La primera idea.'
+  },
+  {
+    src: '/img/posts/spark-boost/cigarrera-circuito.jpg',
+    alt: 'Circuito instalado dentro de la cigarrera',
+    caption: 'Sí entraba. Ese no era el problema.'
+  },
+]} />
+
+Pero al momento de empezar a perforar y montar todo nos dimos cuenta de
+que las cajas no eran suficientemente estables para el circuito ni para
+aguantar el uso normal de un pedal.
+
+Así que tocó cambiar el plan.
+
+<Note variant="note" title="La idea estaba chida, pero...">
+
+Una cosa es lograr meter un circuito dentro de una caja.
+
+Otra muy diferente es hacer algo que puedas pisar una y otra vez.
+
+</Note>
+
+<Divider variant="zigzag" />
+
+## Ahora sí, una caja de pedal
+
+Procedimos a buscar los gabinetes que normalmente se utilizan para
+pedales y empezamos a pensar cómo queríamos que se viera nuestro Boost.
+
+Queríamos hacer algo que tuviera relación con el taller.
+
+Y terminamos llegando a una idea bastante obvia:
+
+**una jirafa.**
+
+La jirafa forma parte del logo de Bujía, así que decidimos pintar el
+gabinete utilizando las manchas y colores como referencia.
+
+<Polaroid
+  src="/img/posts/spark-boost/gabinete-jirafa.jpg"
+  alt="Gabinete del Boost pintado con el patrón inspirado en Bujía"
+  caption="Ya teníamos circuito. Ahora faltaba hacerlo Bujía."
+  tilt={-4}
+/>
+
+El nuevo cascarón ya estaba listo.
+
+Pero todavía faltaba algo importante.
+
+**¿Cómo se iba a llamar?**
+
+<Divider variant="stars" />
+
+<PostCover
+  variant="xerox"
+  title="SPARK BOOST"
+  tag="BUJÍA PEDALS"
+  subtitle="Nuestro primer pedal"
+  colorScheme="negro"
+/>
+
+## ¿Por qué Spark?
+
+Después de lanzar varias ideas para el nombre nos quedamos con una que
+sentimos que iba bastante bien con Bujía:
+
+**Spark.**
+
+Spark significa **chispa** en español.
+
+La chispa que genera una bujía para iniciar la combustión dentro de un
+motor.
+
+Y como el pedal era un Boost, no había que complicarnos demasiado:
+
+**Spark Boost.**
+
+<Quote>
+Una chispa para empujar un poco más la señal.
+</Quote>
+
+## El diseño final
+
+Con el nombre definido empezamos a trabajar en cómo queríamos que se
+viera el pedal terminado.
+
+<ImageFull
+  src="/img/posts/spark-boost/spark-diseno.jpg"
+  alt="Diseño gráfico del Spark Boost"
+  caption="SPARK BOOST / BUJÍA PEDALS"
+/>
+
+Ya teníamos:
+
+- El circuito.
+- Nuestra PCB.
+- El gabinete.
+- El concepto gráfico.
+- El nombre.
+
+Ahora solamente faltaba terminar de armarlo.
+
+<Divider variant="tape" />
+
+## Spark Boost #001
+
+Después de todas las pruebas, PCBs fallidas, cambios de gabinete y horas
+viendo cómo meter todo dentro de una caja...
+
+**teníamos nuestro primer pedal.**
+
+<ImageFull
+  src="/img/posts/spark-boost/spark-final.png"
+  alt="Spark Boost terminado por Bujía Project Music"
+  caption="SPARK BOOST #001 — HECHO EN TEXCOCO"
+/>
+
+Este mismo Spark Boost terminó siendo el **premio de segundo lugar de la
+rifa que hicimos junto con la Skatecaster**.
+
+De cierta manera estuvo chido que dos proyectos que hicimos desde cero
+en el taller terminaran juntos en la misma rifa.
+
+<Divider variant="zigzag" />
+
+## Esto apenas empieza
+
+Durante toda esta travesía aprendimos —y seguimos aprendiendo— cómo es la
+manufactura de un pedal y todo lo que implica.
+
+No es solamente conseguir un circuito y soldar componentes.
+
+Hay que probar.
+
+Diseñar.
+
+Fabricar la PCB.
+
+Equivocarse.
+
+Volver a fabricar.
+
+Soldar.
+
+Diseñar el gabinete.
+
+Ensamblar.
+
+Y después comprobar que realmente aguante el uso para el que fue hecho.
+
+<Columnas n={2}>
+
+### Lo que sigue
+
+Seguiremos haciendo más pedales y experimentando con otros circuitos.
+
+Distorsiones.
+
+Fuzz.
+
+Modulaciones.
+
+Y seguramente algunas cosas más raras.
+
+### Lo que aprendimos
+
+Este primer Boost nos sirvió principalmente para entender el proceso.
+
+Todavía tenemos mucho que aprender y muchas cosas que mejorar.
+
+Pero justamente para eso empezamos a hacerlos.
+
+</Columnas>
+
+<Divider variant="stars" />
+
+<Quote>
+Hacer. Fallar. Entender por qué. Volver a hacerlo.
+</Quote>
+
+<Divider variant="tape" />
+
+<Xerox
+  src="/img/posts/spark-boost/spark-final.png"
+  alt="Primer Spark Boost construido en Bujía Project Music"
+  caption="SPARK BOOST #001 / HECHO EN TEXCOCO"
+/>
+
+## Esperen el siguiente pedal de Bujía...
