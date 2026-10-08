@@ -1,5 +1,14 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection, z, type SchemaContext } from 'astro:content';
 import { colorSchemes } from '../config/site';
+import { toAssetPath } from '../utils/resolveImage';
+
+// Campo de imagen del frontmatter. Se escribe igual que siempre
+// ("/img/posts/may16/portada.png") pero por debajo usa el helper image()
+// de Astro, así que la foto se valida al compilar (si no existe, el
+// build falla con un mensaje claro) y llega a los componentes como
+// ImageMetadata lista para <Image>/getImage (AVIF/WebP, srcset, width/
+// height). Las fotos viven en src/assets/img/ — ver utils/resolveImage.ts.
+const assetImage = (image: SchemaContext['image']) => z.string().transform(toAssetPath).pipe(image());
 
 // Nombres de esquema de color válidos en el frontmatter (rosa, acido,
 // azul, negro, kraft, etc) — se toman directo de `colorSchemes` en
@@ -15,7 +24,7 @@ const colorSchemeNames = Object.keys(colorSchemes) as [
 // antes venían de Ghost (title, tags, feature_image, etc).
 const posts = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     // Número de volumen del fanzine. Opcional: posts que no son parte de
     // un volumen (ej. un post suelto) pueden omitirlo.
@@ -29,7 +38,9 @@ const posts = defineCollection({
     colorScheme: z.enum(colorSchemeNames).default('negro'),
     tags: z.array(z.string()).default([]),
     description: z.string().optional(),
-    cover: z.string().optional(),
+    // Portada del post (layout blog, fanzine: false). Opcional: si se
+    // pone, el archivo tiene que existir en src/assets/img/.
+    cover: assetImage(image).optional(),
     coverAlt: z.string().optional(),
     author: z.string().default('Ripper'),
     draft: z.boolean().default(false),
@@ -42,9 +53,9 @@ const posts = defineCollection({
 // como texto chico debajo del título.
 const hero = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
-    image: z.string(),
+    image: assetImage(image),
     ctaLabel: z.string().optional(),
     ctaHref: z.string().optional(),
     // Apagar una slide (o todas) sin borrar el archivo.
@@ -59,11 +70,11 @@ const hero = defineCollection({
 // detalle (/catalogo/[slug]).
 const catalog = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     name: z.string(),
     price: z.number().nonnegative().optional(),
     currency: z.string().default('MXN'),
-    image: z.string(),
+    image: assetImage(image),
     category: z.enum(['producto', 'servicio']).default('producto'),
     soldOut: z.boolean().default(false),
     // Texto corto para la tarjeta (además de la descripción larga del body).
@@ -79,13 +90,13 @@ const catalog = defineCollection({
 // de detalle (/archive/[slug]).
 const journal = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     date: z.date(),
     // Etiqueta corta tipo "Desde el taller" / "Sesiones" que aparece
     // junto a la fecha en la tarjeta.
     tag: z.string(),
-    cover: z.string(),
+    cover: assetImage(image),
     excerpt: z.string().optional(),
     author: z.string().default('Ripper'),
     enabled: z.boolean().default(true),
@@ -98,9 +109,9 @@ const journal = defineCollection({
 // formato (negritas, links, etc) igual que un post.
 const about = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
-    image: z.string(),
+    image: assetImage(image),
     imageAlt: z.string().optional(),
     // De qué lado va la imagen. Alterná 'left'/'right' entre bloques para
     // que la home no se vea repetitiva (como "¿Qué es...?" vs "Cómo
@@ -111,7 +122,7 @@ const about = defineCollection({
     colorScheme: z.enum(colorSchemeNames).optional(),
     // Imagen de fondo de la sección entera (detrás del recuadro/marco en
     // desktop, a pantalla completa en mobile). Si no se pone, usa `image`.
-    backgroundImage: z.string().optional(),
+    backgroundImage: assetImage(image).optional(),
     // Color y opacidad de la capa que oscurece/tiñe la imagen de fondo en
     // desktop, donde sólo se ve detrás del recuadro (por default un
     // negro semitransparente, para que no compita con el recuadro).
@@ -138,11 +149,11 @@ const about = defineCollection({
 // largas debajo de la tarjeta.
 const guitars = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     model: z.string(),
     price: z.number().nonnegative().optional(),
     currency: z.string().default('MXN'),
-    image: z.string(),
+    image: assetImage(image),
     // Categoría corta libre, ej. "Eléctrica" / "Bajo" / "Acústica".
     type: z.string().default('Eléctrica'),
     // Specs cortas para la tarjeta, ej. "Caoba · Humbucker · 25.5\"".

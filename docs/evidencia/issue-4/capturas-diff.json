@@ -1,0 +1,44 @@
+[
+  {
+    "captura": "fanzine-desktop.png",
+    "antes": "1280x800",
+    "despues": "1280x800",
+    "px_distintos": 0,
+    "pct": "0.00%"
+  },
+  {
+    "captura": "fanzine-mobile.png",
+    "antes": "390x844",
+    "despues": "390x844",
+    "px_distintos": 0,
+    "pct": "0.00%"
+  },
+  {
+    "captura": "home-desktop.png",
+    "antes": "1280x3151",
+    "despues": "1280x3151",
+    "px_distintos": 7202,
+    "pct": "0.18%"
+  },
+  {
+    "captura": "home-mobile.png",
+    "antes": "390x5100",
+    "despues": "390x5100",
+    "px_distintos": 1027,
+    "pct": "0.05%"
+  },
+  {
+    "captura": "nosotros-desktop.png",
+    "antes": "1280x5829",
+    "despues": "1280x5829",
+    "px_distintos": 6322,
+    "pct": "0.08%"
+  },
+  {
+    "captura": "nosotros-mobile.png",
+    "antes": "390x7310",
+    "despues": "390x7310",
+    "px_distintos": 14439,
+    "pct": "0.51%"
+  }
+]

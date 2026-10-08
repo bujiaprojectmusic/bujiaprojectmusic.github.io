@@ -2,23 +2,19 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
-// ── GitHub Pages config ────────────────────────────────────────────────
-// Al desplegar en GitHub Pages, GitHub Actions inyecta GITHUB_REPOSITORY
-// (formato "usuario/repo"). Con eso armamos site + base automáticamente.
-// Para desarrollo local no hace falta tocar nada de esto.
-const repo = process.env.GITHUB_REPOSITORY?.split('/')[1];
-const owner = process.env.GITHUB_REPOSITORY?.split('/')[0];
-
-// Si tu repo se llama "usuario.github.io" el sitio vive en la raíz (base "/").
-// Si es un repo normal ("usuario/mi-fanzine"), vive en "/mi-fanzine/".
-const isUserSite = repo?.endsWith('.github.io');
-const site = owner ? `https://${owner}.github.io` : 'https://tu-usuario.github.io';
-const base = repo && !isUserSite ? `/${repo}` : '/';
-
 export default defineConfig({
-  site,
-  base,
+  // Dominio real del sitio (GitHub Pages con dominio propio). De acá salen
+  // el sitemap y las URLs canónicas; antes se armaba a partir de
+  // GITHUB_REPOSITORY y apuntaba a *.github.io.
+  site: 'https://bujiaprojectmusic.com',
+  base: '/',
   trailingSlash: 'never',
+  // Caché de imágenes optimizadas (astro:assets). Por default Astro la
+  // guarda en node_modules/.astro, que `npm ci` borra en cada build de
+  // CI; la movemos afuera para poder cachearla con actions/cache (ver
+  // .github/workflows/deploy.yml) y no reprocesar las fotos que no
+  // cambiaron. Está en .gitignore.
+  cacheDir: './.astro-cache',
   integrations: [mdx(), sitemap()],
   markdown: {
     shikiConfig: {

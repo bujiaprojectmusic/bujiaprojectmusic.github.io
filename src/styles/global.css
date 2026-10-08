@@ -47,7 +47,18 @@ body {
 
 img {
   max-width: 100%;
+  /* Las imágenes optimizadas traen width/height (para reservar espacio y
+     evitar CLS); height: auto evita que ese atributo fije la altura y
+     la foto se deforme al escalar por ancho. */
+  height: auto;
   display: block;
+}
+/* Las fotos optimizadas se envuelven en <picture> (AVIF/WebP + variante
+   de impresión). display: contents hace que el <img> de adentro se
+   comporte para el layout exactamente como si fuera hijo directo de la
+   figure/tarjeta, así los estilos existentes no cambian. */
+picture {
+  display: contents;
 }
 
 a {

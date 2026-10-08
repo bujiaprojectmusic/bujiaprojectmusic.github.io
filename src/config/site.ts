@@ -55,8 +55,10 @@ export const taller = {
   },
 
   logo: {
-    // Si `image` tiene un path (relativo a la carpeta public/, ej.
-    // "/img/logo.svg" — sin el prefijo "/public"), se usa esa imagen.
+    // Si `image` tiene un path tipo "/img/logo.png" (el archivo vive en
+    // src/assets/img/, ver utils/resolveImage.ts), se usa esa imagen,
+    // optimizada al compilar y servida al tamaño real del header
+    // (~260×84 px y 2x; 84 px en el header fijo).
     // Si se deja vacío, se usa `text` con el estilo
     // "cursiva en óvalo" del diseño como placeholder.
     text: 'Bujía',

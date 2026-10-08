@@ -3,6 +3,10 @@ name: Deploy a GitHub Pages
 on:
   push:
     branches: [main]
+  # En PRs sólo se corre el build (sin deploy) para ver que compila y que
+  # la caché de imágenes funciona antes de mergear.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +15,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -19,18 +23,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - run: npm install
+
+      # npm ci (y no npm install): instala exactamente lo del lockfile y es
+      # más rápido/reproducible en CI.
+      - run: npm ci
+
+      # Caché de las imágenes ya optimizadas por astro:assets (sharp). Astro
+      # guarda cada variante generada (AVIF/WebP/JPG por ancho) en
+      # `cacheDir`, que en astro.config.mjs movimos a ./.astro-cache (el
+      # default es node_modules/.astro, que npm ci borra). Con esto, en el
+      # siguiente build sólo se vuelven a procesar las fotos nuevas o que
+      # cambiaron; el resto se copia de la caché.
+      # La key depende de las fotos fuente y del lockfile (versión de
+      # sharp/astro); restore-keys permite reusar la caché más reciente
+      # aunque la key exacta cambie (p. ej. se agregó una foto).
+      - name: Caché de imágenes optimizadas (astro:assets)
+        uses: actions/cache@v4
+        with:
+          path: .astro-cache/assets
+          key: astro-assets-${{ runner.os }}-${{ hashFiles('src/assets/**', 'package-lock.json') }}
+          restore-keys: |
+            astro-assets-${{ runner.os }}-
+
       - run: npm run build
+
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: ./dist
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

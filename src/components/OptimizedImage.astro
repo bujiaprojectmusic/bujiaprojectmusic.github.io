@@ -1,0 +1,160 @@
+---
+// ─────────────────────────────────────────────────────────────────────────
+// Imagen optimizada al compilar (astro:assets / sharp). Es el único lugar
+// del sitio que sabe cómo servir una foto; el resto de componentes
+// (ImageFull, Polaroid, Portada, tarjetas, logo…) lo usan por debajo.
+//
+// Genera:
+//   <picture>
+//     <source media="print" srcset="…webp ≥ 2000 px">   ← alta para PDF
+//     <source type="image/avif" srcset="… 480w, 960w…" sizes="…">
+//     <source type="image/webp" srcset="… 480w, 960w…" sizes="…">
+//     <img src="…(jpg/png de respaldo)" width height alt loading decoding>
+//   </picture>
+//
+// - `src` puede ser una ruta tipo "/img/foo.jpg" (ver utils/resolveImage)
+//   o un import de imagen (ImageMetadata).
+// - `widths` + `sizes` arman el srcset; nunca se pide un ancho mayor al
+//   del original.
+// - `print` (default true) agrega la <source media="print"> con el original
+//   o una variante de ≥ 2000 px, para que "Descargar PDF" del fanzine
+//   salga en alta aunque en pantalla se haya cargado la chica.
+// - Si la imagen no existe, muestra <MissingImage> (o nada, con
+//   missing="none") y avisa en el build, sin romperlo.
+// - Los atributos data-astro-cid-* que manda el componente padre se
+//   propagan a <picture> y <img> para que sus estilos scoped
+//   (`.img-full img { … }`) sigan aplicando.
+// ─────────────────────────────────────────────────────────────────────────
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { resolveImage, type ImageSource } from '../utils/resolveImage';
+import MissingImage from './MissingImage.astro';
+
+type Format = 'avif' | 'webp';
+
+interface Props {
+  src: ImageSource;
+  alt: string;
+  /** Anchos (px) del srcset. Se descartan los mayores al original. */
+  widths?: number[];
+  /** Atributo `sizes` para srcset. */
+  sizes?: string;
+  /** Ancho del <img> de respaldo (y del atributo width). Default: el mayor de `widths`. */
+  width?: number;
+  formats?: Format[];
+  /** Agregar <source media="print"> en alta resolución. */
+  print?: boolean;
+  /** Ancho mínimo que se intenta para la variante de impresión. */
+  printWidth?: number;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  decoding?: 'async' | 'sync' | 'auto';
+  quality?: number | 'low' | 'mid' | 'high' | 'max';
+  class?: string;
+  style?: string;
+  /** Clase para el <picture> envolvente. */
+  pictureClass?: string;
+  /** Qué mostrar si la imagen no existe. */
+  missing?: 'placeholder' | 'none';
+  /** Texto para el aviso de build (ej. "Polaroid en volumen-01.mdx"). */
+  context?: string;
+  [key: `data-${string}`]: boolean | string | undefined;
+}
+
+const {
+  src,
+  alt,
+  widths = [480, 768, 1024, 1440, 1920],
+  sizes = '100vw',
+  width,
+  formats = ['avif', 'webp'],
+  print = true,
+  printWidth = 2400,
+  loading = 'lazy',
+  fetchpriority,
+  decoding = 'async',
+  quality,
+  class: className,
+  style,
+  pictureClass,
+  missing = 'placeholder',
+  context,
+  ...rest
+} = Astro.props;
+
+// Atributos data-* (incluye data-astro-cid-* del padre) → picture e img.
+const dataAttrs: Record<string, boolean | string | undefined> = {};
+for (const [k, v] of Object.entries(rest)) if (k.startsWith('data-')) dataAttrs[k] = v;
+
+// En build, Astro envuelve el ImageMetadata en un Proxy que marca la
+// imagen como "referenciada" (y entonces copia el ORIGINAL de 3–6 MB a
+// dist/) en cuanto se lee cualquier propiedad. Leemos sobre `.clone`
+// (igual que hace getImage() por dentro) y conservamos `fsPath` (no es
+// enumerable, así que el clon lo pierde y sin él Astro no sabe qué
+// original borrar). Resultado: a dist/ sólo van las variantes optimizadas.
+type ProxiedMetadata = ImageMetadata & { clone?: ImageMetadata; fsPath?: string };
+const resolved = resolveImage(src, context) as ProxiedMetadata | undefined;
+const meta: ImageMetadata | undefined = resolved
+  ? ({ ...(resolved.clone ?? resolved), fsPath: resolved.fsPath } as ImageMetadata)
+  : undefined;
+const srcLabel = typeof src === 'string' ? src : '';
+
+let fallback: Awaited<ReturnType<typeof getImage>> | undefined;
+let sources: { type: string; srcset: string }[] = [];
+let printSrc: string | undefined;
+
+if (meta) {
+  if (meta.format === 'svg') {
+    // Los SVG no se rasterizan: se sirven tal cual, con width/height.
+    fallback = await getImage({ src: meta, ...(width ? { width } : {}) });
+  } else {
+    const maxW = meta.width;
+    const requested = [...new Set(widths.map((w) => Math.round(w)))].filter((w) => w > 0);
+    const ws = [...new Set(requested.map((w) => Math.min(w, maxW)))].sort((a, b) => a - b);
+    const fallbackW = Math.min(width ?? Math.max(...ws), maxW);
+    const fallbackFormat = meta.format === 'png' ? 'png' : 'jpg';
+
+    const built = await Promise.all(
+      formats.map((format) => getImage({ src: meta, format, widths: ws, sizes, quality })),
+    );
+    sources = built.map((img, i) => ({ type: `image/${formats[i]}`, srcset: img.srcSet.attribute }));
+
+    fallback = await getImage({ src: meta, format: fallbackFormat, width: fallbackW, quality });
+
+    if (print) {
+      // El original si mide menos que printWidth; si no, una variante de
+      // printWidth px (≥ 2000) en WebP — a 300 dpi una página de 5.5 in
+      // son 1650 px, así que sobra resolución y pesa 10× menos que el JPEG
+      // original del celular.
+      const pw = Math.min(printWidth, maxW);
+      const p = await getImage({ src: meta, format: 'webp', width: pw, quality: 'high' });
+      printSrc = p.src;
+    }
+  }
+}
+---
+
+{
+  !meta ? (
+    missing === 'none' ? null : <MissingImage src={srcLabel} alt={alt} class={className} style={style} {...dataAttrs} />
+  ) : (
+    <picture class={pictureClass} {...dataAttrs}>
+      {printSrc && <source media="print" srcset={printSrc} />}
+      {sources.map((s) => (
+        <source type={s.type} srcset={s.srcset} sizes={sizes} />
+      ))}
+      <img
+        src={fallback!.src}
+        width={fallback!.attributes.width}
+        height={fallback!.attributes.height}
+        alt={alt}
+        loading={loading}
+        decoding={decoding}
+        fetchpriority={fetchpriority}
+        class={className}
+        style={style}
+        {...dataAttrs}
+      />
+    </picture>
+  )
+}

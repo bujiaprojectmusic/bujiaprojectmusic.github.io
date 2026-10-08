@@ -21,7 +21,7 @@ const posts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueO
     >
       <div class="journal-grid">
         {posts.map((post) => (
-          <JournalCard post={post} href={withBase(`/archive/${post.slug}`)} image={withBase(post.data.cover)} />
+          <JournalCard post={post} href={withBase(`/archive/${post.slug}`)} image={post.data.cover} />
         ))}
       </div>
     </TallerCover>

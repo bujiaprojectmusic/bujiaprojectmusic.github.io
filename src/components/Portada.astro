@@ -2,17 +2,37 @@
 // Portada de volumen: reemplaza el snippet "portada" de Ghost.
 // Uso en MDX:
 // <Portada volume={7} title="Fierros y Fuzz" subtitle="Julio 2026" image="/img/vol7-cover.jpg" />
+// La foto va en src/assets/img/ y se optimiza al compilar (AVIF/WebP +
+// variante grande para el PDF). Es la imagen LCP del volumen, así que se
+// carga eager + fetchpriority="high". Si el archivo todavía no existe se
+// muestra la portada sin foto (fondo --ink) y el build avisa.
+import OptimizedImage from './OptimizedImage.astro';
+import type { ImageSource } from '../utils/resolveImage';
+
 interface Props {
   volume: number;
   title: string;
   subtitle?: string;
-  image?: string;
+  image?: ImageSource;
 }
 const { volume, title, subtitle, image } = Astro.props;
 ---
 
 <section class="fz-portada">
-  {image && <img src={image} alt="" class="fz-portada__bg" />}
+  {image && (
+    <OptimizedImage
+      src={image}
+      alt=""
+      class="fz-portada__bg"
+      widths={[640, 960, 1280, 1920]}
+      sizes="(max-width: 900px) 100vw, 852px"
+      loading="eager"
+      fetchpriority="high"
+      decoding="sync"
+      missing="none"
+      context={`Portada del volumen ${volume}`}
+    />
+  )}
   <div class="fz-portada__in">
     <p class="fz-portada__vol">Volumen {volume}</p>
     <h1 class="fz-portada__title">{title}</h1>

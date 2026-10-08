@@ -1,16 +1,34 @@
 ---
 // Tratamiento Polaroid para fotos de contenido.
 // Uso: <Polaroid src="/img/taller-1.jpg" alt="Rebobinando una pastilla" caption="Rebobinado a mano, marzo 2026" tilt={-4} />
+// La foto va en src/assets/img/ y se optimiza al compilar (ver
+// OptimizedImage). Si no existe, se muestra un placeholder y el build avisa.
+import OptimizedImage from './OptimizedImage.astro';
+import type { ImageSource } from '../utils/resolveImage';
+
 interface Props {
-  src: string;
+  src: ImageSource;
   alt: string;
   caption?: string;
   tilt?: number;
+  // priority: true = es la imagen más grande que se ve al entrar a la
+  // página (la "LCP"): se carga eager + fetchpriority="high" en vez de
+  // lazy. Ponerlo SOLO en la primera foto de la página.
+  priority?: boolean;
 }
-const { src, alt, caption, tilt = -3 } = Astro.props;
+const { src, alt, caption, tilt = -3, priority = false } = Astro.props;
 ---
 
 <figure class="fz-polaroid" style={`--fz-tilt:${tilt}deg`}>
-  <img src={src} alt={alt} loading="lazy" />
+  <OptimizedImage
+    src={src}
+    alt={alt}
+    widths={[480, 768, 1024, 1440]}
+    sizes="(max-width: 900px) calc(100vw - 72px), 828px"
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding={priority ? 'sync' : 'async'}
+    context="Polaroid"
+  />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>

@@ -1,0 +1,53 @@
+---
+// Placeholder visible para una foto que todavía no está en
+// src/assets/img/. No "inventa" una imagen: muestra un recuadro con la
+// ruta que falta para que sea obvio qué hay que subir. Lo usan los
+// componentes de imagen cuando resolveImage() no encuentra el archivo.
+interface Props {
+  src: string;
+  alt?: string;
+  class?: string;
+  style?: string;
+  [key: `data-astro-cid-${string}`]: boolean | string | undefined;
+}
+const { src, alt, class: className, style, ...rest } = Astro.props;
+---
+
+<span class:list={['img-missing', className]} role="img" aria-label={alt || `Imagen pendiente: ${src}`} style={style} {...rest}>
+  <span class="img-missing__label">Imagen pendiente</span>
+  <code class="img-missing__path">{src}</code>
+</span>
+
+<style>
+  .img-missing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    box-sizing: border-box;
+    padding: 1rem;
+    border: 3px dashed currentColor;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent 0 10px,
+      rgba(127, 127, 127, 0.12) 10px 20px
+    );
+    color: inherit;
+    text-align: center;
+  }
+  .img-missing__label {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+  }
+  .img-missing__path {
+    font-size: 0.7rem;
+    opacity: 0.75;
+    word-break: break-all;
+  }
+</style>
