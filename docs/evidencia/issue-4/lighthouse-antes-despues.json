@@ -1,0 +1,106 @@
+{
+  "antes": [
+    {
+      "page": "/archive/primera-skatelecaster",
+      "perf": 65,
+      "lcp_s": "11.4",
+      "cls": "0.030",
+      "img_mb": "5.75",
+      "img_n": 5,
+      "total_mb": "5.78",
+      "lcp_el": "<div class=\"journal-detail__cover\" style=\"background-image: url(&quot;/img/posts/skateleca"
+    },
+    {
+      "page": "/blog/volumen-01",
+      "perf": 100,
+      "lcp_s": "0.8",
+      "cls": "0.000",
+      "img_mb": "0.01",
+      "img_n": 2,
+      "total_mb": "0.03",
+      "lcp_el": "<h1 class=\"fz-portada__title\" data-astro-cid-xrhmy7y3=\"\">"
+    },
+    {
+      "page": "/fanzine",
+      "perf": 100,
+      "lcp_s": "0.9",
+      "cls": "0.000",
+      "img_mb": "0.00",
+      "img_n": 0,
+      "total_mb": "0.00",
+      "lcp_el": "<p data-astro-cid-yh6wryon=\"\">"
+    },
+    {
+      "page": "/",
+      "perf": 74,
+      "lcp_s": "53.4",
+      "cls": "0.010",
+      "img_mb": "13.04",
+      "img_n": 9,
+      "total_mb": "13.08",
+      "lcp_el": "<div class=\"about-section__bg\" aria-hidden=\"true\" data-astro-cid-u35i56mi=\"\">"
+    },
+    {
+      "page": "/nosotros",
+      "perf": 71,
+      "lcp_s": "30.5",
+      "cls": "0.122",
+      "img_mb": "7.72",
+      "img_n": 3,
+      "total_mb": "7.75",
+      "lcp_el": "<img src=\"/img/nosotros/IMG_2408.jpeg\" alt=\"Mural en la entrada\" loading=\"lazy\" data-astro"
+    }
+  ],
+  "despues": [
+    {
+      "page": "/archive/primera-skatelecaster",
+      "perf": 100,
+      "lcp_s": "1.4",
+      "cls": "0.030",
+      "img_mb": "0.14",
+      "img_n": 4,
+      "total_mb": "0.18",
+      "lcp_el": "<img src=\"http://localhost:4321/_astro/41cc7977-6992-4b94-8e5a-1a04a124b373.odRgvk67…\" wid"
+    },
+    {
+      "page": "/blog/volumen-01",
+      "perf": 100,
+      "lcp_s": "1.1",
+      "cls": "0.000",
+      "img_mb": "0.00",
+      "img_n": 0,
+      "total_mb": "0.02",
+      "lcp_el": "<h1 class=\"fz-portada__title\" data-astro-cid-xrhmy7y3=\"\">"
+    },
+    {
+      "page": "/fanzine",
+      "perf": 100,
+      "lcp_s": "0.9",
+      "cls": "0.000",
+      "img_mb": "0.00",
+      "img_n": 0,
+      "total_mb": "0.00",
+      "lcp_el": "<p data-astro-cid-yh6wryon=\"\">"
+    },
+    {
+      "page": "/",
+      "perf": 98,
+      "lcp_s": "2.4",
+      "cls": "0.010",
+      "img_mb": "0.25",
+      "img_n": 6,
+      "total_mb": "0.29",
+      "lcp_el": "<img src=\"http://localhost:4321/_astro/ilustracion.C2VfVVVE_B9bCo.avif\" width=\"1664\" heigh"
+    },
+    {
+      "page": "/nosotros",
+      "perf": 99,
+      "lcp_s": "1.8",
+      "cls": "0.001",
+      "img_mb": "0.18",
+      "img_n": 4,
+      "total_mb": "0.21",
+      "lcp_el": "<img src=\"http://localhost:4321/_astro/IMG_2408.DaZZ8vmP_13yyHI.avif\" width=\"1920\" height="
+    }
+  ]
+}
