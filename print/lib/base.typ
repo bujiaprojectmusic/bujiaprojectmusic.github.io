@@ -106,6 +106,34 @@
     box(width: corte-w + 2 * s, height: corte-h + 2 * s, clip: true, body))
 }
 
+// ── Fondo de página completo: extra (a sangre) + marcas + folio ────────
+// `extra`: función (pagina) => contenido, o `none`. Lo usa configurar() y
+// también cada pliego del volumen (#9) cuando pone su propio fondo con
+// page(background: fondo-pagina(...)).
+#let fondo-pagina(paginas: none, extra: none) = context {
+  let p = counter(page).get().first()
+  if extra != none { extra(p) }
+  marcas-de-corte()
+  folio(p, paginas)
+}
+
+// ── Texto con estilo nombrado y mínimo duro ────────────────────────────
+// `texto("pie")[…]`, `texto("cuerpo_1col", tamano: 10)[…]`. Un tamaño por
+// debajo de `minimo_pt` hace panic con el nombre del estilo y de quién lo
+// pidió (`quien`): el texto nunca se achica (reglas.tipografia.escalar_texto).
+#let texto(nombre, body, tamano: none, quien: none, peso: none, fill: none) = {
+  let e = estilos.at(nombre)
+  let size = if tamano == none { e.pt } else { tamano }
+  if size < e.minimo_pt {
+    panic("Tamaño de letra " + str(size) + " pt por debajo del mínimo " + str(e.minimo_pt) + " pt del estilo '" + nombre + "'" + (if quien != none { " (" + quien + ")" } else { "" }) + ". El texto no se achica: recortá el contenido o pedí más páginas.")
+  }
+  let w = if peso != none { peso } else if e.peso == "bold" { "bold" } else { "regular" }
+  let lead = if e.at("interlinea_pt", default: none) != none { pt(e.interlinea_pt) - pt(size) } else if e.at("interlinea_factor", default: none) != none { pt(size) * (e.interlinea_factor - 1) } else { 0.3em }
+  set text(font: e.fuente, size: pt(size), weight: w, ..(if fill != none { (fill: fill) } else { (:) }))
+  set par(leading: lead, spacing: lead + pt(size) * 0.6)
+  body
+}
+
 // ── Configuración de página y texto ────────────────────────────────────
 // `paginas`: total N del volumen (para esconder el folio en la última).
 // `fondo`: función (pagina) => contenido extra del fondo (opcional).
@@ -121,12 +149,7 @@
       outside: off + pt(margen.exterior_pt),
     ),
     binding: left,
-    background: context {
-      let p = counter(page).get().first()
-      if fondo != none { fondo(p) }
-      marcas-de-corte()
-      folio(p, paginas)
-    },
+    background: fondo-pagina(paginas: paginas, extra: fondo),
   )
   set text(
     font: fuente-texto,

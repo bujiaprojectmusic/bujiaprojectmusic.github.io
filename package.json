@@ -6,14 +6,17 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "node scripts/check-volumes.mjs && astro build",
+    "build": "node scripts/check-volumes.mjs && astro build && node scripts/print/copy-dist.mjs",
     "check:volumes": "node scripts/check-volumes.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "print:install": "bash scripts/print/install-typst.sh",
     "print:prueba": "node scripts/print/build-prueba.mjs",
     "print:check": "node scripts/print/check-reglas.mjs",
-    "print:verify": "node scripts/print/verify-prueba.mjs"
+    "print:verify": "node scripts/print/verify-prueba.mjs",
+    "print": "node scripts/print/build.mjs",
+    "print:export": "tsx scripts/print/export.ts",
+    "print:test": "node --test tests/print/"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.0",
@@ -21,8 +24,14 @@
     "astro": "^4.16.0"
   },
   "devDependencies": {
+    "gray-matter": "4.0.3",
+    "jsqr": "1.4.0",
     "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.4",
-    "sharp": "^0.33.5"
+    "remark-mdx": "3.1.1",
+    "remark-parse": "11.0.0",
+    "sharp": "^0.33.5",
+    "tsx": "4.23.15",
+    "unified": "11.0.5"
   }
 }

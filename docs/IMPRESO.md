@@ -229,6 +229,109 @@ El job `impreso` de `.github/workflows/deploy.yml` corre en cada PR y en
 sube los cuatro PDF como artifact **`impreso-prueba`**. Si el sha256 del
 binario no coincide, el job falla antes de compilar.
 
+## El volumen en PDF (motor Typst, issue #9)
+
+Cada volumen publicable (`fanzine: true`, sin `draft`) sale en dos PDF:
+`jirafa-<slug>-pantalla.pdf` (396 × 612 pt, fotos a 150 ppi, índice con
+ligas internas y marcadores, ≤ 5 MB) y `jirafa-<slug>-imprenta.pdf`
+(450 × 666 pt con TrimBox 396 × 612 y BleedBox 414 × 630, masters a
+resolución completa, marcas de corte, sin ligas). Se generan en CI y se
+copian a `dist/fanzine/<slug>/`; el bloque "Descargar PDF" de
+`/fanzine/<slug>` lee `print/build/manifest.json`.
+
+### Generar en local
+
+```bash
+npm run print:install     # Typst fijado
+npm run print             # export → variantes → compile → chequeos → manifest.json
+npm run print -- --dos-veces   # además compila dos veces y compara sha256
+npm run print:test        # fixtures de tests/print/fixtures/ (node --test)
+npm run build             # Astro + copia de los PDF a dist/fanzine/<slug>/
+```
+
+Sin Typst, `npm run build` sigue funcionando: el bloque de descarga dice
+"PDF no disponible en este build" y no se copia nada. En CI el impreso es
+obligatorio (`copy-dist.mjs` falla sin manifest).
+
+Pasos de `scripts/print/build.mjs`:
+
+1. **Export** (`scripts/print/export.ts`, con `tsx`): lee el volumen con el
+   adaptador `scripts/print/sources/posts.ts` (hoy `src/content/posts/**`
+   con `<Pliego n=… tipo=…>`; cuando entre #13 se agrega otro adaptador),
+   parsea el MDX con `remark-parse` + `remark-mdx` y escribe
+   `print/build/<slug>/volumen.json` (`"version": 1`) con los pliegos como
+   árbol de nodos, las fotos (master, px, usos y ancho colocado), los QR
+   (SVG) y la paleta de `src/config/site.ts`. No publica datos internos.
+2. **Variantes** (`scripts/print/variantes.mjs`, sharp): imprenta = master
+   tal cual (Typst respeta la orientación EXIF); pantalla = 150 ppi JPEG
+   q75; bn = gris (para #10). Caché por hash en `print/build/<slug>/img/`.
+3. **Typst**: `print/volumen.typ` → `print/lib/paginas.typ` (portada,
+   índice, piezas, relleno, Fin, contraportada) → `print/lib/render.typ`
+   (recorre el árbol) → `print/lib/componentes/*.typ` (un gemelo por
+   componente web). Cada pliego es una página; al empezar y al terminar
+   lleva `metadata` con su página real.
+4. **Chequeos** (`scripts/print/check.mjs`): desbordes (`typst query`),
+   índice = página real, mapa de páginas y folios (`pdftotext`), cajas
+   (pdf-lib), fuentes (`pdffonts`), 0 `/Link` en imprenta y ligas +
+   marcadores en pantalla, tamaños de letra leídos del PDF (operador `Tf`),
+   ppi efectivo de cada foto, peso, QR decodificados (jsQR, o `zbarimg` si
+   está) y, con `--dos-veces`, determinismo.
+
+### Cómo leer los errores
+
+- `La pieza "X" (pág. N) (archivo:línea) no cabe: empieza en la pág. N y
+  termina en la pág. N+1. … El texto NO se achica.` → recortá el texto de
+  ese `<Pliego>`, achicá las fotos (`alto_max_pct` en `print/componentes.json`)
+  o mové contenido a otra página. Nunca se escala el texto
+  (`rg 'scale\(' print/lib` no encuentra nada).
+- `Tamaño de letra 6 pt por debajo del mínimo 9 pt del estilo 'cuerpo_2col'
+  (Note)` → un componente pidió un tamaño menor al de `reglas.json`.
+- `el volumen no cierra: … no es múltiplo de 4 / el Fin está en la página
+  15, pero el volumen cierra en 17` → arreglá los `n` de los `<Pliego>`:
+  piezas en 3…N-2, Fin en N-1, contraportada en N. Las páginas que faltan
+  entre medio se rellenan solas con páginas diseñadas (`colabora`, `notas`,
+  `taller`) y salen como aviso.
+- `La foto X en la pieza "Y" (pág. N, <ImageFull>) queda a 120 ppi` → master
+  más grande o foto más chica. Entre 150 y 299 ppi es sólo advertencia.
+- `el componente <X> (X.astro) no tiene gemelo Typst` → agregá el gemelo
+  (abajo) o sacá el componente del volumen. Lo mismo con una prop que no
+  sea literal: en el impreso sólo entran literales y datos de
+  `src/data/taller.ts`.
+- `índice: "X" dice pág. 7 pero la pieza empieza en la pág. 8` → el
+  `page` del `<Indice>` no coincide con el `n` del `<Pliego>`.
+
+### Multimedia (videos y playlists)
+
+Frontmatter del volumen: `impreso: { multimedia: "qr" | "omitir" }`, default
+`qr`. Con `qr`, cada `<VideoPoster>`, `<VideoOldTV>` o `<VideoCinema>` sale
+como un QR vectorial de 0.6 in con zona de silencio y la leyenda "▶ Video:
+<título> — escanéalo" (7.5 pt). Con `omitir` no sale nada y queda un aviso.
+Las ligas externas salen como texto sin URL; las internas al volumen
+(`#pagina-N`) como "(pág. N)" y, en pantalla, con liga.
+
+### Cómo agregar el gemelo Typst de un componente
+
+1. Creá la función en `print/lib/componentes/<grupo>.typ` con la firma
+   `(ctx, props, hijos)`: `ctx.render(ctx, hijos)` pinta los hijos; los
+   tamaños de letra van por `texto("pie", …)` / `texto("cuerpo_2col", …)`
+   (nunca `size:` suelto); las fotos por `imagen(ctx, props.src, …)`.
+2. Registralo en `gemelos` de `print/lib/render.typ` y en `GEMELOS` de
+   `scripts/print/lib/mdx.ts`. Si lleva fotos, agregá la prop a
+   `PROPS_IMAGEN` y su ancho colocado a `anchoColocado()` en
+   `scripts/print/export.ts` (y la geometría a `print/componentes.json`).
+3. Corré `npm run print:test` y mirá el PDF.
+
+Gemelos hoy: SectionTitle, PostCover, Columnas, Quote, Note, Divider,
+ImageFull, ImageSide, Gallery, Polaroid, PhotoOld, Xerox, BeforeAfter,
+OptimizedImage, VideoPoster/VideoOldTV/VideoCinema (QR), DatosTaller, más
+Portada, Indice y Contraportada (páginas fijas) y las etiquetas HTML
+genéricas (`p`, `div`, `ul`, `li`, `strong`, `em`, `a`, `small`…).
+
+Limitaciones conocidas: Typst no hace que el texto rodee una figura, así
+que `<ImageSide>` pone la foto al lado pedido y el texto sigue debajo; las
+3 columnas de la web se imprimen en 2; un SVG en la variante B/N queda en
+color.
+
 ## Qué reutiliza el motor del volumen (#9)
 
 - `print/lib/base.typ`: `configurar(paginas: N)` (hoja, márgenes

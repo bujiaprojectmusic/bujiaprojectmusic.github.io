@@ -1,0 +1,88 @@
+{
+  "$comentario": "Geometría de los gemelos Typst de los componentes web (print/lib/componentes/). La leen print/lib/componentes/*.typ y scripts/print/export.ts (para el ancho colocado de cada foto → ppi efectivo). Porcentajes sobre la caja de texto de reglas.json; pt = puntos. alto_max_pct: alto máximo de la foto como % de la caja de texto (una foto vertical se achica para caber; el texto nunca).",
+  "polaroid": {
+    "ancho_pct": 78,
+    "marco_pt": 9,
+    "pie_pt": 18,
+    "giro_grados_max": 4,
+    "alto_max_pct": 17
+  },
+  "photo_old": {
+    "ancho_pct": 84,
+    "marco_pt": 8,
+    "cinta_pt": 40,
+    "giro_grados_max": 3,
+    "alto_max_pct": 28
+  },
+  "xerox": {
+    "ancho_pct": 100,
+    "marco_pt": 2.25,
+    "alto_max_pct": 45
+  },
+  "image_full": {
+    "ancho_pct": 100,
+    "alto_max_pct": 50
+  },
+  "image_side": {
+    "ancho_pct_default": 42,
+    "separacion_pt": 8,
+    "alto_max_pct": 40
+  },
+  "gallery": {
+    "columnas_max": 3,
+    "separacion_pt": 8,
+    "giro_grados": [
+      -3,
+      2,
+      -1.5,
+      3,
+      -2.5,
+      1.5
+    ],
+    "alto_max_pct": 30
+  },
+  "before_after": {
+    "separacion_pt": 10,
+    "alto_max_pct": 40
+  },
+  "optimized_image": {
+    "px_a_pt": 0.75,
+    "alto_max_pct": 30
+  },
+  "portada": {
+    "mascota_ancho_pt": 70,
+    "parche_ancho_pt": 54,
+    "opacidad_foto": 0.55
+  },
+  "contraportada": {
+    "logo_ancho_pt": 110,
+    "mascota_ancho_pt": 80,
+    "qr_in": 0.75
+  },
+  "fin": {
+    "mascota_ancho_pt": 56
+  },
+  "mascota": {
+    "archivo": "/img/nosotros/Mascota.svg.svg",
+    "credito": "Mascota: ilustración por encargo (crédito pendiente de confirmar)",
+    "ancho_pt_default": 120
+  },
+  "logo": {
+    "archivo": "/img/logo.png"
+  },
+  "video": {
+    "qr_in": 0.6,
+    "leyenda_prefijo": "Video",
+    "playlist_prefijo": "Playlist",
+    "leyenda_sufijo": "escanéalo"
+  },
+  "relleno": {
+    "orden": [
+      "colabora",
+      "notas",
+      "taller"
+    ],
+    "colabora_url": "/fanzine",
+    "notas_renglones_pt": 18
+  }
+}

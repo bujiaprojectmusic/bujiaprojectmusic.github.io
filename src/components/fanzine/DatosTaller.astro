@@ -1,0 +1,21 @@
+---
+// Bloque de datos del taller para la contraportada de un volumen (logo,
+// dirección, horario, WhatsApp y web), todo desde src/data/taller.ts.
+// Uso en MDX, dentro del <Pliego tipo="contraportada">:
+//   <DatosTaller />                       (o con contenido extra adentro)
+//   <DatosTaller><p class="fz-small">EDICIÓN DE PRUEBA</p></DatosTaller>
+// Tiene gemelo Typst en print/lib/componentes/taller.typ (#9): en el
+// impreso el bloque sale con los mismos datos y un QR a la web.
+import OptimizedImage from '../OptimizedImage.astro';
+import { direccionTexto, horario, whatsapp, mapa } from '../../data/taller';
+---
+
+<div class="fz-contra-datos">
+  <OptimizedImage src="/img/logo.png" alt="Bujía Project Music" width={180} widths={[180, 360]} sizes="180px" print={false} />
+  <p><a href={mapa.url} target="_blank" rel="noreferrer noopener">{direccionTexto}</a></p>
+  <ul>
+    {horario.map((b) => <li><strong>{b.dias}:</strong> {b.texto}</li>)}
+  </ul>
+  <p>WhatsApp: <a href={whatsapp.url} target="_blank" rel="noreferrer noopener">{whatsapp.numeroTexto}</a> · <a href="/">bujiaprojectmusic.com</a></p>
+  <slot />
+</div>

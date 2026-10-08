@@ -28,7 +28,8 @@ import Note from '../../../components/content/Note.astro';
 import Divider from '../../../components/content/Divider.astro';
 import VideoPoster from '../../../components/content/VideoPoster.astro';
 import OptimizedImage from '../../../components/OptimizedImage.astro';
-import { direccionTexto, horario, whatsapp, mapa } from '../../../data/taller';
+import DatosTaller from '../../../components/fanzine/DatosTaller.astro';
+import { whatsapp } from '../../../data/taller';
 
 {/*
   VOLUMEN 00 — EDICIÓN DE PRUEBA. Todo el contenido es ficticio: las
@@ -428,13 +429,7 @@ import { direccionTexto, horario, whatsapp, mapa } from '../../../data/taller';
 
 <Pliego n={20} tipo="contraportada">
   <Contraportada texto="Bujía Project Music — Texcoco, MX" />
-  <div class="fz-contra-datos">
-    <OptimizedImage src="/img/logo.png" alt="Bujía Project Music" width={180} widths={[180, 360]} sizes="180px" print={false} />
-    <p><a href={mapa.url} target="_blank" rel="noreferrer noopener">{direccionTexto}</a></p>
-    <ul>
-      {horario.map((b) => <li><strong>{b.dias}:</strong> {b.texto}</li>)}
-    </ul>
-    <p>WhatsApp: <a href={whatsapp.url} target="_blank" rel="noreferrer noopener">{whatsapp.numeroTexto}</a> · <a href="/">bujiaprojectmusic.com</a></p>
+  <DatosTaller>
     <p class="fz-small">EDICIÓN DE PRUEBA — contenido ficticio.</p>
-  </div>
+  </DatosTaller>
 </Pliego>

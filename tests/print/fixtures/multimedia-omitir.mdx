@@ -1,0 +1,99 @@
+---
+title: "Multimedia omitir"
+volume: 90
+date: 2026-10-08
+fanzine: true
+prueba: true
+colorScheme: acido
+author: Fixture
+impreso:
+  multimedia: omitir
+---
+
+import Pliego from '../../../src/components/fanzine/Pliego.astro';
+import Portada from '../../../src/components/Portada.astro';
+import Indice from '../../../src/components/Indice.astro';
+import SectionTitle from '../../../src/components/SectionTitle.astro';
+import Contraportada from '../../../src/components/Contraportada.astro';
+import Note from '../../../src/components/content/Note.astro';
+import ImageFull from '../../../src/components/content/ImageFull.astro';
+import VideoPoster from '../../../src/components/content/VideoPoster.astro';
+import VideoOldTV from '../../../src/components/content/VideoOldTV.astro';
+
+{/* Fixture de tests/print (issue #9). Texto de relleno marcado TODO. */}
+
+<Pliego n={1} tipo="portada">
+  <Portada volume={90} title="Multimedia omitir" subtitle="Fixture de prueba" />
+</Pliego>
+<Pliego n={2} tipo="indice">
+  <Indice items={[{ page: "03", title: "Pieza de prueba" }]} />
+</Pliego>
+<Pliego n={3} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 3</SectionTitle>
+
+  <VideoOldTV id="C1vfbwwdtOQ" title="Guitar Set Up 101" />
+
+  <VideoPoster kind="playlist" id="PLzMaYoBMVrDm6n8BMuAVIctRy7GFBR5Ef" title="Playlist de ajuste" meta="Playlist real" />
+
+  Liga externa: [D'Addario](https://www.daddario.com/) y liga interna a la [pieza 5](#pagina-5).
+</Pliego>
+<Pliego n={4} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 4</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={5} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 5</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={6} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 6</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={7} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 7</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={8} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 8</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={9} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 9</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={10} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 10</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={11} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 11</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={12} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 12</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={13} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 13</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={14} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 14</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={15} tipo="fin" />
+
+<Pliego n={16} tipo="contraportada">
+  <Contraportada texto="Fixture — Texcoco, MX" />
+</Pliego>
