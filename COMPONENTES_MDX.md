@@ -149,8 +149,9 @@ import Polaroid from '../../components/Polaroid.astro';
 
 Sólo para los volúmenes del fanzine (`src/content/posts/*.mdx` con
 `fanzine: true`). Cada `<Pliego>` es **una página del cuadernillo
-impreso** (media carta); un volumen tiene exactamente 16, con `n` del 1
-al 16 (el mismo número de página del impreso). En la web esos mismos
+impreso** (media carta); un volumen tiene N páginas, con N ≥ 16 y
+múltiplo de 4 (16, 20, 24…), y `n` del 1 al N (el mismo número de página
+del impreso: 1 portada, 2 índice, N-1 fin, N contraportada). En la web esos mismos
 bloques se apilan en **una columna con scroll continuo**: no hay caja de
 página, ni doble página, ni pasar de página. `n` además es el ancla
 `#pagina-N` a la que apunta el índice.
@@ -176,8 +177,8 @@ Props: `n` (obligatorio, 1–16), `tipo?` (`portada` | `indice` | `normal` |
 de color de esa página), `bleed?` (`true` = sin márgenes interiores, o una
 ruta `"/img/…"` para una foto a sangre, con `bleedAlt?`).
 
-Mapa fijo del impreso: 1 portada · 2 índice · 3–14 contenido · 15 fin ·
-16 contraportada. Un pliego sin contenido (`relleno`, o `fin` vacío) es
+Mapa fijo del impreso: 1 portada · 2 índice · 3…N-2 contenido · N-1 fin ·
+N contraportada. Un pliego sin contenido (`relleno`, o `fin` vacío) es
 una página del papel: el `relleno` **no se ve en la web** (el ancla
 queda) y al imprimir muestra el placeholder "TODO"; `fin` muestra la
 palabra Fin. En la web hay un solo atajo fijo "↑ Inicio" y, en el

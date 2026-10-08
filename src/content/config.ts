@@ -28,7 +28,8 @@ const posts = defineCollection({
     title: z.string(),
     // Número de volumen del fanzine. Opcional: posts que no son parte de
     // un volumen (ej. un post suelto) pueden omitirlo.
-    volume: z.number().int().positive().optional(),
+    // 0 es el volumen de prueba (vol-00).
+    volume: z.number().int().nonnegative().optional(),
     date: z.date(),
     updated: z.date().optional(),
     // true = layout de fanzine (sin título/imagen default, todo lo controla
@@ -44,6 +45,11 @@ const posts = defineCollection({
     coverAlt: z.string().optional(),
     author: z.string().default('Ripper'),
     draft: z.boolean().default(false),
+    // true = volumen de prueba (contenido ficticio): se publica en
+    // /fanzine/vol-NN con noindex,nofollow, no va al sitemap, al menú ni
+    // al archivo /fanzine, y muestra la marca "EDICIÓN DE PRUEBA" en la
+    // portada y en el pie de cada pliego. Un solo flag para apagarlo.
+    prueba: z.boolean().default(false),
   }).refine((data) => !data.fanzine || data.volume != null, {
     message: 'Un post con fanzine: true necesita `volume`: la URL del volumen es /fanzine/vol-NN y sale de ese número.',
     path: ['volume'],

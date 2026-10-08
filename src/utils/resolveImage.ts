@@ -16,11 +16,15 @@ import type { ImageMetadata } from 'astro';
 
 export const PUBLIC_PREFIX = '/img/';
 export const ASSETS_PREFIX = '/src/assets/img/';
+// Assets del fanzine (fotos por volumen, mascota): "/fanzine/vol-00/x.jpg"
+// → src/assets/fanzine/vol-00/x.jpg.
+export const FANZINE_PREFIX = '/fanzine/';
+export const FANZINE_ASSETS_PREFIX = '/src/assets/fanzine/';
 
 // Mapa "/src/assets/img/foo.jpg" → módulo con el ImageMetadata (eager:
 // se resuelve una sola vez al compilar; no hay que importar cada foto).
 const images = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/img/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,avif,gif,svg}',
+  '/src/assets/{img,fanzine}/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,avif,gif,svg}',
   { eager: true },
 );
 
@@ -37,6 +41,7 @@ export function toAssetPath(src: string): string {
   let path = src.trim();
   if (base && path.startsWith(`${base}/`)) path = path.slice(base.length);
   if (path.startsWith(PUBLIC_PREFIX)) return ASSETS_PREFIX + path.slice(PUBLIC_PREFIX.length);
+  if (path.startsWith(FANZINE_PREFIX)) return FANZINE_ASSETS_PREFIX + path.slice(FANZINE_PREFIX.length);
   return path;
 }
 
@@ -69,5 +74,9 @@ export function resolveImage(src: ImageSource, context?: string): ImageMetadata 
 
 /** Lista de rutas disponibles (para debug / tests). */
 export function availableImages(): string[] {
-  return Object.keys(images).map((k) => PUBLIC_PREFIX + k.slice(ASSETS_PREFIX.length));
+  return Object.keys(images).map((k) =>
+    k.startsWith(FANZINE_ASSETS_PREFIX)
+      ? FANZINE_PREFIX + k.slice(FANZINE_ASSETS_PREFIX.length)
+      : PUBLIC_PREFIX + k.slice(ASSETS_PREFIX.length),
+  );
 }

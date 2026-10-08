@@ -7,7 +7,8 @@ import OptimizedImage from '../../components/OptimizedImage.astro';
 import { fanzinePath } from '../../utils/fanzine';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const allPosts = await getCollection('posts', ({ data }) => !data.draft);
+// Los volúmenes de prueba (prueba: true) no van en el archivo público.
+const allPosts = await getCollection('posts', ({ data }) => !data.draft && !data.prueba);
 const volumes = allPosts
   .filter((p) => p.data.fanzine)
   .sort((a, b) => (b.data.volume ?? 0) - (a.data.volume ?? 0) || b.data.date.valueOf() - a.data.date.valueOf());
@@ -22,7 +23,7 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
     <header class="fz-index__head">
       <p class="fz-index__eyebrow">Fanzine</p>
       <h1 class="fz-index__title">La Jirafa Eléctrica</h1>
-      <p class="fz-index__sub">Se leen en esta página, con scroll. El cuadernillo impreso sigue siendo de 16 páginas, media carta.</p>
+      <p class="fz-index__sub">Se leen en esta página, con scroll. El cuadernillo impreso va en media carta, en múltiplos de 4 páginas.</p>
     </header>
 
     <ul class="fz-index__list">

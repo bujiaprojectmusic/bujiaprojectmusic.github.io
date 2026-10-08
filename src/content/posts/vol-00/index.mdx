@@ -1,0 +1,440 @@
+---
+title: "Ruido de prueba"
+volume: 0
+date: 2026-10-08
+fanzine: true
+prueba: true
+colorScheme: xerox
+tags: ["fanzine", "prueba"]
+description: "Volumen 00 de La Jirafa Eléctrica: edición de prueba con contenido ficticio para probar el sistema completo del fanzine."
+author: La Jirafa Eléctrica
+---
+
+import Pliego from '../../../components/fanzine/Pliego.astro';
+import Portada from '../../../components/Portada.astro';
+import Indice from '../../../components/Indice.astro';
+import SectionTitle from '../../../components/SectionTitle.astro';
+import Polaroid from '../../../components/Polaroid.astro';
+import Columnas from '../../../components/Columnas.astro';
+import Contraportada from '../../../components/Contraportada.astro';
+import PostCover from '../../../components/content/PostCover.astro';
+import ImageFull from '../../../components/content/ImageFull.astro';
+import ImageSide from '../../../components/content/ImageSide.astro';
+import Gallery from '../../../components/content/Gallery.astro';
+import Xerox from '../../../components/content/Xerox.astro';
+import PhotoOld from '../../../components/content/PhotoOld.astro';
+import Quote from '../../../components/content/Quote.astro';
+import Note from '../../../components/content/Note.astro';
+import Divider from '../../../components/content/Divider.astro';
+import VideoPoster from '../../../components/content/VideoPoster.astro';
+import OptimizedImage from '../../../components/OptimizedImage.astro';
+import { direccionTexto, horario, whatsapp, mapa } from '../../../data/taller';
+
+{/*
+  VOLUMEN 00 — EDICIÓN DE PRUEBA. Todo el contenido es ficticio: las
+  personas, las bandas, los pedales, las tocadas y los anuncios no existen.
+  El único contacto real es el del taller (data/taller.ts). Los videos y la
+  playlist son reales (ligas públicas de YouTube) y sirven para probar las
+  fachadas y, en el impreso, los QR. En la web se lee de corrido (una
+  columna, scroll); las 20 páginas (1 portada · 2 índice · 3–18 contenido ·
+  19 fin · 20 contraportada) existen sólo al imprimir. Fotos: ver CREDITOS.md en
+  src/assets/fanzine/vol-00/. Para apagarlo: draft: true. Para borrarlo:
+  esta carpeta + src/assets/fanzine/vol-00/.
+*/}
+
+<Pliego n={1} tipo="portada">
+  <Portada
+    volume={0}
+    title="La Jirafa Eléctrica"
+    subtitle="Vol. 00 — Ruido de prueba · Texcoco, octubre 2026 · EDICIÓN DE PRUEBA: contenido ficticio"
+    image="/fanzine/vol-00/portada-taller.jpeg"
+  />
+</Pliego>
+
+<Pliego n={2} tipo="indice">
+  <Indice
+    items={[
+      { page: "03", title: "Editorial: probando, probando" },
+      { page: "04", title: "Anatomía de un ajuste" },
+      { page: "06", title: "Entrevista: Las Bujías Quemadas" },
+      { page: "08", title: "Galería de customs" },
+      { page: "09", title: "Tutorial: cuerdas de bajo" },
+      { page: "10", title: "Reseña de pedales" },
+      { page: "11", title: "Tracklist del taller" },
+      { page: "12", title: "Agenda de tocadas" },
+      { page: "13", title: "Diccionario del taller" },
+      { page: "14", title: "Opinión: la guitarra fea" },
+      { page: "15", title: "Collage xerox" },
+      { page: "16", title: "Clasificados punk" },
+      { page: "17", title: "Cartas de lectores" },
+      { page: "18", title: "Colabora" },
+      { page: "19", title: "Fin y créditos" },
+    ]}
+  />
+
+  <p class="fz-small">Edición de prueba. Todo lo que sigue es ficticio salvo los datos del taller y los videos ligados.</p>
+</Pliego>
+
+<Pliego n={3} scheme="rosa">
+  <SectionTitle scheme="rosa">Editorial</SectionTitle>
+
+  <ImageSide src="/fanzine/vol-00/taller-completo.jpeg" alt="Vista general del taller con instrumentos colgados" side="right" width="38%" caption="El taller, visto desde la puerta. Foto: Bujía Project Music" />
+
+  **Probando, probando, ¿se oye?** Este es el Volumen 00 de La Jirafa
+  Eléctrica, y no es un volumen de verdad: es el que usamos para ver que
+  todo el aparato funcione antes de meterle contenido real. Piénsenlo como
+  la prueba de sonido antes de la tocada: nadie la aplaude, pero sin ella
+  el bajista termina sonando a licuadora.
+
+  Acá adentro van a encontrar un reportaje sobre un ajuste, una entrevista
+  con una banda que no existe, un tutorial que sí sirve, pedales
+  inventados, tocadas que no van a pasar y anuncios de gente que nunca va a
+  contestar. Todo ficticio, todo marcado. Lo que sí es real: las fotos del
+  taller, los videos que ligamos y la dirección de la contraportada.
+
+  La idea del fanzine de verdad es la misma de siempre: hablar de guitarras
+  y bajos como se habla en la mesa de trabajo, con viruta en el piso y café
+  frío. Nada de catálogo, nada de "tono boutique". Si un instrumento suena,
+  suena. Si no, se abre y se ve por qué.
+
+  Cuando este volumen cumpla su chamba lo vamos a apagar y en su lugar va a
+  salir el Vol. 01 con fotos y textos de a deveras. Mientras, úsenlo para
+  romper cosas: si algo se ve mal en el teléfono, si una liga no abre, si
+  el PDF sale chueco, ese es exactamente el punto.
+
+  *— La redacción (inventada) de La Jirafa Eléctrica*
+</Pliego>
+
+<Pliego n={4} scheme="acido">
+  <SectionTitle scheme="acido">Anatomía de un ajuste</SectionTitle>
+
+  <ImageFull
+    src="/fanzine/vol-00/mesa-trabajo.jpeg"
+    alt="Manos trabajando sobre el cuerpo de una guitarra en la mesa del taller"
+    caption="La mesa, el instrumento y la luz que sí alumbra. Foto: Bujía Project Music"
+  />
+
+  Un ajuste no es magia, es orden. Llega una guitarra "que suena raro", y
+  antes de tocar un tornillo se afina, se mira el mástil a contraluz y se
+  escucha qué trastes zumban. Luego, siempre en este orden: **alma**,
+  **altura de cuerdas**, **octavación**, **pastillas**. Si lo haces al revés
+  vas a dar vueltas toda la tarde.
+
+  <VideoPoster id="C1vfbwwdtOQ" title="Guitar Set Up 101: alma, acción e intonación" meta="Video real en YouTube, en inglés. Carga solo al hacer clic." />
+</Pliego>
+
+<Pliego n={5} scheme="acido">
+  <Gallery images={[
+    { src: '/fanzine/vol-00/tablas-cortadas.jpeg', alt: 'Tablas de skate cortadas sobre la mesa', caption: '1. Revisar' },
+    { src: '/fanzine/vol-00/capas-pegadas.jpeg', alt: 'Capas de madera prensadas con sargentos', caption: '2. Apretar con cabeza' },
+    { src: '/fanzine/vol-00/cnc-cuerpo.jpeg', alt: 'Cuerpo de guitarra en la CNC', caption: '3. Medir dos veces' },
+  ]} />
+
+  1. **Alma (truss rod).** Capo en el traste 1, pisa el último traste y mide el claro en el 7. Un cuarto de vuelta, esperar, volver a medir.
+  2. **Altura.** Del traste 12 a la cuerda. Baja hasta que zumbe, sube tantito.
+  3. **Octavación.** Armónico del 12 contra nota pisada en el 12. Si pisada sale aguda, puente para atrás.
+  4. **Pastillas.** Que no jalen las cuerdas ni se oigan apagadas.
+
+  <VideoPoster id="ZemHulXvqVY" title="Nivelar, coronar y pulir trastes" meta="Video real en YouTube. Lo que pasa cuando el ajuste no alcanza." />
+</Pliego>
+
+<Pliego n={6} scheme="azul">
+  <SectionTitle scheme="azul">Las Bujías Quemadas</SectionTitle>
+
+  <p class="fz-small">Banda ficticia. La entrevista es inventada para probar el formato de pregunta y respuesta.</p>
+
+  **¿Por qué "Las Bujías Quemadas"?** — *La Chispa (voz):* Porque la camioneta
+  del primer tour tenía exactamente ese problema, y el nombre que teníamos
+  antes era peor.
+
+  **¿Cómo describen lo que tocan?** — *Toño Fuzz (guitarra):* Punk de
+  Texcoco con un pedal de más. Mariana dice que es "cumbia a 180 BPM" y no
+  la contradigo porque toca el bajo más fuerte que yo.
+
+  **¿Qué instrumento les da más lata?** — *Mariana Distorsión (bajo):* Mi
+  Jazz Bass tiene un traste que zumba desde 2019. Ya le tengo cariño.
+
+  **¿Y el ensayo?** — *El Trueno (batería):* En un cuarto de 3×3 con un
+  ventilador que suena en Sol. Afinamos con el ventilador.
+
+  <VideoPoster id="GiLZ5FB2LYU" title="En vivo (prueba): Hunx and His Punx, sesión completa en KEXP" meta="Video real de KEXP para probar el 'en vivo'. Las Bujías Quemadas no existen." />
+</Pliego>
+
+<Pliego n={7} scheme="azul">
+  **¿Qué escuchan en la camioneta?** — *La Chispa:* Lo que sea que no se
+  trabe en el estéreo. Armamos una playlist de prueba para este número, de
+  ajuste de guitarras, porque somos así de románticos.
+
+  <VideoPoster kind="playlist" id="PLzMaYoBMVrDm6n8BMuAVIctRy7GFBR5Ef" title="Playlist (prueba): ajustar tu guitarra completa" meta="Playlist real de YouTube para probar el embed de listas." />
+
+  **Último consejo para una banda que empieza.** — *Toño Fuzz:* Lleven
+  cuerdas de repuesto, un cable extra y un amigo que sepa dónde está el
+  taller. — *Mariana:* Y afinen. Afinar es punk.
+
+  <Quote cite="El Trueno, baterista ficticio">
+  Si el bajista no se oye, no es problema del bajista. Es problema de todos.
+  </Quote>
+</Pliego>
+
+<Pliego n={8} scheme="kraft">
+  <SectionTitle scheme="kraft">Galería de customs</SectionTitle>
+
+  <Polaroid src="/fanzine/vol-00/skatecaster-terminada.jpeg" alt="Guitarra hecha con tablas de skate, terminada" caption="Skatecaster #001 — hecha en Texcoco" tilt={-3} />
+
+  <Polaroid src="/fanzine/vol-00/cuerpo-pelon.jpeg" alt="Cuerpo de guitarra sin pickguard, con las capas de madera a la vista" caption="Sin pickguard. Así se queda." tilt={2} />
+
+  <Polaroid src="/fanzine/vol-00/headstock-reparado.jpeg" alt="Clavijero reparado sobre la mesa" caption="Headstock que volvió de la muerte" tilt={-1.5} />
+</Pliego>
+
+<Pliego n={9} scheme="acido">
+  <SectionTitle scheme="acido">Tutorial: cuerdas de bajo</SectionTitle>
+
+  Cambiar cuerdas de bajo no tiene ciencia, pero sí tiene orden. Diez
+  minutos si no te peleas con el puente.
+
+  1. **Una por una.** No quites las cuatro juntas: el mástil se mueve y luego hay que reajustar todo.
+  2. **Mide antes de cortar.** Dos clavijas más allá de la suya, dobla la cuerda y corta después del doblez para que no se desenrolle.
+  3. **Enrolla hacia abajo.** Dos o tres vueltas limpias, sin encimar.
+  4. **Estira y afina.** Jala suave, afina, repite hasta que aguante.
+  5. **Revisa la octavación.** Con calibre nuevo casi siempre se mueve.
+
+  <VideoPoster id="-8uBYIwMevA" title="Cómo encordar tu bajo, con John Carruthers" meta="Video real en YouTube, en inglés." />
+
+  Calibres y tipos de cuerda: los fabricantes lo explican mejor que
+  nosotros, por ejemplo [D'Addario](https://www.daddario.com/) y
+  [Ernie Ball](https://www.ernieball.com/).
+</Pliego>
+
+<Pliego n={10} scheme="rojo">
+  <SectionTitle scheme="rojo">Reseña de pedales</SectionTitle>
+
+  <p class="fz-small">Los tres pedales son inventados. Las ligas a fabricantes son reales.</p>
+
+  **Chingón Fuzz MK-II (ficticio).** Un fuzz con una sola perilla que dice
+  "MÁS". A la mitad ya es demasiado y a tope se escucha desde la esquina.
+  Lo probamos con la Skatecaster y el vecino tocó la puerta. Cinco jirafas
+  de cinco.
+
+  **Jirafa Boost (ficticio).** Booster limpio de 20 dB para el solo que
+  nadie pidió. Hecho en el taller con una cigarrera. Tres jirafas: le falta
+  LED.
+
+  **Overol Delay (ficticio).** Delay analógico con un switch que dice
+  "lunes". Nadie sabe qué hace. Cuatro jirafas por el misterio.
+
+  Si quieren comparar con pedales que sí existen, miren los catálogos de
+  [Electro-Harmonix](https://www.ehx.com/) y [Fender](https://www.fender.com/).
+</Pliego>
+
+<Pliego n={11} scheme="rojo">
+  <SectionTitle scheme="rojo">Tracklist del taller</SectionTitle>
+
+  <ImageSide src="/fanzine/vol-00/pintura.jpeg" alt="Cuerpo de guitarra recién pintado colgado para secar" side="left" width="36%" caption="Mientras seca la pintura, suena esto." />
+
+  Lo que sonó en la bocina del taller mientras se armaba este número.
+  Canciones y bandas inventadas; cualquier parecido es coincidencia.
+
+  1. Las Bujías Quemadas — *Camioneta en Sol*
+  2. Los Trastes Sucios — *Zumba el 7*
+  3. Overol Eléctrico — *Lunes con delay*
+  4. Pastilla Fantasma — *Ruido de fondo*
+  5. Ruido Blanco Texcoco — *Prueba de sonido*
+  6. Las Bujías Quemadas — *Cumbia a 180*
+  7. Los Trastes Sucios — *Octavación*
+  8. Overol Eléctrico — *Viruta*
+
+  Para armar la tuya: la playlist de la página 7, o lo que suene en
+  [KEXP](https://www.kexp.org/), que graba sesiones en vivo todos los días.
+  Para pastillas y cableado, [Seymour Duncan](https://www.seymourduncan.com/)
+  tiene diagramas; para herramienta, [StewMac](https://www.stewmac.com/).
+</Pliego>
+
+<Pliego n={12} scheme="flyer">
+  <PostCover variant="flyer" title="Agenda de tocadas" tag="Ficticias" subtitle="Ninguna de estas fechas existe" colorScheme="flyer" />
+
+  <ImageFull src="/fanzine/vol-00/skatecasters.jpeg" alt="Dos guitarras hechas de tablas de skate, una junto a la otra" caption="Las que sí van a la tocada. Foto: Bujía Project Music" />
+
+  - **Vie 17 oct — Foro La Cochera (ficticio), Texcoco.** Las Bujías Quemadas + Los Trastes Sucios. Cooperación voluntaria.
+  - **Sáb 25 oct — Bar El Trastero (ficticio), Chiconcuac.** Overol Eléctrico, Pastilla Fantasma. Trae tus tapones.
+  - **Dom 2 nov — Patio de alguien (ficticio).** Ruido Blanco Texcoco, acústico-ish. Se pide no romper macetas.
+  - **Sáb 15 nov — Taller Bujía (real), Abasolo 105.** Tarde de ajustes abiertos, sin banda: trae tu instrumento.
+
+  <p class="fz-small">Para avisar de una tocada real cuando el fanzine sea de verdad: ver "Colabora", página 18.</p>
+</Pliego>
+
+<Pliego n={13} scheme="oliva">
+  <SectionTitle scheme="oliva">Diccionario del taller</SectionTitle>
+
+  <Columnas n={2}>
+
+  **Alma.** La varilla dentro del mástil. Se ajusta con respeto y de a
+  cuartos de vuelta.
+
+  **Acción.** Altura de las cuerdas sobre los trastes. Baja = cómodo,
+  demasiado baja = zumba.
+
+  **Cejilla.** La piecita arriba del traste 1 por donde pasan las cuerdas.
+  Si está mal cortada, nada afina.
+
+  **Octavar.** Mover los puentes para que el traste 12 dé la misma nota
+  que el armónico.
+
+  **Puente flotante.** Un puente que se mueve. Suena bonito, afina mal.
+
+  **Pastilla.** El micrófono de la guitarra. Simple o doble (humbucker).
+
+  **Potenciómetro.** La perilla. Cuando truena al girarla, se limpia o se
+  cambia.
+
+  **Jack.** Donde entra el cable. El 40 por ciento de "mi guitarra no
+  suena" vive acá.
+
+  **Trastes.** Los metalitos. Se nivelan, se coronan, se pulen y se
+  cambian.
+
+  **Viruta.** Lo que queda en el piso. Lo que da fe de la chamba.
+
+  **Setup.** Ajuste. Lo mismo, pero en inglés y más caro.
+
+  </Columnas>
+</Pliego>
+
+{/* En la web el pliego ya no pinta fondo propio, así que los esquemas
+    oscuros (negro/carbon) dejarían texto claro sobre papel claro: se usa
+    uno de papel claro. */}
+<Pliego n={14} scheme="overol">
+  <PostCover variant="stamp" title="La guitarra fea" tag="Opinión" colorScheme="overol" />
+
+  <ImageSide src="/fanzine/vol-00/patinetas.jpeg" alt="Pila de patinetas usadas, con rayones y gráficas gastadas" side="right" width="40%" caption="Feas, usadas y a punto de ser guitarra." />
+
+  Hay una idea muy vendida de que un instrumento "bien cuidado" es uno que
+  parece nuevo. Que las calcomanías le quitan tono, que el golpe en la
+  esquina es un pecado, que las cuerdas oxidadas cuentan una historia
+  triste. Mentira.
+
+  La guitarra fea, la que tiene el barniz comido por el antebrazo y el
+  pickguard de otro color, suele ser la que sí se toca. La que sale de la
+  casa, la que se presta, la que se cae en la camioneta. Un instrumento
+  que vive guardado está "bien cuidado" como está bien cuidado un sillón
+  con plástico.
+
+  Lo que sí importa es que funcione: que afine, que octave, que la
+  electrónica no truene, que el mástil no sea una hamaca. Eso se arregla en
+  el taller. Lo otro, la pinta, es de quien la toca.
+
+  Así que no: no le vamos a quitar las calcomanías. Le vamos a nivelar los
+  trastes.
+
+  *— Columna ficticia firmada por "El de la mesa de atrás"*
+</Pliego>
+
+<Pliego n={15} scheme="xerox">
+  <SectionTitle scheme="xerox">Collage xerox</SectionTitle>
+
+  <Xerox src="/fanzine/vol-00/mural.jpeg" alt="Mural del taller en blanco y negro" caption="COPIA DE LA COPIA" />
+
+  <div class="fz-mascota">
+    <OptimizedImage src="/fanzine/vol-00/mascota.svg" alt="La jirafa, mascota del fanzine" width={220} print={false} />
+    <p class="fz-small">Mascota: ilustración por encargo (crédito pendiente de confirmar).</p>
+  </div>
+</Pliego>
+
+<Pliego n={16} scheme="kraft">
+  <SectionTitle scheme="kraft">Clasificados punk</SectionTitle>
+
+  <p class="fz-small">Anuncios ficticios. Sin teléfonos ni correos: en el fanzine real, los avisos se dejan en el taller.</p>
+
+  <PhotoOld src="/fanzine/vol-00/instrumentos-esperando.jpeg" alt="Guitarras y bajos esperando turno en el taller" caption="En la sala de espera. Foto: Bujía Project Music" tilt={1.5} />
+
+  <Columnas n={3}>
+
+  **VENDO** ampli de 15 W que suena a 60 si lo pateas. Pregunta en el taller.
+
+  **BUSCO** baterista que tenga coche. Lo del ritmo se aprende.
+
+  **CAMBIO** pedal de wah por dos cuerdas de bajo. Urge.
+
+  **SE RENTA** cuarto de ensayo 3×3 con ventilador en Sol. Incluye ventilador.
+
+  **REGALO** 14 púas encontradas abajo del sillón. Una es de carey, creo.
+
+  **SE BUSCA** la otra mitad de un set de cuerdas. Se perdió en 2023.
+
+  **VENDO** funda de guitarra que ya no cierra. Ideal para guitarra que ya no se guarda.
+
+  **CLASES** de punk de Texcoco. Primera clase: afinar.
+
+  **SE OFRECE** roadie con experiencia en cargar cosas. No sabe de audio.
+
+  </Columnas>
+</Pliego>
+
+<Pliego n={17} scheme="rosa">
+  <SectionTitle scheme="rosa">Cartas de lectores</SectionTitle>
+
+  <p class="fz-small">Cartas inventadas; los nombres no son de personas reales.</p>
+
+  <PhotoOld src="/fanzine/vol-00/skate-001.jpeg" alt="Construcción de la Skatecaster 001 con tablas recicladas" caption="La 001, cuando era solo tablas. Foto: Bujía Project Music" tilt={-2} />
+
+  <Quote cite="Lupita, de Chiconcuac (ficticia)">
+  Les llevé un bajo que no sonaba y me lo regresaron sonando. No sé qué le
+  hicieron. ¿Le pueden hacer lo mismo a mi novio?
+  </Quote>
+
+  <Quote cite="El Güero del mercado (ficticio)">
+  El fanzine anterior no existe y aun así me gustó más que este.
+  </Quote>
+
+  <Quote cite="Una banda que prefiere no decir su nombre (ficticia)">
+  Gracias por el consejo de afinar. Cambió todo. Ahora sonamos mal pero
+  afinados.
+  </Quote>
+
+  <Note variant="tip" title="Escríbenos">
+  Cuando el fanzine sea de verdad, las cartas se mandan por WhatsApp al
+  taller o se dejan en la caja de la entrada. Ver la página 18.
+  </Note>
+</Pliego>
+
+<Pliego n={18} scheme="acido">
+  <SectionTitle scheme="acido">Colabora</SectionTitle>
+
+  La Jirafa Eléctrica se arma con lo que la gente manda: fotos de su
+  instrumento, crónicas de tocadas, tutoriales, dibujos, quejas. No hace
+  falta saber escribir bonito, hace falta tener algo que contar.
+
+  <Note variant="note" title="Cómo mandar material">
+  - Por WhatsApp al taller: [{whatsapp.numeroTexto}]({whatsapp.url}).
+  - En persona, en el taller: [Bujía Project Music, Abasolo 105, Texcoco](/) — ver cómo llegar en [Nosotros](/nosotros).
+  - Los volúmenes anteriores (cuando los haya) viven en [/fanzine](/fanzine).
+  </Note>
+
+  {/* TODO(#12): cuando exista /fanzine/colabora/, poner acá la liga
+      directa (y en el impreso su QR). Por ahora no se liga para no dejar
+      un 404. */}
+
+  Las fotos van en alta (como salen del celular), los textos en lo que sea
+  que abra. Todo se publica con crédito y con permiso. Nada de fotos de
+  terceros sin preguntar.
+</Pliego>
+
+<Pliego n={19} tipo="fin">
+  <p class="fz-fin-word">Fin</p>
+
+  <p class="fz-small">**Créditos (edición de prueba).** Fotos: Bujía Project Music, del archivo del taller (portada-taller, mesa-trabajo, tablas-cortadas, capas-pegadas, cnc-cuerpo, skatecaster-terminada, cuerpo-pelon, headstock-reparado, mural, y el resto listado en CREDITOS.md). Mascota: ilustración por encargo (crédito pendiente de confirmar). Textos: ficticios, escritos para esta prueba; ninguna persona ni banda nombrada existe. Videos y playlist: ligas públicas de YouTube de sus autores (créditos en cada fachada). Tipografías: Space Mono y Anton (OFL).</p>
+
+  <p class="fz-small">Hecho en Texcoco con Astro, viruta y café frío.</p>
+</Pliego>
+
+<Pliego n={20} tipo="contraportada">
+  <Contraportada texto="Bujía Project Music — Texcoco, MX" />
+  <div class="fz-contra-datos">
+    <OptimizedImage src="/img/logo.png" alt="Bujía Project Music" width={180} widths={[180, 360]} sizes="180px" print={false} />
+    <p><a href={mapa.url} target="_blank" rel="noreferrer noopener">{direccionTexto}</a></p>
+    <ul>
+      {horario.map((b) => <li><strong>{b.dias}:</strong> {b.texto}</li>)}
+    </ul>
+    <p>WhatsApp: <a href={whatsapp.url} target="_blank" rel="noreferrer noopener">{whatsapp.numeroTexto}</a> · <a href="/">bujiaprojectmusic.com</a></p>
+    <p class="fz-small">EDICIÓN DE PRUEBA — contenido ficticio.</p>
+  </div>
+</Pliego>

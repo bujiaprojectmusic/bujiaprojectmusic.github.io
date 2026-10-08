@@ -1,12 +1,14 @@
 ---
 // ─────────────────────────────────────────────────────────────────────────
-// Unidad de página del IMPRESO (media carta, n = 1…16, el mismo número
-// que va a usar Typst). En la web NO es una página: es un tramo del
+// Unidad de página del IMPRESO (media carta, n = 1…N con N ≥ 16 y
+// múltiplo de 4, el mismo número que va a usar Typst; mapa fijo: 1
+// portada, 2 índice, N-1 fin, N contraportada — lo valida
+// scripts/check-volumes.mjs). En la web NO es una página: es un tramo del
 // scroll continuo. Los componentes punk (Portada, Indice, piezas,
 // Contraportada) se apilan en flujo normal, una columna, sin caja de
 // media carta, sin número de página y sin doble página.
 //
-// Uso en MDX (igual que antes; el mapa de 16 lo exige el cuadernillo):
+// Uso en MDX (el mapa de N páginas lo exige el cuadernillo):
 //   <Pliego n={3} tipo="normal" scheme="acido">...markdown/componentes...</Pliego>
 //   <Pliego n={7} tipo="relleno" />        ← placeholder: sólo se ve al imprimir
 //
@@ -23,7 +25,7 @@ import type { ImageSource } from '../../utils/resolveImage';
 export type PliegoTipo = 'portada' | 'indice' | 'normal' | 'relleno' | 'fin' | 'contraportada';
 
 interface Props {
-  /** Número de página del impreso, 1–16. También es el ancla #pagina-N. */
+  /** Número de página del impreso, 1–N. También es el ancla #pagina-N. */
   n: number;
   scheme?: ColorSchemeName;
   /** Fondo a sangre: color (true) o imagen (ruta "/img/..." o import). En
@@ -36,8 +38,8 @@ interface Props {
 
 const { n, scheme, bleed = false, tipo = 'normal', bleedAlt = '' } = Astro.props;
 
-if (!Number.isInteger(n) || n < 1 || n > 16) {
-  throw new Error(`<Pliego n={${n}}>: n tiene que ser un entero entre 1 y 16.`);
+if (!Number.isInteger(n) || n < 1 || n > 64) {
+  throw new Error(`<Pliego n={${n}}>: n tiene que ser un entero entre 1 y 64 (el total del volumen lo valida scripts/check-volumes.mjs).`);
 }
 
 const hasContent = Astro.slots.has('default');
@@ -268,6 +270,32 @@ const LABELS: Record<PliegoTipo, string> = {
     .pliego__todo {
       border: 3px dashed var(--ink);
       padding: 0.5em 1em;
+    }
+
+    /* Volúmenes de prueba (prueba: true → data-prueba en <body>): marca
+       en el pie de cada página del impreso. En la web la marca es la
+       franja de arriba del layout, no esto. */
+    :global([data-prueba]) .pliego::after {
+      content: 'EDICIÓN DE PRUEBA — contenido ficticio';
+      position: absolute;
+      left: 0.4in;
+      bottom: 0.3rem;
+      z-index: 2;
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 0.55rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: var(--accent);
+      padding: 0.15em 0.5em;
+      border: 1px solid var(--ink);
+    }
+    :global([data-prueba]) .pliego--portada::after,
+    :global([data-prueba]) .pliego--contraportada::after {
+      color: var(--paper);
+      background: var(--ink);
+      border-color: var(--paper);
     }
   }
 </style>

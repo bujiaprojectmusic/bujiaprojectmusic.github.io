@@ -4,7 +4,7 @@ import FanzineLayout from '../layouts/FanzineLayout.astro';
 import { fanzinePath } from '../utils/fanzine';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const posts = await getCollection('posts', ({ data }) => data.fanzine && !data.draft);
+const posts = await getCollection('posts', ({ data }) => data.fanzine && !data.draft && !data.prueba);
 const volumes = posts.sort((a, b) => (b.data.volume ?? 0) - (a.data.volume ?? 0));
 ---
 

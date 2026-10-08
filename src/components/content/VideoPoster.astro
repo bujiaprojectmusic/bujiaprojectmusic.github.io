@@ -1,0 +1,149 @@
+---
+// Video o playlist de YouTube con FACHADA: en la página sólo hay un póster
+// (CSS, sin pedir nada a YouTube) y el iframe vive dentro de un <details>
+// cerrado con loading="lazy", así que el navegador no lo carga hasta que
+// la persona abre el bloque (clic en "Ver"). Cero JavaScript. Es la
+// versión "presupuesto de datos" (#8) de VideoCinema/VideoOldTV.
+//
+// Uso en MDX:
+//   <VideoPoster id="C1vfbwwdtOQ" title="Guitar setup 101" />
+//   <VideoPoster kind="playlist" id="PLzMaYoBMV…" title="Playlist de ajuste" />
+// `href` queda visible como liga normal (y en el impreso se vuelve QR, #9).
+interface Props {
+  id: string;
+  title: string;
+  kind?: 'video' | 'playlist';
+  /** Texto chico bajo el título (canal, duración…). */
+  meta?: string;
+}
+const { id, title, kind = 'video', meta } = Astro.props;
+const href = kind === 'playlist' ? `https://www.youtube.com/playlist?list=${id}` : `https://www.youtube.com/watch?v=${id}`;
+const embed =
+  kind === 'playlist'
+    ? `https://www.youtube-nocookie.com/embed/videoseries?list=${id}`
+    : `https://www.youtube-nocookie.com/embed/${id}`;
+---
+
+<details class="video-poster" data-video={kind}>
+  <summary class="video-poster__face">
+    <span class="video-poster__play" aria-hidden="true">▶</span>
+    <span class="video-poster__kind">{kind === 'playlist' ? 'Playlist' : 'Video'} · YouTube</span>
+    <span class="video-poster__title">{title}</span>
+    {meta && <span class="video-poster__meta">{meta}</span>}
+    <span class="video-poster__cta">Ver acá (carga al hacer clic)</span>
+  </summary>
+  <div class="video-poster__frame">
+    <iframe
+      src={embed}
+      title={title}
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+    />
+  </div>
+  <p class="video-poster__link">
+    <a href={href} target="_blank" rel="noreferrer noopener">{href}</a>
+  </p>
+</details>
+
+<style>
+  .video-poster {
+    margin: 1.5rem 0;
+    border: var(--border-w) solid var(--ink);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #111;
+    color: #fff;
+  }
+  .video-poster__face {
+    list-style: none;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    aspect-ratio: 16 / 9;
+    padding: 1rem 1.1rem;
+    background:
+      repeating-linear-gradient(-45deg, transparent 0 10px, rgba(255, 255, 255, 0.05) 10px 20px),
+      radial-gradient(circle at 70% 30%, var(--accent) 0, transparent 45%),
+      #111;
+  }
+  .video-poster__face::-webkit-details-marker {
+    display: none;
+  }
+  .video-poster__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--ink);
+    border: 3px solid #fff;
+    display: grid;
+    place-items: center;
+    font-size: 1.3rem;
+    padding-left: 0.2rem;
+  }
+  .video-poster__kind {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.65rem;
+    opacity: 0.8;
+  }
+  .video-poster__title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+  .video-poster__meta {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+  .video-poster__cta {
+    font-family: var(--font-head);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+  .video-poster[open] .video-poster__face {
+    aspect-ratio: auto;
+    padding: 0.6rem 1.1rem;
+  }
+  .video-poster[open] .video-poster__play,
+  .video-poster[open] .video-poster__cta {
+    display: none;
+  }
+  .video-poster__frame {
+    aspect-ratio: 16 / 9;
+    background: #000;
+  }
+  .video-poster__frame iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .video-poster__link {
+    margin: 0;
+    padding: 0.4rem 1.1rem 0.6rem;
+    font-size: 0.7rem;
+    word-break: break-all;
+  }
+  .video-poster__link a {
+    color: #fff;
+  }
+  @media print {
+    .video-poster__frame {
+      display: none;
+    }
+  }
+</style>
