@@ -223,7 +223,10 @@ const LABELS: Record<PliegoTipo, string> = {
     border-radius: 0;
     padding: 0.5rem 0;
   }
-  .pliego :global(.fz-page-num) {
+  /* Los <div class="fz-page-num"> vacíos que mete <SectionTitle pageBreak>
+     (marcadores de salto de página) no hacen falta adentro de un pliego.
+     Sólo los vacíos: Indice y Contraportada también llevan esa clase. */
+  .pliego :global(.fz-page-num:empty) {
     display: none;
   }
   .pliego--relleno {
