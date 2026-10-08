@@ -4,14 +4,13 @@
 import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import OptimizedImage from '../../components/OptimizedImage.astro';
-import { fanzinePath } from '../../utils/fanzine';
+import { listarVolumenes } from '../../utils/volumenes';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-// Los volúmenes de prueba (prueba: true) no van en el archivo público.
+// Volúmenes compuestos (src/content/volumenes/*.yml) y MDX (issue #13);
+// los de prueba (prueba: true) no van en el archivo público.
+const volumes = (await listarVolumenes()).filter((v) => !v.prueba);
 const allPosts = await getCollection('posts', ({ data }) => !data.draft && !data.prueba);
-const volumes = allPosts
-  .filter((p) => p.data.fanzine)
-  .sort((a, b) => (b.data.volume ?? 0) - (a.data.volume ?? 0) || b.data.date.valueOf() - a.data.date.valueOf());
 const others = allPosts
   .filter((p) => !p.data.fanzine)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -27,21 +26,21 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
     </header>
 
     <ul class="fz-index__list">
-      {volumes.map((post) => (
+      {volumes.map((v) => (
         <li>
-          <a href={fanzinePath(post)} class="fz-index__card">
+          <a href={`${base}/fanzine/${v.slug}`} class="fz-index__card">
             <span class="fz-index__cover">
-              {post.data.cover ? (
-                <OptimizedImage src={post.data.cover} alt={post.data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(max-width: 600px) 40vw, 220px" print={false} />
+              {v.cover ? (
+                <OptimizedImage src={v.cover} alt="" widths={[320, 480, 640]} sizes="(max-width: 600px) 40vw, 220px" print={false} />
               ) : (
-                <span class="fz-index__cover-ph" aria-hidden="true">Vol. {post.data.volume}</span>
+                <span class="fz-index__cover-ph" aria-hidden="true">Vol. {v.numero}</span>
               )}
             </span>
             <span class="fz-index__body">
-              {post.data.volume && <span class="fz-index__vol">Volumen {post.data.volume}</span>}
-              <span class="fz-index__name">{post.data.title}</span>
-              <span class="fz-index__date">{fmt.format(post.data.date)}</span>
-              {post.data.description && <span class="fz-index__desc">{post.data.description}</span>}
+              <span class="fz-index__vol">Volumen {v.numero}</span>
+              <span class="fz-index__name">{v.titulo}</span>
+              <span class="fz-index__date">{fmt.format(v.fecha)}</span>
+              {v.descripcion && <span class="fz-index__desc">{v.descripcion}</span>}
             </span>
           </a>
         </li>
