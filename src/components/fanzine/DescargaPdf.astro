@@ -23,6 +23,28 @@ const v = impresoDe(slug);
       <a class="fz-descarga__btn fz-descarga__btn--imprenta" href={`${base}/fanzine/${slug}/${v.pdfs.imprenta.archivo}`} download>
         Descargar PDF para imprenta <span>({mb(v.pdfs.imprenta.bytes)})</span>
       </a>
+      {/* Cuadernillo en casa y versión xerox (issue #10). */}
+      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.cuadernillo.archivo}`} download>
+        Cuadernillo carta, color <span>({mb(v.pdfs.cuadernillo.bytes)})</span>
+      </a>
+      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.cuadernilloXerox.archivo}`} download>
+        Cuadernillo carta, xerox <span>({mb(v.pdfs.cuadernilloXerox.bytes)})</span>
+      </a>
+      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.xerox.archivo}`} download>
+        PDF xerox, página por página <span>({mb(v.pdfs.xerox.bytes)})</span>
+      </a>
+      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.comoImprimir.archivo}`} download>
+        Cómo imprimir (1 pág.) <span>({mb(v.pdfs.comoImprimir.bytes)})</span>
+      </a>
+      <details class="fz-descarga__como">
+        <summary>Cómo imprimir y engrapar</summary>
+        <ol>
+          <li><strong>Elegí la versión:</strong> cuadernillo <em>color</em> para imprimir, cuadernillo <em>xerox</em> para fotocopiar en blanco y negro.</li>
+          <li><strong>Papel carta, horizontal, al 100 %</strong> (sin "ajustar a página"). Cada cara trae dos páginas de media carta.</li>
+          <li><strong>Doble cara, voltear por el borde corto.</strong></li>
+          <li><strong>{v.pdfs.cuadernillo.hojas ?? v.paginas / 4} hojas:</strong> apilalas como salen, doblá la pila a la mitad con la portada afuera y poné <strong>dos grapas en el lomo</strong>.</li>
+        </ol>
+      </details>
     </>
   ) : (
     <span class="fz-descarga__nada">PDF no disponible en este build</span>
@@ -51,8 +73,33 @@ const v = impresoDe(slug);
     line-height: 1.2;
     box-shadow: 2px 2px 0 var(--ink);
   }
-  .fz-descarga__btn--imprenta {
+  .fz-descarga__btn--imprenta,
+  .fz-descarga__btn--casa {
     background: var(--paper);
+  }
+  .fz-descarga__como {
+    flex-basis: 100%;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  .fz-descarga__como summary {
+    cursor: pointer;
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-align: right;
+  }
+  .fz-descarga__como ol {
+    margin: 0.4rem 0 0;
+    padding-left: 1.2rem;
+    text-align: left;
+    max-width: 34rem;
+    margin-left: auto;
+  }
+  .fz-descarga__como li {
+    margin-bottom: 0.25rem;
   }
   .fz-descarga__btn span {
     font-weight: 400;

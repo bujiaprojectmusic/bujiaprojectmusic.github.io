@@ -36,7 +36,16 @@ export async function variantes(jsonPath) {
       u.ppi = foto.formato === 'svg' ? null : Math.round(foto.ancho_px / (u.ancho_pt / 72));
       informe.push({ pliego: u.pliego, componente: u.componente, master: foto.master, px: `${foto.ancho_px}×${foto.alto_px}`, ancho_pt: Math.round(u.ancho_pt), ppi: u.ppi });
     }
-    if (foto.formato === 'svg') { foto.pantalla = foto.imprenta; foto.bn = foto.imprenta; continue; }
+    if (foto.formato === 'svg') {
+      // Vectores: pantalla e imprenta usan el SVG; para bn (xerox) se
+      // rasteriza en gris a 300 ppi del ancho colocado (Typst no recolorea SVG).
+      foto.pantalla = foto.imprenta;
+      const px = Math.max(64, Math.round((anchoMax / 72) * I.ppi_objetivo));
+      const bnSvg = path.join(dir, `${foto.id}-${hash}-bn-${px}.png`);
+      if (!fs.existsSync(bnSvg)) await sharp(master, { density: 300 }).resize({ width: px }).grayscale().png().toFile(bnSvg);
+      foto.bn = rel(bnSvg);
+      continue;
+    }
     // pantalla / bn
     const anchoPx = Math.min(foto.ancho_px, Math.round((anchoMax / 72) * I.pantalla_ppi));
     const esPng = ext === '.png';
@@ -54,6 +63,15 @@ export async function variantes(jsonPath) {
       await (esPng ? s.png() : s.jpeg({ quality: I.pantalla_jpeg_calidad, mozjpeg: true })).toFile(bn);
     }
     foto.bn = rel(bn);
+    // bn a resolución completa para la variante imprenta del gemelo <Xerox>
+    // (la foto "fotocopiada" va siempre en gris, también en la imprenta a color).
+    const bnFull = path.join(dir, `${foto.id}-${hash}-bn-full${esPng ? '.png' : '.jpg'}`);
+    if (!fs.existsSync(bnFull)) {
+      const lo = Math.round((B.punto_negro_pct / 100) * 255), hi = Math.round((B.punto_blanco_pct / 100) * 255);
+      const s = sharp(master, { failOn: 'none' }).rotate().grayscale().gamma(B.gamma).linear((hi - lo) / 255, lo);
+      await (esPng ? s.png() : s.jpeg({ quality: 92, mozjpeg: true })).toFile(bnFull);
+    }
+    foto.bn_imprenta = rel(bnFull);
   }
   fs.writeFileSync(jsonPath, JSON.stringify(vol, null, 2));
   return { vol, informe };

@@ -80,7 +80,7 @@
   let ancho = ancho-ajustado(foto, caja * G.ancho_pct / 100 - 2 * pt(G.marco_pt), G.alto_max_pct) + 2 * pt(G.marco_pt)
   block(width: 100%, breakable: false, {
     box(width: ancho, stroke: pt(G.marco_pt) + negro, {
-      if foto != none and foto.existe { image(foto.bn, width: 100%) } else { pendiente(ctx, foto) }
+      if foto != none and foto.existe { image(if ctx.variante == "imprenta" { foto.at("bn_imprenta", default: foto.bn) } else { foto.bn }, width: 100%) } else { pendiente(ctx, foto) }
       place(bottom + right, dx: -8pt, dy: -8pt, rotate(-4deg, box(fill: white, stroke: 1.5pt + black, inset: (x: 5pt, y: 3pt),
         text(font: fuente-texto, weight: "bold", size: pt(estilos.pie.pt), fill: black, tracking: 0.08em, upper("Copia")))))
     })

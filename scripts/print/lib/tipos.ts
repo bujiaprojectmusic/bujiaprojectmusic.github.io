@@ -36,6 +36,7 @@ export interface Foto {
   imprenta?: string;
   pantalla?: string;
   bn?: string;
+  bn_imprenta?: string;
 }
 
 export interface Pliego {

@@ -344,6 +344,53 @@ licencia incluida, nada se descarga al compilar).
 Limitaciones conocidas: las 3 columnas de la web se imprimen en 2; un SVG
 en la variante B/N queda en color.
 
+## Cuadernillo en carta y versión xerox (issue #10)
+
+Además de pantalla e imprenta, `npm run print` deja por volumen:
+
+| Archivo | Qué es |
+|---|---|
+| `jirafa-<slug>-cuadernillo.pdf` | Hojas carta horizontales (792 × 612 pt) con dos páginas de media carta por cara, a color, para imprimir en casa a doble cara y engrapar al centro. Sale del PDF de imprenta recortado al TrimBox con `pdf-lib` (`scripts/print/impose.mjs`), como vector y a escala 1: nada se rasteriza ni se reescala. |
+| `jirafa-<slug>-xerox.pdf` | El mismo volumen en la variante `bn` de Typst: paleta en gris (`luma`), fotos en gris con punto negro/blanco y gamma de `reglas.bn`, portada, contraportada y páginas a sangre aclaradas (fondo papel, foto velada en blanco, texto negro), sin sangrado ni marcas, 396 × 612 pt. |
+| `jirafa-<slug>-cuadernillo-xerox.pdf` | El cuadernillo de la versión xerox. |
+| `jirafa-<slug>-como-imprimir.pdf` | Una página con los pasos para imprimir y engrapar (`print/como-imprimir.typ`). Va aparte del cuadernillo para no romper el orden de doble cara. |
+
+Orden de imposición para N páginas (múltiplo de 4; si no, se rellena con
+blancos antes de las dos últimas): hoja h → frente `[N−2(h−1) | 2h−1]`,
+vuelta `[2h | N−2h+1]` (`cuadernillo(N)` en `scripts/print/lib/reglas.mjs`).
+Para 16 páginas: `[16|1] [2|15] [14|3] [4|13] [12|5] [6|11] [10|7] [8|9]`.
+
+Chequeos que corre el build (`scripts/print/cuadernillo.mjs`):
+
+- **Orden**: compila el volumen con `--input marcas-prueba=true` (cada
+  página lleva `P01`…`PN` en la caja de texto), lo impone y lee con
+  `pdftotext -x -y -W -H` la mitad izquierda y derecha de cada cara; tiene
+  que coincidir con la tabla. Los tests unitarios (`tests/print/impose.test.mjs`)
+  hacen lo mismo con un PDF sintético y prueban el relleno a múltiplo de 4
+  (12 → 12, 14 → 16, 18 → 20).
+- **Escala 1**: las matrices `cm` de las páginas embebidas son `1 0 0 1 x 0`.
+- **Gris puro**: `pdftoppm -r 50` de xerox y cuadernillo-xerox, |R−G| y
+  |G−B| ≤ 2 en todos los píxeles.
+- **Tóner**: % de negro sólido (luma < 20 a 50 dpi) por página de la versión
+  xerox; más de `reglas.bn.negro_solido_max_pct_pagina` (25 %) sale como
+  aviso en el resumen del job.
+- `pdfimages -list` (ppi de las imágenes embebidas) y `pdffonts`.
+- Miniaturas de las caras en `print/build/<slug>/caras-<slug>.png` (van al
+  artifact `fanzine-pdfs`).
+
+En `/fanzine/<slug>` hay seis ligas de descarga (pantalla, imprenta,
+cuadernillo color, cuadernillo xerox, xerox página por página y cómo
+imprimir) y el bloque desplegable "Cómo imprimir y engrapar".
+
+### Cómo imprimir y engrapar (resumen)
+
+1. Elegí la versión: cuadernillo color para imprimir, xerox para fotocopiar.
+2. Papel carta horizontal, **tamaño real 100 %**, sin "ajustar a página".
+3. **Doble cara, voltear por el borde corto.** Antes, probá con
+   `jirafa-prueba-doble-cara.pdf`.
+4. N/4 hojas: apilalas como salen, doblá la pila a la mitad con la portada
+   afuera y dos grapas en el lomo.
+
 ## Qué reutiliza el motor del volumen (#9)
 
 - `print/lib/base.typ`: `configurar(paginas: N)` (hoja, márgenes

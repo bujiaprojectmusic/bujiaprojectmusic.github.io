@@ -124,7 +124,9 @@ chequeos de desborde, índice, ppi, fuentes y QR), `npm run print:test`
 `npm run print:check` (reglas vs docs). Los PDF se generan en CI
 (artifacts `fanzine-pdfs` e `impreso-prueba`), se copian a
 `dist/fanzine/<slug>/` y no se commitean; en `/fanzine/vol-NN` hay botones
-"Descargar PDF para leer / para imprenta". Si una pieza no cabe en su
+"Descargar PDF para leer / para imprenta", el **cuadernillo en carta**
+(color y xerox) para imprimir en casa a doble cara y engrapar, la versión
+xerox página por página y "Cómo imprimir". Si una pieza no cabe en su
 página, el build falla y dice cuál: el texto nunca se achica.
 
 ## Personalización (colores, tipografía, redes)
