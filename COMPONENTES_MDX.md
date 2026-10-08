@@ -178,7 +178,8 @@ contraportada. Un pliego sin contenido muestra un placeholder "TODO" (y el
 de tipo `fin`, la palabra Fin). Desde el pliego 2, cada página trae el
 control "↑ Inicio / ≡ Índice" (anclas a `#pagina-1` y `#pagina-2`, sin
 JavaScript, oculto al imprimir). `npm run build` falla si faltan o sobran
-pliegos (`scripts/check-volumes.mjs`).
+pliegos (`scripts/check-volumes.mjs`). El volumen se publica en
+`/fanzine/vol-NN` (el número sale de `volume` en el frontmatter).
 
 ---
 

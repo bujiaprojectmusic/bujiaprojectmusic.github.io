@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
+import { fanzinePath } from '../../utils/fanzine';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -12,12 +13,13 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 
-// Los volúmenes del fanzine viven en /fanzine/<slug> (ver
-// src/pages/fanzine/[slug].astro). La URL vieja /blog/<slug> sigue
-// existiendo pero redirige: en build estático Astro genera un HTML con
-// <meta http-equiv="refresh"> + <link rel="canonical"> a la URL nueva.
+// Los volúmenes del fanzine viven en /fanzine/vol-NN (ver
+// src/pages/fanzine/[slug].astro y utils/fanzine.ts). La URL vieja
+// /blog/<slug> sigue existiendo pero redirige: en build estático Astro
+// genera un HTML con <meta http-equiv="refresh"> + <link rel="canonical">
+// a la URL nueva. Nada del fanzine se sirve bajo /blog/.
 if (post.data.fanzine) {
-  return Astro.redirect(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/fanzine/${post.slug}`, 301);
+  return Astro.redirect(fanzinePath(post), 301);
 }
 
 const { Content } = await post.render();

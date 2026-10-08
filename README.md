@@ -58,9 +58,12 @@ import Pliego from '../../components/fanzine/Pliego.astro';
 Cómo se ve: en móvil cada pliego va a todo el ancho, uno debajo de otro;
 en desktop (≥ 1024 px) se agrupan como revista abierta — página 1 sola,
 (2–3), (4–5) … (14–15) y 16 sola. Desde el pliego 2 hay un control
-"↑ Inicio / ≡ Índice" (anclas, sin JavaScript). El volumen se sirve en
-`/fanzine/<slug>` (la URL vieja `/blog/<slug>` redirige) con el layout
-propio del fanzine (`src/layouts/FanzineLayout.astro`).
+"↑ Inicio / ≡ Índice" (anclas, sin JavaScript). El volumen se sirve en **`/fanzine/vol-NN`** (dos dígitos,
+sale del `volume` del frontmatter, no del nombre del archivo ni del
+título; `volume` es obligatorio con `fanzine: true`). Las URLs viejas
+(`/blog/<archivo>`, `/fanzine/<archivo>`) se generan como redirección
+(meta refresh + canonical) y quedan fuera del sitemap. Nada del fanzine
+se sirve bajo `/blog/`. Layout propio: `src/layouts/FanzineLayout.astro`.
 
 `npm run build` corre antes `scripts/check-volumes.mjs`, que **falla si un
 volumen no tiene exactamente 16 `<Pliego>` con `n` del 1 al 16 sin
