@@ -6,7 +6,10 @@ fanzine: true
 colorScheme: rosa
 tags: ["fanzine", "taller", "reparacion"]
 description: "Primer volumen de La Jirafa Eléctrica: rebobinado de pastillas, playlist de agosto y fotos del taller."
-cover: "/img/vol1-cover.jpg"
+# TODO(Ricardo): subir la portada real a src/assets/img/vol1-cover.jpg y
+# descomentar. Con fanzine: true la portada la pinta <Portada> acá abajo,
+# así que este campo sólo se usa en el listado / layout de blog.
+# cover: "/img/vol1-cover.jpg"
 author: Ripper
 ---
 
@@ -17,6 +20,9 @@ import Polaroid from '../../components/Polaroid.astro';
 import Columnas from '../../components/Columnas.astro';
 import Contraportada from '../../components/Contraportada.astro';
 
+{/* TODO(Ricardo): la foto de portada todavía no existe. Subirla a
+    src/assets/img/vol1-cover.jpg (se referencia como /img/vol1-cover.jpg)
+    y la portada la toma sola; mientras tanto se muestra sin foto. */}
 <Portada
   volume={1}
   title="Fierros y Fuzz"
@@ -54,6 +60,8 @@ estire de más.
 
 </Columnas>
 
+{/* TODO(Ricardo): subir la foto a src/assets/img/taller-1.jpg. Mientras
+    no exista se muestra un recuadro "Imagen pendiente" en su lugar. */}
 <Polaroid
   src="/img/taller-1.jpg"
   alt="Rebobinando una pastilla a mano"

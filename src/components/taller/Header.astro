@@ -9,6 +9,7 @@
 // sale de src/config/site.ts — este componente sólo arma el markup.
 import { taller } from '../../config/site';
 import Icon from './Icon.astro';
+import OptimizedImage from '../OptimizedImage.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (href: string) => `${base}${href}`;
@@ -57,7 +58,15 @@ const withBase = (href: string) => `${base}${href}`;
       >
         {
           taller.logo.image ? (
-            <img src={withBase(taller.logo.image)} alt={taller.logo.alt} />
+            <OptimizedImage
+              src={taller.logo.image}
+              alt={taller.logo.alt}
+              widths={[260, 360, 520, 720]}
+              sizes="(max-width: 720px) 180px, 260px"
+              width={260}
+              print={false}
+              context="logo del header (site.ts → taller.logo.image)"
+            />
           ) : (
             <span>{taller.logo.text}</span>
           )
@@ -115,7 +124,15 @@ const withBase = (href: string) => `${base}${href}`;
       >
         {
           taller.logo.image ? (
-            <img src={withBase(taller.logo.image)} alt={taller.logo.alt} />
+            <OptimizedImage
+              src={taller.logo.image}
+              alt={taller.logo.alt}
+              widths={[84, 168, 252]}
+              sizes="84px"
+              width={84}
+              print={false}
+              context="logo del header fijo (site.ts → taller.logo.image)"
+            />
           ) : (
             <span>{taller.logo.text}</span>
           )

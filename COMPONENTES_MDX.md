@@ -38,6 +38,14 @@ con texto normal en Markdown.
 Todo lo que sigue son ejemplos copiar/pegar. Los props sin `?` son
 obligatorios.
 
+> **Fotos:** van en `src/assets/img/` (en la carpeta que corresponda) y
+> se referencian como `"/img/carpeta/archivo.jpg"`, igual que siempre.
+> No hace falta achicarlas ni convertirlas: Astro genera al compilar las
+> versiones AVIF/WebP en varios tamaños, con `width`/`height` y carga
+> lazy, y una versión grande para el PDF del fanzine. Si la ruta no
+> existe, el build no se rompe: muestra un recuadro "Imagen pendiente"
+> con la ruta y avisa en la consola.
+
 ---
 
 ## 1. Portadas de post (`PostCover`)
@@ -84,6 +92,13 @@ import BeforeAfter from '../../components/content/BeforeAfter.astro';
   ```mdx
   <ImageFull src="/img/telecaster-final.jpg" alt="Telecaster terminada" caption="Terminada, mayo 2026" />
   ```
+  Si es la primera foto que se ve al entrar a la página (la más grande
+  "arriba del todo"), agregale `priority` para que cargue primero en vez
+  de lazy — sólo a UNA foto por página:
+  ```mdx
+  <ImageFull src="/img/telecaster-final.jpg" alt="Telecaster terminada" priority />
+  ```
+  (`priority` también existe en `ImageSide`, `Xerox`, `PhotoOld` y `Polaroid`.)
 - **`ImageSide`** — foto a la izquierda o derecha, el texto la rodea. Metela
   en medio de tus párrafos.
   ```mdx

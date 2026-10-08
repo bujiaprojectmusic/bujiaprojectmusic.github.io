@@ -8,6 +8,7 @@
 import { getCollection } from 'astro:content';
 import { taller } from '../../config/site';
 import PunkButton from './PunkButton.astro';
+import OptimizedImage from '../OptimizedImage.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}${href}`);
@@ -24,8 +25,22 @@ const showNav = slides.length > 1;
   slides.length > 0 && (
     <section class="hero-slider" id="hero-slider">
       <div class="hero-slider__track" id="hero-slider-track">
-        {slides.map((slide) => (
-          <div class="hero-slider__slide" style={`background-image:url(${withBase(slide.data.image)})`}>
+        {slides.map((slide, i) => (
+          <div class="hero-slider__slide">
+            {/* Antes era background-image (sin lazy ni srcset). Ahora es un
+                <img> optimizado a pantalla completa con object-fit: cover;
+                la primera slide es la LCP (eager + high), el resto lazy. */}
+            <OptimizedImage
+              src={slide.data.image}
+              alt=""
+              class="hero-slider__img"
+              widths={[640, 960, 1280, 1920]}
+              sizes="100vw"
+              print={false}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'high' : undefined}
+              decoding={i === 0 ? 'sync' : 'async'}
+            />
             <div class="hero-slider__card">
               <h2 class="hero-slider__title">{slide.data.title}</h2>
               <div class="hero-slider__body">
@@ -69,17 +84,27 @@ const showNav = slides.length > 1;
     transition: transform 0.4s ease;
   }
   .hero-slider__slide {
+    position: relative;
     flex: none;
     width: 100%;
     min-height: 60vh;
-    background-size: cover;
-    background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem;
   }
+  .hero-slider__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+  }
   .hero-slider__card {
+    position: relative;
+    z-index: 1;
     background: var(--paper);
     border: var(--border-w) solid var(--ink);
     border-radius: var(--radius);

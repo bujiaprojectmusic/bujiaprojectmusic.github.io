@@ -2,9 +2,16 @@
 // Antes/Después: dos fotos lado a lado con etiquetas, para reparaciones
 // y restauraciones.
 // Uso: <BeforeAfter before="/img/antes.jpg" after="/img/despues.jpg" alt="Guitarra restaurada" />
+// Las fotos van en src/assets/img/ y se optimizan al compilar (ver OptimizedImage).
+import OptimizedImage from '../OptimizedImage.astro';
+import type { ImageSource } from '../../utils/resolveImage';
+
+const SIZES = '(max-width: 560px) calc(100vw - 48px), (max-width: 1140px) 46vw, 520px';
+const WIDTHS = [480, 768, 1024];
+
 interface Props {
-  before: string;
-  after: string;
+  before: ImageSource;
+  after: ImageSource;
   alt: string;
   beforeLabel?: string;
   afterLabel?: string;
@@ -15,12 +22,12 @@ const { before, after, alt, beforeLabel = 'Antes', afterLabel = 'Después' } = A
 <div class="before-after">
   <figure class="before-after__side">
     <span class="before-after__tag">{beforeLabel}</span>
-    <img src={before} alt={`${alt} — ${beforeLabel.toLowerCase()}`} loading="lazy" />
+    <OptimizedImage src={before} alt={`${alt} — ${beforeLabel.toLowerCase()}`} widths={WIDTHS} sizes={SIZES} context="BeforeAfter" />
   </figure>
   <span class="before-after__vs" aria-hidden="true">→</span>
   <figure class="before-after__side">
     <span class="before-after__tag before-after__tag--after">{afterLabel}</span>
-    <img src={after} alt={`${alt} — ${afterLabel.toLowerCase()}`} loading="lazy" />
+    <OptimizedImage src={after} alt={`${alt} — ${afterLabel.toLowerCase()}`} widths={WIDTHS} sizes={SIZES} context="BeforeAfter" />
   </figure>
 </div>
 

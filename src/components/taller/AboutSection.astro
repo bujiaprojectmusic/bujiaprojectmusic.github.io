@@ -8,6 +8,7 @@
 import { getCollection } from 'astro:content';
 import { taller } from '../../config/site';
 import PunkButton from './PunkButton.astro';
+import OptimizedImage from '../OptimizedImage.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}${href}`);
@@ -22,7 +23,6 @@ const entries = await Promise.all(
 {
   entries.map((entry) => {
     const bgVars = [
-      `--about-bg-image:url(${withBase(entry.data.backgroundImage || entry.data.image)})`,
       entry.data.backgroundOverlayColor && `--about-bg-color:${entry.data.backgroundOverlayColor}`,
       entry.data.backgroundOverlayOpacity != null && `--about-bg-opacity:${entry.data.backgroundOverlayOpacity}%`,
       entry.data.backgroundOverlayColorMobile && `--about-bg-color-mobile:${entry.data.backgroundOverlayColorMobile}`,
@@ -34,17 +34,40 @@ const entries = await Promise.all(
 
     return (
       <section class={`about-section scheme-${entry.data.colorScheme ?? taller.about.colorScheme}`} style={bgVars}>
-        <div class="about-section__bg" aria-hidden="true" />
+        {/* Fondo de la sección entera (en mobile es lo único que se ve de
+            la foto, y es la imagen LCP de la home): antes era un
+            background-image inline con el PNG original de 6 MB; ahora es
+            un <img> optimizado con object-fit: cover, eager + high. El
+            tinte (::after) sigue igual. */}
+        <div class="about-section__bg" aria-hidden="true">
+          <OptimizedImage
+            src={entry.data.backgroundImage || entry.data.image}
+            alt=""
+            class="about-section__bg-img"
+            widths={[640, 960, 1280, 1920]}
+            sizes="100vw"
+            print={false}
+            loading="eager"
+            fetchpriority="high"
+            decoding="sync"
+          />
+        </div>
 
         <div
           class:list={['container-wide', 'about-section__in', { 'about-section__in--reverse': entry.data.imagePosition === 'right' }]}
         >
-          <div
-            class="about-section__img"
-            role="img"
-            aria-label={entry.data.imageAlt || ''}
-            style={`background-image:url(${withBase(entry.data.image)})`}
-          />
+          {/* Recuadro con la foto (sólo desktop; en mobile está display:none
+              y por ser lazy no se descarga). */}
+          <div class="about-section__img">
+            <OptimizedImage
+              src={entry.data.image}
+              alt={entry.data.imageAlt || ''}
+              class="about-section__img-pic"
+              widths={[480, 768, 1024, 1440]}
+              sizes="(max-width: 1440px) 44vw, 640px"
+              print={false}
+            />
+          </div>
 
           <div class="about-section__body">
             <h2 class="about-section__title">{entry.data.title}</h2>
@@ -89,10 +112,17 @@ const entries = await Promise.all(
     position: absolute;
     inset: 0;
     z-index: 0;
-    background-image: var(--about-bg-image);
-    background-size: cover;
-    background-position: center;
+    overflow: hidden;
     pointer-events: none;
+  }
+  .about-section__bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: center;
   }
   .about-section__bg::after {
     content: '';
@@ -125,11 +155,16 @@ const entries = await Promise.all(
   .about-section__img {
     aspect-ratio: 4 / 5;
     background-color: rgba(127, 127, 127, 0.15);
-    background-size: cover;
-    background-position: center;
     border: var(--border-w) solid var(--ink);
     border-radius: var(--radius);
     box-shadow: 10px 10px 0 var(--accent);
+    overflow: hidden;
+  }
+  .about-section__img-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
 
   .about-section__title {

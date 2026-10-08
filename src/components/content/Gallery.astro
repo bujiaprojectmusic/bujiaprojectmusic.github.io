@@ -8,10 +8,12 @@
 //   { src: '/img/proceso-2.jpg', alt: 'Lijando', caption: 'Tres horas de lija' },
 //   { src: '/img/proceso-3.jpg', alt: 'Pintado' },
 // ]} />
-import { withBase } from '../../utils/withBase';
+// Las fotos van en src/assets/img/ y se optimizan al compilar (ver OptimizedImage).
+import OptimizedImage from '../OptimizedImage.astro';
+import type { ImageSource } from '../../utils/resolveImage';
 
 interface GalleryImage {
-  src: string;
+  src: ImageSource;
   alt: string;
   caption?: string;
 }
@@ -25,7 +27,13 @@ const tilts = [-3, 2, -1.5, 3, -2.5, 1.5];
 <div class="gallery">
   {images.map((img, i) => (
     <figure class="gallery__item" style={`--tilt:${tilts[i % tilts.length]}deg`}>
-      <img src={withBase(img.src)} alt={img.alt} loading="lazy" />
+      <OptimizedImage
+        src={img.src}
+        alt={img.alt}
+        widths={[320, 480, 640, 960]}
+        sizes="(max-width: 640px) 50vw, 220px"
+        context="Gallery"
+      />
       {img.caption && <figcaption>{img.caption}</figcaption>}
     </figure>
   ))}

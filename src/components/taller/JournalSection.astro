@@ -36,7 +36,7 @@ const hasMore = sorted.length > posts.length;
 
           <div class="journal-grid">
             {posts.map((post) => (
-              <JournalCard post={post} href={withBase(`/archive/${post.slug}`)} image={withBase(post.data.cover)} />
+              <JournalCard post={post} href={withBase(`/archive/${post.slug}`)} image={post.data.cover} />
             ))}
           </div>
 

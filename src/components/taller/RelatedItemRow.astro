@@ -2,16 +2,22 @@
 // Fila de un ítem relacionado dentro de un SidebarBox: miniatura circular
 // + título. Ponés varias seguidas y quedan separadas por una línea
 // punteada, como "POSTS DESTACADOS" del fanzine.
+import type { ImageMetadata } from 'astro';
+import OptimizedImage from '../OptimizedImage.astro';
+
 interface Props {
   href: string;
-  image: string;
+  // Imagen ya resuelta por el schema (cover/image de la colección).
+  image: ImageMetadata;
   title: string;
 }
 const { href, image, title } = Astro.props;
 ---
 
 <a href={href} class="related-row">
-  <span class="related-row__thumb" style={`background-image:url(${image})`} />
+  <span class="related-row__thumb">
+    <OptimizedImage src={image} alt="" class="related-row__pic" widths={[96, 144, 192]} sizes="48px" print={false} />
+  </span>
   <span class="related-row__title">{title}</span>
 </a>
 
@@ -34,9 +40,14 @@ const { href, image, title } = Astro.props;
     height: 48px;
     border-radius: 50%;
     background-color: rgba(127, 127, 127, 0.15);
-    background-size: cover;
-    background-position: center;
     border: 2px solid var(--ink);
+    overflow: hidden;
+  }
+  .related-row__pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
   .related-row__title {
     font-family: var(--font-head);

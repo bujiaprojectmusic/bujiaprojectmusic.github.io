@@ -2,20 +2,43 @@
 // Imagen a la izquierda o derecha con el texto del post fluyendo
 // alrededor. Metela en medio de tus párrafos de MDX.
 // Uso: <ImageSide src="/img/pastilla.jpg" alt="Pastilla rebobinada" side="left" caption="Rebobinado a mano" />
-import { withBase } from '../../utils/withBase';
+// La foto va en src/assets/img/ y se optimiza al compilar (ver OptimizedImage).
+import OptimizedImage from '../OptimizedImage.astro';
+import type { ImageSource } from '../../utils/resolveImage';
 
 interface Props {
-  src: string;
+  src: ImageSource;
   alt: string;
   side?: 'left' | 'right';
   caption?: string;
   width?: string;
+  // priority: true = es la imagen más grande que se ve al entrar a la
+  // página (la "LCP"): se carga eager + fetchpriority="high" en vez de
+  // lazy. Ponerlo SOLO en la primera foto de la página.
+  priority?: boolean;
 }
-const { src, alt, side = 'left', caption, width = '42%' } = Astro.props;
+const { src, alt, side = 'left', caption, width = '42%', priority = false } = Astro.props;
+
+// `sizes` no acepta porcentajes: si width es "42%" lo pasamos a calc()
+// sobre el ancho del contenedor (100vw - 48px de padding, máx. 1092px).
+const pct = width.trim().endsWith('%') ? parseFloat(width) / 100 : null;
+const sizes =
+  pct != null
+    ? `(max-width: 640px) calc(100vw - 48px), (max-width: 1140px) calc((100vw - 48px) * ${pct}), ${Math.round(1092 * pct)}px`
+    : `(max-width: 640px) calc(100vw - 48px), ${width}`;
 ---
 
 <figure class:list={['img-side', `img-side--${side}`]} style={`--img-side-w: ${width}`}>
-  <img src={withBase(src)} alt={alt} loading="lazy" />
+  <OptimizedImage
+    src={src}
+    alt={alt}
+    widths={[400, 600, 800, 1200]}
+    sizes={sizes}
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding={priority ? 'sync' : 'async'}
+    context="ImageSide"
+  />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
