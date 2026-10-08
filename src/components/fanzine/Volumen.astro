@@ -1,8 +1,9 @@
 ---
-// Contenedor de los 16 pliegos de un volumen. Es el que arma las dobles
-// páginas en desktop (CSS grid de 2 columnas: la página 1 va sola a la
-// derecha, la 16 sola a la izquierda, el resto de a pares) y la columna
-// única en móvil. Sin JavaScript. Lo usa src/pages/fanzine/[slug].astro.
+// Columna de lectura de un volumen. En pantalla es flujo normal (una
+// sola columna, scroll del navegador): los <Pliego> de adentro no se
+// agrupan en dobles páginas. Al imprimir, cada <Pliego> ya es su propia
+// página y este contenedor sólo deja de limitar el ancho.
+// Lo usa src/pages/fanzine/[slug].astro.
 ---
 
 <div class="fz-volume">
@@ -11,45 +12,14 @@
 
 <style>
   .fz-volume {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1rem;
-    padding: 1rem 0.75rem 2rem;
-    max-width: 600px;
+    display: block;
+    max-width: 900px;
     margin: 0 auto;
-    container-type: inline-size;
+    padding: 1.5rem 1.25rem 3rem;
   }
   @media (max-width: 767px) {
     .fz-volume {
-      padding: 0.75rem 0 2rem;
-      gap: 0.75rem;
-      max-width: none;
-    }
-  }
-  @media (min-width: 1024px) {
-    .fz-volume {
-      max-width: 1180px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 0;
-      row-gap: 2.5rem;
-      padding: 2rem 1.5rem 3rem;
-    }
-    /* Cuadernillo: 1 sola a la derecha, 16 sola a la izquierda, el resto
-       de a pares (par a la izquierda, impar a la derecha). La clase
-       pliego--left / pliego--right la pone <Pliego> según n. */
-    .fz-volume :global(.pliego--right) {
-      grid-column: 2;
-      border-left-width: calc(var(--border-w) / 2);
-    }
-    .fz-volume :global(.pliego--left) {
-      grid-column: 1;
-      border-right-width: calc(var(--border-w) / 2);
-    }
-    /* Las páginas solas (1 y 16) conservan el borde completo del lomo. */
-    .fz-volume :global(.pliego--portada),
-    .fz-volume :global(.pliego--contraportada) {
-      border-left-width: var(--border-w);
-      border-right-width: var(--border-w);
+      padding: 1rem 1rem 3rem;
     }
   }
   @media print {

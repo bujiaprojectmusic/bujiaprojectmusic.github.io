@@ -2,8 +2,8 @@
 // Página de un volumen del fanzine: /fanzine/vol-NN (el slug sale del
 // número de volumen, ver utils/fanzine.ts). Sólo posts con fanzine: true;
 // los demás siguen en /blog/<slug> con PostLayout. El MDX del volumen trae
-// sus 16 <Pliego>; acá sólo se envuelven en <Volumen> (que arma las dobles
-// páginas en desktop) dentro de FanzineLayout.
+// sus 16 <Pliego> (mapa del cuadernillo impreso); en esta página se leen
+// en una columna con scroll continuo. La paginación queda en @media print.
 //
 // Además, si el nombre del archivo no coincide con vol-NN (p. ej.
 // volumen-01.mdx), /fanzine/<archivo> se genera como redirección a la URL
@@ -40,7 +40,8 @@ const title = `Vol. ${post.data.volume} — ${post.data.title}`;
 ---
 
 <FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme}>
-  <article class="fz-volume-page">
+  <a slot="jump" href="#pagina-2">≡ Índice</a>
+  <article class="fz-volume-page post-body">
     <Volumen>
       <Content />
     </Volumen>
