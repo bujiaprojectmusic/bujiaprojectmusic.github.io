@@ -84,5 +84,10 @@
     ],
     "colabora_url": "/fanzine",
     "notas_renglones_pt": 18
+  },
+  "pliego_sangre": {
+    "oscurecer_arriba_pct": 35,
+    "oscurecer_abajo_pct": 88,
+    "texto": "paper"
   }
 }

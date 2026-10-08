@@ -218,7 +218,9 @@ export async function exportar(fuente: FuenteVolumen, salidaDir: string): Promis
       foto.usos.push({ pliego: n, componente: 'Pliego', ancho_pt: anchoColocado('Pliego', c.props, foto, 1) });
       (c.props as any).bleed = foto.id;
     }
-    pliegos.push({ n, tipo: c.tipo as Pliego['tipo'], esquema: c.esquema, nodos, origen: { archivo: fuente.archivo, linea: c.linea }, ...(typeof c.props.bleed === 'string' ? { bleed: c.props.bleed } : {}) } as Pliego);
+    // bleed: imagen (id de foto) o true (fondo de color ink del esquema), como en Pliego.astro.
+    const bleed = typeof c.props.bleed === 'string' ? { bleed: c.props.bleed } : c.props.bleed === true ? { bleed_color: true } : {};
+    pliegos.push({ n, tipo: c.tipo as Pliego['tipo'], esquema: c.esquema, nodos, origen: { archivo: fuente.archivo, linea: c.linea }, ...bleed } as Pliego);
   }
 
   // ── Índice (página 2) ──────────────────────────────────────────────────

@@ -327,6 +327,16 @@ OptimizedImage, VideoPoster/VideoOldTV/VideoCinema (QR), DatosTaller, más
 Portada, Indice y Contraportada (páginas fijas) y las etiquetas HTML
 genéricas (`p`, `div`, `ul`, `li`, `strong`, `em`, `a`, `small`…).
 
+Recursos de revista que ya tienen gemelo y conviene usar en los MDX:
+`<Columnas n={2}>` (las columnas se emparejan midiendo el contenido),
+`<Quote>` para citas destacadas, `<Note>` para recuadros, `<Divider>`,
+`<Gallery>`/`<Polaroid>`/`<PhotoOld>`/`<Xerox>` para fotos, y
+**`<Pliego bleed="/img/foto.jpg">`** para una página con la foto a toda la
+hoja (hasta el BleedBox) y el texto encima: la foto se oscurece con un
+degradado hacia abajo y el texto va en el color papel del esquema, pegado
+al pie (apertura tipo revista; en la web la foto queda arriba del bloque).
+`bleed={true}` da la página con fondo del color ink del esquema.
+
 `<ImageSide>`: el texto que sigue en el MDX rodea la foto como en la web,
 con el paquete `wrap-it` vendorizado en `print/vendor/` (versión fijada,
 licencia incluida, nada se descarga al compilar).

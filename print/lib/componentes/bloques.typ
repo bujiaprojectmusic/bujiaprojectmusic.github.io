@@ -2,17 +2,28 @@
 #import "/print/lib/componentes/util.typ": *
 
 /// Columnas: máximo 2 en papel (las 3 de la web se imprimen en 2), cuerpo_2col.
+/// Typst llena la primera columna hasta el final de la página antes de
+/// pasar a la segunda; para que queden parejas (como en una revista) se
+/// mide el contenido al ancho de una columna y el bloque se corta a
+/// alto/n más una línea y media de holgura.
 #let columnas(ctx, p, hijos) = {
   let c = reglas.tipografia.columnas
   let n = calc.min(int(p.at("n", default: 2)), c.maximo)
-  block(width: 100%, columns(n, gutter: pt(c.separacion_pt), texto("cuerpo_2col", quien: "Columnas", (ctx.render)(ctx, hijos))))
+  let gutter = pt(c.separacion_pt)
+  let cuerpo = texto("cuerpo_2col", quien: "Columnas", (ctx.render)(ctx, hijos))
+  layout(size => {
+    let ancho-col = (size.width - gutter * (n - 1)) / n
+    let alto = measure(block(width: ancho-col, cuerpo)).height
+    let holgura = pt(estilos.cuerpo_2col.interlinea_pt) * 1.5
+    block(width: 100%, height: calc.min(size.height, alto / n + holgura), columns(n, gutter: gutter, cuerpo))
+  })
 }
 
 #let quote(ctx, p, hijos) = {
   let c = colores(ctx)
   let cita = p.at("cite", default: none)
-  block(width: 100%, breakable: false, above: 10pt, below: 10pt, inset: (left: 12pt, y: 4pt, right: 6pt), stroke: (left: 2.25pt + negro), {
-    place(top + left, dx: -4pt, dy: -10pt, text(font: fuente-titulos, size: pt(estilos.titulo.pt_max) * 0.625, fill: c.accent, stroke: 0.6pt + negro, "“"))
+  block(width: 100%, breakable: false, above: 12pt, below: 10pt, inset: (left: 12pt, y: 4pt, right: 6pt), stroke: (left: 2.25pt + negro), {
+    place(top + left, dx: -6pt, dy: -12pt, text(font: fuente-titulos, size: pt(estilos.titulo.pt_max) * 0.625, fill: c.accent, stroke: 0.6pt + negro, "“"))
     texto("cuerpo_2col", quien: "Quote", peso: "bold", fill: negro, upper((ctx.render)(ctx, hijos)))
     if cita != none { v(2pt); texto("pie", quien: "Quote cite")[— #cita] }
   })

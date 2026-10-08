@@ -44,6 +44,9 @@ export interface Pliego {
   esquema: string | null;
   /** Relleno generado porque faltaba el <Pliego n> (o venía vacío). */
   relleno?: 'colabora' | 'notas' | 'taller';
+  /** Foto a sangre (id) con el texto encima, o fondo de color del esquema. */
+  bleed?: string;
+  bleed_color?: boolean;
   nodos: Nodo[];
   origen?: { archivo: string; linea: number };
 }

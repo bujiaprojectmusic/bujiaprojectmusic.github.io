@@ -99,11 +99,29 @@
 }
 
 // ── Pieza (3 … N-2) ──────────────────────────────────────────────────────
+// Con `bleed="/img/…"` la foto cubre la página (hasta el BleedBox), se
+// oscurece con un degradado (más abajo, donde va el texto) y el texto va
+// en el color papel del esquema: página de apertura tipo revista. Con
+// `bleed={true}` el fondo es el ink del esquema.
 #let pieza(vol, pliego) = {
   let ctx = contexto(vol, pliego.n, pliego.esquema)
+  let c = colores(ctx)
+  let G = geo.pliego_sangre
   let bleed = pliego.at("bleed", default: none)
-  let fondo = if bleed != none { imagen(ctx, bleed, width: 100%, height: 100%, fit: "cover") } else { none }
-  pagina(vol, pliego.n, texto("cuerpo_1col", quien: "pieza pág. " + str(pliego.n), render-nodos(ctx, pliego.nodos)), fondo: fondo)
+  let color = pliego.at("bleed_color", default: false)
+  let fondo = if bleed != none {
+    {
+      rect(width: 100%, height: 100%, fill: c.ink)
+      place(top + left, box(width: 100%, height: 100%, clip: true, imagen(ctx, bleed, width: 100%, height: 100%, fit: "cover")))
+      place(top + left, rect(width: 100%, height: 100%, fill: gradient.linear(angle: 90deg,
+        (c.ink.transparentize(100% - G.oscurecer_arriba_pct * 1%), 0%),
+        (c.ink.transparentize(100% - G.oscurecer_abajo_pct * 1%), 100%))))
+    }
+  } else if color { rect(width: 100%, height: 100%, fill: c.ink) } else { none }
+  let fill = if bleed != none or color { c.paper } else { none }
+  let cuerpo = texto("cuerpo_1col", quien: "pieza pág. " + str(pliego.n), render-nodos(ctx, pliego.nodos))
+  // Sobre una foto el texto va abajo, donde el degradado oscurece más.
+  pagina(vol, pliego.n, if bleed != none { v(1fr); cuerpo } else { cuerpo }, fondo: fondo, fill: fill)
 }
 
 // ── Relleno diseñado: colabora / notas / taller ──────────────────────────
