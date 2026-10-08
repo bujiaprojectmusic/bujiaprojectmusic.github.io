@@ -64,6 +64,9 @@ const { volume, title, subtitle, image } = Astro.props;
   .fz-portada__in {
     position: relative;
     padding: 2rem;
+    /* En la web el volumen va dentro de .post-body (texto justificado);
+       el título y el subtítulo de la portada van alineados a la izquierda. */
+    text-align: left;
   }
   .fz-portada__vol {
     font-family: var(--font-head);
