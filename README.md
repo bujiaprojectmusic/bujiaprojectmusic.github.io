@@ -110,6 +110,17 @@ Posts que **no** son de fanzine (`fanzine: false`, el default) usan el
 header estándar con título + imagen destacada, igual que un post normal
 de Ghost sin el tag `#fanzine`.
 
+## El impreso (Typst)
+
+El fanzine en papel se genera con **Typst** (versión fijada en
+`print/TYPST_VERSION`), no con el navegador. Todas las medidas (media carta
+396 × 612 pt, sangrado, márgenes, folio, tamaños de letra, páginas múltiplo
+de 4) viven en **`print/reglas.json`** y están documentadas, con la hoja de
+prueba de impresión y el checklist físico, en
+[`docs/IMPRESO.md`](docs/IMPRESO.md). Comandos: `npm run print:install`,
+`npm run print:prueba`, `npm run print:verify`, `npm run print:check`. Los
+PDF se generan en CI (artifact `impreso-prueba`) y no se commitean.
+
 ## Personalización (colores, tipografía, redes)
 
 Todo vive en `src/config/site.ts`:

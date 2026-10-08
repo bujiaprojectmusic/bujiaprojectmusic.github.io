@@ -57,6 +57,62 @@ jobs:
         with:
           path: ./dist
 
+  # Hoja de prueba del impreso (issue #16): Typst fijado en print/TYPST_VERSION
+  # con sha256 verificado, fuentes del repo, PDF verificados con poppler y
+  # subidos como artifact `impreso-prueba`. Los PDF no se commitean.
+  impreso:
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_DATE_EPOCH: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: poppler-utils (pdfinfo, pdffonts, pdftoppm, pdftotext)
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends poppler-utils
+
+      # El .tar.xz de Typst se cachea por versión + sha256 esperado; aunque
+      # venga de la caché, install-typst.sh vuelve a verificar el sha256.
+      - name: Caché del binario de Typst
+        uses: actions/cache@v4
+        with:
+          path: print/build/typst-dl
+          key: typst-${{ runner.os }}-${{ hashFiles('print/TYPST_VERSION', 'print/typst.sha256') }}
+
+      - name: Instalar Typst (versión fijada, sha256 verificado)
+        run: npm run print:install
+
+      - run: print/build/bin/typst --version
+
+      - name: reglas.json coherente y docs/IMPRESO.md al día
+        run: npm run print:check
+
+      - name: Generar la hoja de prueba
+        run: npm run print:prueba
+
+      - name: Verificar los PDF (pdfinfo, pdffonts, pdftoppm, pdftotext, determinismo)
+        run: npm run print:verify
+
+      - name: Ningún PDF commiteado
+        run: |
+          if [ -n "$(git ls-files '*.pdf')" ]; then echo "Hay PDF en git:"; git ls-files '*.pdf'; exit 1; fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: impreso-prueba
+          path: |
+            print/build/jirafa-prueba-impresion.pdf
+            print/build/jirafa-prueba-impresion-imprenta.pdf
+            print/build/jirafa-prueba-impresion-bn.pdf
+            print/build/jirafa-prueba-doble-cara.pdf
+          if-no-files-found: error
+
   deploy:
     needs: build
     if: github.event_name != 'pull_request'

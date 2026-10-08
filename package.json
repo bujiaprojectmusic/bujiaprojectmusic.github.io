@@ -9,11 +9,20 @@
     "build": "node scripts/check-volumes.mjs && astro build",
     "check:volumes": "node scripts/check-volumes.mjs",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "print:install": "bash scripts/print/install-typst.sh",
+    "print:prueba": "node scripts/print/build-prueba.mjs",
+    "print:check": "node scripts/print/check-reglas.mjs",
+    "print:verify": "node scripts/print/verify-prueba.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.0",
     "@astrojs/sitemap": "3.2.1",
     "astro": "^4.16.0"
+  },
+  "devDependencies": {
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.33.5"
   }
 }
