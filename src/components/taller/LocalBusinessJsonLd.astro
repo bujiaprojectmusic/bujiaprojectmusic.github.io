@@ -1,0 +1,41 @@
+---
+// Datos estructurados schema.org (LocalBusiness) del taller para el
+// <head>: nombre, dirección (PostalAddress), horario
+// (openingHoursSpecification, un bloque por rango), teléfono (WhatsApp),
+// mapa y redes. Todo sale de src/data/taller.ts y site.ts.
+import { site, social } from '../../config/site';
+import { direccion, horario, mapa, whatsapp, contacto } from '../../data/taller';
+
+const siteUrl = (Astro.site ?? new URL('https://bujiaprojectmusic.com')).href.replace(/\/$/, '');
+
+const data = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': `${siteUrl}/#taller`,
+  name: site.title,
+  description: site.tagline,
+  url: siteUrl,
+  telephone: whatsapp.e164,
+  email: contacto.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: `${direccion.calle}, ${direccion.colonia}`,
+    addressLocality: direccion.ciudad,
+    addressRegion: direccion.estado,
+    ...(direccion.cp ? { postalCode: direccion.cp } : {}),
+    addressCountry: direccion.paisISO,
+  },
+  hasMap: mapa.url,
+  openingHoursSpecification: horario
+    .filter((b) => b.abre && b.cierra)
+    .map((b) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: b.diasSchema,
+      opens: b.abre,
+      closes: b.cierra,
+    })),
+  sameAs: [social.instagram, 'https://facebook.com/bujiaprojectmusic', whatsapp.url].filter(Boolean),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(data)} />

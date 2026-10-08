@@ -101,6 +101,11 @@ Todo vive en `src/config/site.ts`:
 - `fonts` → tipografía de cuerpo y de titulares (Space Mono por default).
 - `social`, `site` → título, tagline, redes.
 
+La **dirección, el horario, el WhatsApp y la liga al mapa** del taller
+viven en `src/data/taller.ts` (único lugar): de ahí salen el footer, el
+bloque "Dónde estamos" de /nosotros y los datos estructurados JSON-LD
+(`LocalBusiness`). Para cambiar de local u horario, tocá sólo ese archivo.
+
 Los valores se inyectan como CSS custom properties (`--paper`, `--ink`,
 `--accent`, `--font-body`, `--font-head`) desde `BaseLayout.astro`, y los
 esquemas de color puntuales viven directamente en `src/styles/tokens.css`.
