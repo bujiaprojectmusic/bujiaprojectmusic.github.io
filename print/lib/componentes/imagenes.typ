@@ -1,6 +1,7 @@
 // Gemelos de ImageFull, ImageSide, Gallery, Polaroid, PhotoOld, Xerox,
 // BeforeAfter y OptimizedImage. Anchos de /print/componentes.json.
 #import "/print/lib/componentes/util.typ": *
+#import "/print/vendor/wrap-it-0.1.1/wrap-it.typ": wrap-content
 
 #let pie-foto(ctx, caption, align-: center, color: none, mayus: false) = {
   if caption == none or caption == "" { return }
@@ -13,17 +14,23 @@
   pie-foto(ctx, p.at("caption", default: none), align-: left)
 })
 
-/// Typst no hace que el texto rodee una figura: la foto va al lado
-/// indicado, al ancho pedido, y el texto sigue debajo.
-#let image-side(ctx, p, hijos) = {
+/// Foto a un lado con el texto que sigue rodeándola, como en la web
+/// (wrap-it, vendorizado en /print/vendor). `resto` son los nodos de
+/// texto corrido que vienen después en el MDX (los junta render.typ);
+/// sin resto, la foto va sola al lado pedido.
+#let image-side(ctx, p, hijos, resto: ()) = {
   let w = p.at("width", default: str(geo.image_side.ancho_pct_default) + "%")
   let ancho = if w.ends-with("%") { caja * float(w.trim("%")) / 100 } else { float(w.trim("px")) * geo.optimized_image.px_a_pt * 1pt }
-  let lado = if p.at("side", default: "left") == "right" { right } else { left }
+  let derecha = p.at("side", default: "left") == "right"
   let ancho = ancho-ajustado(foto-de(ctx, p.src), ancho, geo.image_side.alto_max_pct)
-  block(width: 100%, breakable: false, align(lado, box(width: ancho, {
+  let figura = box(width: ancho, inset: (bottom: 4pt), {
     imagen(ctx, p.src, width: 100%)
     pie-foto(ctx, p.at("caption", default: none), align-: left)
-  })))
+  })
+  if resto.len() == 0 {
+    return block(width: 100%, breakable: false, align(if derecha { right } else { left }, figura))
+  }
+  block(width: 100%, wrap-content(figura, (ctx.render)(ctx, resto), align: top + (if derecha { right } else { left }), column-gutter: pt(geo.image_side.separacion_pt)))
 }
 
 #let gallery(ctx, p, hijos) = {

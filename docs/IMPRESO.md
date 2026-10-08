@@ -327,10 +327,12 @@ OptimizedImage, VideoPoster/VideoOldTV/VideoCinema (QR), DatosTaller, más
 Portada, Indice y Contraportada (páginas fijas) y las etiquetas HTML
 genéricas (`p`, `div`, `ul`, `li`, `strong`, `em`, `a`, `small`…).
 
-Limitaciones conocidas: Typst no hace que el texto rodee una figura, así
-que `<ImageSide>` pone la foto al lado pedido y el texto sigue debajo; las
-3 columnas de la web se imprimen en 2; un SVG en la variante B/N queda en
-color.
+`<ImageSide>`: el texto que sigue en el MDX rodea la foto como en la web,
+con el paquete `wrap-it` vendorizado en `print/vendor/` (versión fijada,
+licencia incluida, nada se descarga al compilar).
+
+Limitaciones conocidas: las 3 columnas de la web se imprimen en 2; un SVG
+en la variante B/N queda en color.
 
 ## Qué reutiliza el motor del volumen (#9)
 

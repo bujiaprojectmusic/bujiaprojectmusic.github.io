@@ -61,7 +61,26 @@
   else { panic("nodo desconocido: " + t) }
 }
 
-#let render-nodos(ctx, nodos) = { for n in nodos { render-nodo(ctx, n) } }
+// Nodos de texto corrido que pueden rodear una figura (<ImageSide>).
+#let fluye(n) = n.t in ("parrafo", "lista", "cita", "titulo", "separador") or (n.t == "html" and n.etiqueta == "p")
+
+#let render-nodos(ctx, nodos) = {
+  let i = 0
+  while i < nodos.len() {
+    let n = nodos.at(i)
+    if n.t == "componente" and n.nombre == "ImageSide" {
+      // La foto va a un lado y el texto que sigue la rodea (wrap-it), como en la web.
+      let resto = ()
+      let j = i + 1
+      while j < nodos.len() and fluye(nodos.at(j)) { resto.push(nodos.at(j)); j += 1 }
+      image-side(ctx, n.props, n.hijos, resto: resto)
+      i = j
+    } else {
+      render-nodo(ctx, n)
+      i += 1
+    }
+  }
+}
 
 /// Contexto de un pliego. `render`/`inline` apuntan a render-nodos.
 #let contexto(vol, n, esquema) = (
