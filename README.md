@@ -55,10 +55,14 @@ import Pliego from '../../components/fanzine/Pliego.astro';
 <Pliego n={7} tipo="relleno" />   {/* placeholder TODO hasta tener contenido */}
 ```
 
-Cómo se ve: en móvil cada pliego va a todo el ancho, uno debajo de otro;
-en desktop (≥ 1024 px) se agrupan como revista abierta — página 1 sola,
-(2–3), (4–5) … (14–15) y 16 sola. Desde el pliego 2 hay un control
-"↑ Inicio / ≡ Índice" (anclas, sin JavaScript). El volumen se sirve en **`/fanzine/vol-NN`** (dos dígitos,
+Cómo se ve: **en la web es una página con scroll vertical continuo**,
+una sola columna, con los componentes punk apilados (portada, índice,
+piezas, fin, contraportada). No hay doble página ni pasar de página en
+pantalla; los `<Pliego tipo="relleno">` (páginas en blanco del
+cuadernillo) no se muestran. El índice apunta a `#pagina-N` y hay un
+atajo fijo "↑ Inicio / ≡ Índice". **Las páginas existen sólo al
+imprimir** (`@media print`: cada `<Pliego>` es una hoja, portada sola,
+múltiplo de 16). El volumen se sirve en **`/fanzine/vol-NN`** (dos dígitos,
 sale del `volume` del frontmatter, no del nombre del archivo ni del
 título; `volume` es obligatorio con `fanzine: true`). Las URLs viejas
 (`/blog/<archivo>`, `/fanzine/<archivo>`) se generan como redirección
