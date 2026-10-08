@@ -1,3 +1,5 @@
+import { direccionTexto, horario, whatsapp as whatsappTaller, contacto as contactoTaller } from '../data/taller';
+
 // ─────────────────────────────────────────────────────────────────────────
 // Configuración central del sitio y del tema.
 // Esto reemplaza el panel "Theme settings" de Ghost: acá se tocan colores,
@@ -16,7 +18,7 @@ export const site = {
 
 export const social = {
   instagram: 'https://instagram.com/bujiaprojectmusic',
-  whatsapp: 'https://wa.me/message/PRMKHTDNWYD3I1',
+  whatsapp: whatsappTaller.url,
   discord: '',
   email: '',
 };
@@ -75,7 +77,7 @@ export const taller = {
   social: [
     { name: 'facebook', href: 'https://facebook.com/bujiaprojectmusic', label: 'Facebook' },
     { name: 'instagram', href: 'https://instagram.com/bujiaprojectmusic', label: 'Instagram' },
-    { name: 'whatsapp', href: 'https://wa.me/message/PRMKHTDNWYD3I1', label: 'WhatsApp' },
+    { name: 'whatsapp', href: whatsappTaller.url, label: 'WhatsApp' },
   ] as { name: 'facebook' | 'instagram' | 'whatsapp'; href: string; label: string }[],
 
   // Ítems del menú principal (barra tipo píldora / menú fijo al hacer scroll).
@@ -198,14 +200,17 @@ export const taller = {
       action: '',
     },
 
-    // Datos de contacto del taller físico. Cualquier campo vacío no se
-    // muestra. Poné acá lo que la gente necesita para pasar o escribir.
+    // Datos de contacto del taller físico. La dirección, el horario y el
+    // WhatsApp NO se escriben acá: salen de src/data/taller.ts (único
+    // lugar donde se cambian). Cualquier campo vacío no se muestra.
     contact: {
       enabled: true,
-      address: 'Zacatecas 39, San Nicolas Huexotla, Texcoco, Edo. de México',
-      phone: '5618622447',
-      email: 'bujiaprojectmusic@gmail.com',
-      hours: 'Lun a jue, 12:00--19:30, Vie a Sab 10:00--15:30',
+      address: direccionTexto,
+      phone: whatsappTaller.numero,
+      email: contactoTaller.email,
+      // Horario estructurado (ver src/data/taller.ts); el footer lo pinta
+      // como lista, un renglón por bloque, con el domingo como "Cerrado".
+      hours: horario,
     },
 
     // Links legales/institucionales (política de privacidad, cambios y

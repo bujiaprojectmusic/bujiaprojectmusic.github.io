@@ -6,6 +6,7 @@ import AnnouncementBar from '../components/taller/AnnouncementBar.astro';
 import Footer from '../components/taller/Footer.astro';
 import BackToTop from '../components/taller/BackToTop.astro';
 import ColorSchemeStyles from '../components/ColorSchemeStyles.astro';
+import LocalBusinessJsonLd from '../components/taller/LocalBusinessJsonLd.astro';
 
 interface Props {
   title?: string;
@@ -32,6 +33,7 @@ const pageTitle = title ? `${site.title} - ${title}` : site.title;
     <link rel="preload" as="font" type="font/woff2" href={`${import.meta.env.BASE_URL}fonts/anton-regular.woff2`} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={`${import.meta.env.BASE_URL}fonts/space-mono-regular.woff2`} crossorigin />
     <ColorSchemeStyles />
+    <LocalBusinessJsonLd />
   </head>
   <body style={`--page-background:${taller.theme.pageBackground}`}>
     <AnnouncementBar />
