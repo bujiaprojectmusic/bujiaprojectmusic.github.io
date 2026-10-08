@@ -14,7 +14,14 @@ export interface PdfImpreso {
 export interface VolumenImpreso {
   slug: string;
   paginas: number;
-  pdfs: { pantalla: PdfImpreso; imprenta: PdfImpreso };
+  pdfs: {
+    pantalla: PdfImpreso;
+    imprenta: PdfImpreso;
+    cuadernillo: PdfImpreso & { hojas?: number };
+    xerox: PdfImpreso;
+    cuadernilloXerox: PdfImpreso & { hojas?: number };
+    comoImprimir: PdfImpreso;
+  };
 }
 
 let cache: { volumenes: VolumenImpreso[] } | null | undefined;

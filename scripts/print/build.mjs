@@ -15,6 +15,7 @@ import { RAIZ, reglas, revisarPaginas } from './lib/reglas.mjs';
 import { typstBin, verificarFuentes, compilar, cajasImprenta } from './build-prueba.mjs';
 import { variantes } from './variantes.mjs';
 import * as C from './check.mjs';
+import * as Q from './cuadernillo.mjs';
 
 const BUILD = path.join(RAIZ, 'print', 'build');
 const args = process.argv.slice(2);
@@ -52,8 +53,10 @@ async function construirVolumen(bin, jsonPath) {
   const pdfs = {};
   const avisos = [...vol.avisos];
   const errores = [];
-  for (const variante of ['pantalla', 'imprenta']) {
-    const salida = path.join(dir, `jirafa-${slug}-${variante}.pdf`);
+  // Variantes: pantalla, imprenta (#9) y xerox = bn (#10).
+  for (const variante of ['pantalla', 'imprenta', 'bn']) {
+    const nombre = variante === 'bn' ? 'xerox' : variante;
+    const salida = path.join(dir, `jirafa-${slug}-${nombre}.pdf`);
     const r = spawnSync(bin, ['compile', '--root', RAIZ, '--font-path', path.join(RAIZ, 'print', 'fonts'), '--ignore-system-fonts', '--creation-timestamp', EPOCH, '--input', `variante=${variante}`, '--input', `volumen=${jsonRel}`, path.join(RAIZ, 'print', 'volumen.typ'), salida], { cwd: RAIZ, encoding: 'utf8' });
     if (r.status !== 0) {
       // Un panic de Typst (tamaño mínimo, componente sin gemelo) llega acá con su mensaje.
@@ -61,7 +64,18 @@ async function construirVolumen(bin, jsonPath) {
       throw new C.ErrorBuild(`${slug} (${variante}): Typst falló:\n${msg}`);
     }
     if (variante === 'imprenta') await cajasImprenta(salida);
-    pdfs[variante] = salida;
+    pdfs[nombre] = salida;
+  }
+  // Cuadernillos (#10): carta horizontal, 2 páginas por cara, orden de reglas.mjs.
+  pdfs.cuadernillo = path.join(dir, `jirafa-${slug}-cuadernillo.pdf`);
+  const impC = await Q.cuadernillo(pdfs.imprenta, pdfs.cuadernillo, 'trim', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo`);
+  pdfs.cuadernilloXerox = path.join(dir, `jirafa-${slug}-cuadernillo-xerox.pdf`);
+  const impX = await Q.cuadernillo(pdfs.xerox, pdfs.cuadernilloXerox, 'media', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo xerox`);
+  // Cómo imprimir y engrapar (1 página, aparte del cuadernillo).
+  pdfs.comoImprimir = path.join(dir, `jirafa-${slug}-como-imprimir.pdf`);
+  {
+    const r = spawnSync(bin, ['compile', '--root', RAIZ, '--font-path', path.join(RAIZ, 'print', 'fonts'), '--ignore-system-fonts', '--creation-timestamp', EPOCH, '--input', `volumen=${jsonRel}`, path.join(RAIZ, 'print', 'como-imprimir.typ'), pdfs.comoImprimir], { cwd: RAIZ, encoding: 'utf8' });
+    if (r.status !== 0) throw new C.ErrorBuild(`${slug} (como-imprimir): Typst falló:\n${r.stderr.replace(/\x1b\[[0-9;]*m/g, '').trim()}`);
   }
   // ── Chequeos ──────────────────────────────────────────────────────────
   const reales = C.paginasReales(bin, jsonRel, 'pantalla');
@@ -101,20 +115,55 @@ async function construirVolumen(bin, jsonPath) {
   errores.push(...qr.errores);
   const pesoP = C.pesoMB(pdfs.pantalla), pesoI = C.pesoMB(pdfs.imprenta);
   if (pesoP > 5) errores.push(`pantalla pesa ${pesoP.toFixed(2)} MB (> 5 MB)`);
+  // ── #10: cuadernillo, xerox, tóner, orden, escala ─────────────────────
+  const infoC = C.pdfinfo(pdfs.cuadernillo), infoCX = C.pdfinfo(pdfs.cuadernilloXerox), infoX = C.pdfinfo(pdfs.xerox), infoComo = C.pdfinfo(pdfs.comoImprimir);
+  const carasEsperadas = impC.total / 2;
+  const hojaCarta = `${F.cuadernillo.hoja_ancho_pt} x ${F.cuadernillo.hoja_alto_pt} pts`;
+  if (infoC.pages !== carasEsperadas || !infoC.size.startsWith(hojaCarta)) errores.push(`cuadernillo: ${infoC.pages} caras de ${infoC.size} (esperadas ${carasEsperadas} de ${hojaCarta})`);
+  if (infoCX.pages !== carasEsperadas || !infoCX.size.startsWith(hojaCarta)) errores.push(`cuadernillo-xerox: ${infoCX.pages} caras de ${infoCX.size}`);
+  if (infoX.pages !== vol.paginas || infoX.size !== `${reglas.bn.ancho_pt} x ${reglas.bn.alto_pt} pts`) errores.push(`xerox: ${infoX.pages} páginas de ${infoX.size}`);
+  if (infoComo.pages !== 1) errores.push(`como-imprimir: ${infoComo.pages} páginas (debe ser 1)`);
+  const orden = await Q.verificarOrden(bin, jsonRel, 'imprenta', 'trim', vol.paginas);
+  if (!orden.ok) errores.push(`cuadernillo: orden leído ${JSON.stringify(orden.leido)} ≠ esperado ${JSON.stringify(orden.esperado)}`);
+  const grisX = await Q.grisesYToner(pdfs.xerox);
+  const grisCX = await Q.grisesYToner(pdfs.cuadernilloXerox);
+  if (!grisX.gris) errores.push(`xerox no es escala de grises pura: máx |R−G| ${grisX.maxRG}, |G−B| ${grisX.maxGB}`);
+  if (!grisCX.gris) errores.push(`cuadernillo-xerox no es escala de grises pura: máx |R−G| ${grisCX.maxRG}, |G−B| ${grisCX.maxGB}`);
+  const tonerMax = reglas.bn.negro_solido_max_pct_pagina;
+  for (const t of grisX.toner) if (t.pct > tonerMax) avisos.push(`xerox pág. ${t.pagina}: ${t.pct} % de negro sólido (más de ${tonerMax} %).`);
+  const ppiC = Q.ppiEmbebidas(pdfs.cuadernillo);
+  if (ppiC.ppi_min != null && ppiC.ppi_min < reglas.imagenes.ppi_objetivo) avisos.push(`cuadernillo: imagen embebida a ${ppiC.ppi_min} ppi (pdfimages -list).`);
+  const escala = await Q.escalaCuadernillo(pdfs.cuadernillo);
+  if (!escala.escala1) errores.push(`cuadernillo: páginas reescaladas (cm ${JSON.stringify(escala.cm)})`);
+  for (const k of ['cuadernillo', 'cuadernilloXerox', 'xerox', 'comoImprimir']) {
+    fuentes[k] = C.pdffonts(pdfs[k]);
+    const raras = fuentes[k].filter((f) => !/^(Anton|SpaceMono)-/.test(f.nombre) || f.emb !== 'yes');
+    if (raras.length) errores.push(`${k}: fuentes no permitidas o sin embeber: ${raras.map((f) => f.nombre).join(', ')}`);
+  }
+  const caras = path.join(dir, `caras-${slug}.png`);
+  await Q.miniaturasCaras(pdfs.cuadernillo, caras);
   const rp = revisarPaginas(vol.paginas);
   avisos.push(...rp.avisos);
   if (errores.length) throw new C.ErrorBuild(`${slug}:\n  - ${errores.join('\n  - ')}`);
 
   let determinismo = null;
   if (dosVeces) {
-    const antes = { pantalla: sha(pdfs.pantalla), imprenta: sha(pdfs.imprenta) };
-    for (const variante of ['pantalla', 'imprenta']) {
-      const tmp = path.join(dir, `.otra-${variante}.pdf`);
+    const antes = Object.fromEntries(Object.entries(pdfs).map(([k, p]) => [k, sha(p)]));
+    const otra = {};
+    for (const [variante, nombre] of [['pantalla', 'pantalla'], ['imprenta', 'imprenta'], ['bn', 'xerox']]) {
+      const tmp = path.join(dir, `.otra-${nombre}.pdf`);
       compilar(bin, path.join(RAIZ, 'print', 'volumen.typ'), tmp, null, ['--input', `variante=${variante}`, '--input', `volumen=${jsonRel}`]);
       if (variante === 'imprenta') await cajasImprenta(tmp);
-      determinismo = { ...(determinismo ?? {}), [variante]: { a: antes[variante], b: sha(tmp), igual: antes[variante] === sha(tmp) } };
-      fs.rmSync(tmp);
+      otra[nombre] = tmp;
     }
+    otra.cuadernillo = path.join(dir, '.otra-cuadernillo.pdf');
+    await Q.cuadernillo(otra.imprenta, otra.cuadernillo, 'trim', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo`);
+    otra.cuadernilloXerox = path.join(dir, '.otra-cuadernillo-xerox.pdf');
+    await Q.cuadernillo(otra.xerox, otra.cuadernilloXerox, 'media', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo xerox`);
+    otra.comoImprimir = path.join(dir, '.otra-como.pdf');
+    compilar(bin, path.join(RAIZ, 'print', 'como-imprimir.typ'), otra.comoImprimir, null, ['--input', `volumen=${jsonRel}`]);
+    determinismo = {};
+    for (const [k, tmp] of Object.entries(otra)) { determinismo[k] = { a: antes[k], b: sha(tmp), igual: antes[k] === sha(tmp) }; fs.rmSync(tmp); }
     if (!Object.values(determinismo).every((d) => d.igual)) throw new C.ErrorBuild(`${slug}: dos compilaciones dan PDFs distintos`);
   }
   const ppiMin = Math.min(...ppi.filas.map((f) => f.ppi).filter((x) => x != null), Infinity);
@@ -123,7 +172,13 @@ async function construirVolumen(bin, jsonPath) {
     pdfs: {
       pantalla: { archivo: `jirafa-${slug}-pantalla.pdf`, ruta: rel(pdfs.pantalla), bytes: fs.statSync(pdfs.pantalla).size, sha256: sha(pdfs.pantalla), paginas: infoP.pages, tamano: infoP.size },
       imprenta: { archivo: `jirafa-${slug}-imprenta.pdf`, ruta: rel(pdfs.imprenta), bytes: fs.statSync(pdfs.imprenta).size, sha256: sha(pdfs.imprenta), paginas: infoI.pages, tamano: infoI.size, mediabox: infoI.media, trimbox: infoI.trim, bleedbox: infoI.bleed },
+      cuadernillo: { archivo: `jirafa-${slug}-cuadernillo.pdf`, ruta: rel(pdfs.cuadernillo), bytes: fs.statSync(pdfs.cuadernillo).size, sha256: sha(pdfs.cuadernillo), paginas: infoC.pages, tamano: infoC.size, hojas: infoC.pages / 2 },
+      xerox: { archivo: `jirafa-${slug}-xerox.pdf`, ruta: rel(pdfs.xerox), bytes: fs.statSync(pdfs.xerox).size, sha256: sha(pdfs.xerox), paginas: infoX.pages, tamano: infoX.size },
+      cuadernilloXerox: { archivo: `jirafa-${slug}-cuadernillo-xerox.pdf`, ruta: rel(pdfs.cuadernilloXerox), bytes: fs.statSync(pdfs.cuadernilloXerox).size, sha256: sha(pdfs.cuadernilloXerox), paginas: infoCX.pages, tamano: infoCX.size, hojas: infoCX.pages / 2 },
+      comoImprimir: { archivo: `jirafa-${slug}-como-imprimir.pdf`, ruta: rel(pdfs.comoImprimir), bytes: fs.statSync(pdfs.comoImprimir).size, sha256: sha(pdfs.comoImprimir), paginas: infoComo.pages, tamano: infoComo.size },
     },
+    cuadernillo: { caras: impC.caras, total: impC.total, orden: orden, escala: escala, ppi_embebidas: ppiC, miniaturas: rel(caras) },
+    xerox: { gris: { maxRG: grisX.maxRG, maxGB: grisX.maxGB }, cuadernillo_gris: { maxRG: grisCX.maxRG, maxGB: grisCX.maxGB }, toner: grisX.toner, toner_max_pct: tonerMax },
     ppi_min: Number.isFinite(ppiMin) ? ppiMin : null,
     ligas: { pantalla: ligasP, imprenta: ligasI },
     fuentes: Object.fromEntries(Object.entries(fuentes).map(([k, v]) => [k, v.map((f) => `${f.nombre} emb=${f.emb}`)])),
@@ -139,6 +194,16 @@ function resumenMd(resultados, segundos) {
     const i = r.pdfs.imprenta;
     l.push(`| ${r.pdfs.pantalla.archivo} | ${r.pdfs.pantalla.paginas} | ${r.pdfs.pantalla.tamano} | — | ${r.ppi_min ?? '—'} | ${(r.pdfs.pantalla.bytes / 1024 / 1024).toFixed(2)} MB | ${r.avisos.length} |`);
     l.push(`| ${i.archivo} | ${i.paginas} | ${i.tamano} | Trim ${i.trimbox.join(' ')} · Bleed ${i.bleedbox.join(' ')} | ${r.ppi_min ?? '—'} | ${(i.bytes / 1024 / 1024).toFixed(2)} MB | ${r.avisos.length} |`);
+    for (const k of ['cuadernillo', 'xerox', 'cuadernilloXerox', 'comoImprimir']) {
+      const p = r.pdfs[k];
+      l.push(`| ${p.archivo} | ${p.paginas}${p.hojas ? ` caras (${p.hojas} hojas)` : ''} | ${p.tamano} | — | ${k === 'cuadernillo' ? (r.cuadernillo.ppi_embebidas.ppi_min ?? '—') : '—'} | ${(p.bytes / 1024 / 1024).toFixed(2)} MB | |`);
+    }
+  }
+  for (const r of resultados) {
+    l.push('', `### ${r.slug}: cuadernillo`, '', `Orden de caras (izq | der): ${r.cuadernillo.caras.map((c) => `[${c.map((p) => p ?? '—').join(' | ')}]`).join(' ')} — leído con marcas-prueba: ${r.cuadernillo.orden.ok ? 'coincide ✔' : 'NO coincide ✖'}. Escala 1 (cm): ${r.cuadernillo.escala.cm.map((m) => m.join(' ')).join('; ')}. Imágenes embebidas: ${r.cuadernillo.ppi_embebidas.imagenes}, ppi mínimo ${r.cuadernillo.ppi_embebidas.ppi_min ?? '—'}.`);
+    l.push('', `### ${r.slug}: xerox — tóner por página (negro sólido, luma < 20 a 50 dpi; aviso > ${r.xerox.toner_max_pct} %)`, '', '| Pág. | Negro sólido | |', '|---|---|---|');
+    for (const t of r.xerox.toner) l.push(`| ${t.pagina} | ${t.pct} % | ${t.pct > r.xerox.toner_max_pct ? '⚠ más de ' + r.xerox.toner_max_pct + ' %' : ''} |`);
+    l.push('', `Escala de grises: xerox máx |R−G| ${r.xerox.gris.maxRG}, |G−B| ${r.xerox.gris.maxGB}; cuadernillo-xerox máx |R−G| ${r.xerox.cuadernillo_gris.maxRG}, |G−B| ${r.xerox.cuadernillo_gris.maxGB}.`);
   }
   for (const r of resultados) {
     l.push('', `### ${r.slug}: fotos (ppi efectivo en imprenta)`, '', '| Pág. | Componente | Foto | px | Ancho (pt) | ppi | Estado |', '|---|---|---|---|---|---|---|');
@@ -160,6 +225,7 @@ async function main() {
     const r = await construirVolumen(bin, j);
     resultados.push(r);
     log(`✔ ${r.slug}: ${r.pdfs.pantalla.archivo} (${r.pdfs.pantalla.paginas} págs, ${(r.pdfs.pantalla.bytes / 1024 / 1024).toFixed(2)} MB) · ${r.pdfs.imprenta.archivo} (${(r.pdfs.imprenta.bytes / 1024 / 1024).toFixed(2)} MB) · ppi mín ${r.ppi_min ?? '—'} · ligas pantalla ${r.ligas.pantalla.links}, imprenta ${r.ligas.imprenta.links} · marcadores ${r.ligas.pantalla.marcadores}`);
+    log(`  cuadernillo ${r.pdfs.cuadernillo.paginas} caras (${(r.pdfs.cuadernillo.bytes / 1024 / 1024).toFixed(2)} MB), orden ${r.cuadernillo.orden.ok ? '✔' : '✖'} ${JSON.stringify(r.cuadernillo.caras)} · xerox ${r.pdfs.xerox.paginas} págs gris ✔ (máx |R−G| ${r.xerox.gris.maxRG}) · cuadernillo-xerox ${r.pdfs.cuadernilloXerox.paginas} caras · tóner máx ${Math.max(...r.xerox.toner.map((t) => t.pct))} % · como-imprimir ${r.pdfs.comoImprimir.paginas} pág`);
     for (const a of r.avisos) log(`  ⚠ ${a}`);
   }
   const segundos = (Date.now() - t0) / 1000;

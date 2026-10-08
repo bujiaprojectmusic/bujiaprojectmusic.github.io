@@ -11,8 +11,18 @@
     box(fill: negro, inset: (x: 5pt, y: 2pt), text(font: fuente-texto, weight: "bold", size: pt(estilos.folio.pt), fill: blanco, tracking: 0.06em, upper("Edición de prueba — contenido ficticio"))))
 }
 
+/// Con `--input marcas-prueba=true` cada página lleva "P01"…"PN" dentro de
+/// la caja de texto: check.mjs lee las mitades de cada cara del
+/// cuadernillo con pdftotext y compara con la tabla de imposición (#10).
+#let marcas-prueba = sys.inputs.at("marcas-prueba", default: "false") == "true"
+#let marca-prueba-pagina(n) = {
+  if not marcas-prueba { return none }
+  let id = "P" + (if n < 10 { "0" + str(n) } else { str(n) })
+  place(top + left, box(fill: blanco, stroke: 0.5pt + negro, inset: 3pt, text(font: fuente-texto, weight: "bold", size: pt(estilos.calado.pt), fill: negro, id)))
+}
+
 /// Metadatos de inicio/fin del pliego (página real) para check.mjs.
-#let marca-inicio(n) = [#context [#metadata((tipo: "inicio", n: n, pagina: here().page()))#label("pliego-" + str(n))]]
+#let marca-inicio(n) = [#context [#metadata((tipo: "inicio", n: n, pagina: here().page()))#label("pliego-" + str(n))]#marca-prueba-pagina(n)]
 #let marca-fin(n) = context [#metadata((tipo: "fin", n: n, pagina: here().page()))]
 
 /// Página con fondo opcional a sangre (`fondo`: contenido que cubre el
@@ -42,11 +52,14 @@
   let p = if P != none { P.props } else { (:) }
   let G = geo.portada
   let foto = p.at("image", default: none)
+  // En B/N (fotocopia) la página se aclara: fondo papel, foto velada en
+  // blanco y texto negro (reglas.bn: nada de negro sólido a toda página).
+  let base = if es-bn { blanco } else { c.ink }
   let fondo = {
-    rect(width: 100%, height: 100%, fill: c.ink)
+    rect(width: 100%, height: 100%, fill: base)
     if foto != none and foto-de(ctx, foto).existe {
       place(top + left, box(width: 100%, height: 100%, clip: true, imagen(ctx, foto, width: 100%, height: 100%, fit: "cover")))
-      place(top + left, rect(width: 100%, height: 100%, fill: c.ink.transparentize(G.opacidad_foto * 100%)))
+      place(top + left, rect(width: 100%, height: 100%, fill: base.transparentize(G.opacidad_foto * 100%)))
     }
   }
   let cuerpo = {
@@ -54,11 +67,12 @@
     render-nodos(ctx, pliego.nodos.filter(x => not (x.t == "componente" and x.nombre == "Portada")))
     place(top + right, dx: 0pt, dy: 0pt, imagen(ctx, vol.mascota, width: pt(G.mascota_ancho_pt)))
     place(bottom + left, {
+      let tinta-texto = if es-bn { negro } else { c.paper }
       box(fill: c.accent, inset: (x: 6pt, y: 3pt), text(font: fuente-texto, weight: "bold", size: pt(estilos.folio.pt), fill: c.ink, tracking: 0.15em, upper("Volumen " + vol-nn(p.at("volume", default: vol.volumen)))))
       v(6pt)
-      block(width: 100%, text(font: fuente-titulos, size: pt(estilos.titulo.pt_max), fill: c.paper, hyphenate: false, upper(p.at("title", default: vol.titulo))))
+      block(width: 100%, text(font: fuente-titulos, size: pt(estilos.titulo.pt_max), fill: tinta-texto, hyphenate: false, upper(p.at("title", default: vol.titulo))))
       v(4pt)
-      texto("cuerpo_1col", quien: "Portada subtitle", fill: c.paper, {
+      texto("cuerpo_1col", quien: "Portada subtitle", fill: tinta-texto, {
         let s = p.at("subtitle", default: none)
         if s != none { s } else { mes-anio(vol.fecha) }
       })
@@ -68,7 +82,7 @@
         text(font: fuente-texto, weight: "bold", size: pt(estilos.pie.pt), fill: c.accent, tracking: 0.08em, upper(mes-anio(vol.fecha) + " · " + vol.sitio.replace("https://", "")))))
     })
   }
-  pagina(vol, 1, cuerpo, fondo: fondo, fill: c.paper)
+  pagina(vol, 1, cuerpo, fondo: fondo, fill: if es-bn { negro } else { c.paper })
 }
 
 // ── Índice (pág. 2): número de página REAL de cada pieza (desde el
@@ -109,16 +123,18 @@
   let G = geo.pliego_sangre
   let bleed = pliego.at("bleed", default: none)
   let color = pliego.at("bleed_color", default: false)
+  // En B/N la foto se vela en blanco y el texto va en negro (fotocopia).
+  let base = if es-bn { blanco } else { c.ink }
   let fondo = if bleed != none {
     {
-      rect(width: 100%, height: 100%, fill: c.ink)
+      rect(width: 100%, height: 100%, fill: base)
       place(top + left, box(width: 100%, height: 100%, clip: true, imagen(ctx, bleed, width: 100%, height: 100%, fit: "cover")))
       place(top + left, rect(width: 100%, height: 100%, fill: gradient.linear(angle: 90deg,
-        (c.ink.transparentize(100% - G.oscurecer_arriba_pct * 1%), 0%),
-        (c.ink.transparentize(100% - G.oscurecer_abajo_pct * 1%), 100%))))
+        (base.transparentize(100% - G.oscurecer_arriba_pct * 1%), 0%),
+        (base.transparentize(100% - G.oscurecer_abajo_pct * 1%), 100%))))
     }
-  } else if color { rect(width: 100%, height: 100%, fill: c.ink) } else { none }
-  let fill = if bleed != none or color { c.paper } else { none }
+  } else if color { rect(width: 100%, height: 100%, fill: base) } else { none }
+  let fill = if bleed != none or color { if es-bn { negro } else { c.paper } } else { none }
   let cuerpo = texto("cuerpo_1col", quien: "pieza pág. " + str(pliego.n), render-nodos(ctx, pliego.nodos))
   // Sobre una foto el texto va abajo, donde el degradado oscurece más.
   pagina(vol, pliego.n, if bleed != none { v(1fr); cuerpo } else { cuerpo }, fondo: fondo, fill: fill)
@@ -205,22 +221,23 @@
   let CP = nodo(pliego, "Contraportada")
   let stamp = if CP != none { CP.props.at("texto", default: "Bujía Project Music — Texcoco, MX") } else { "Bujía Project Music — Texcoco, MX" }
   let tiene-datos = nodo(pliego, "DatosTaller") != none
-  let fondo = rect(width: 100%, height: 100%, fill: c.ink)
+  let fondo = rect(width: 100%, height: 100%, fill: if es-bn { blanco } else { c.ink })
+  let tinta-texto = if es-bn { negro } else { c.paper }
   let cuerpo = {
     v(10pt)
     align(center, rotate(-3deg, reflow: true, box(stroke: 2.25pt + c.accent, inset: (x: 12pt, y: 8pt),
-      text(font: fuente-texto, weight: "bold", size: pt(estilos.indice.pt), fill: c.paper, tracking: 0.08em, upper(stamp)))))
+      text(font: fuente-texto, weight: "bold", size: pt(estilos.indice.pt), fill: tinta-texto, tracking: 0.08em, upper(stamp)))))
     v(10pt)
     render-nodos(ctx, pliego.nodos.filter(x => not (x.t == "componente" and x.nombre == "Contraportada")))
     v(1fr)
     align(center, {
       imagen(ctx, vol.mascota, width: pt(geo.contraportada.mascota_ancho_pt))
       v(3pt)
-      texto("pie", quien: "Contraportada", fill: c.paper, geo.mascota.credito)
-      if not tiene-datos { v(6pt); qr(ctx, vol.qr_volumen, lado: inch(geo.contraportada.qr_in)); v(2pt); texto("pie", quien: "Contraportada", fill: c.paper, vol.url.replace("https://", "")) }
+      texto("pie", quien: "Contraportada", fill: tinta-texto, geo.mascota.credito)
+      if not tiene-datos { v(6pt); qr(ctx, vol.qr_volumen, lado: inch(geo.contraportada.qr_in)); v(2pt); texto("pie", quien: "Contraportada", fill: tinta-texto, vol.url.replace("https://", "")) }
     })
   }
-  pagina(vol, pliego.n, cuerpo, fondo: fondo, fill: c.paper)
+  pagina(vol, pliego.n, cuerpo, fondo: fondo, fill: tinta-texto)
 }
 
 #let render-volumen(vol) = {

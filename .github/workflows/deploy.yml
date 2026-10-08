@@ -98,6 +98,7 @@ jobs:
           name: fanzine-pdfs
           path: |
             print/build/vol-*/jirafa-*.pdf
+            print/build/vol-*/caras-*.png
             print/build/manifest.json
             print/build/resumen.md
           if-no-files-found: error
