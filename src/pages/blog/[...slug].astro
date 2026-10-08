@@ -4,7 +4,8 @@ import PostLayout from '../../layouts/PostLayout.astro';
 import { fanzinePath } from '../../utils/fanzine';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  // Los volúmenes de prueba no tienen ni siquiera redirección bajo /blog/.
+  const posts = await getCollection('posts', ({ data }) => !data.draft && !data.prueba);
   return posts.map((post) => ({
     params: { slug: post.slug },
     props: { post },

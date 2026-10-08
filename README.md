@@ -66,8 +66,24 @@ título; `volume` es obligatorio con `fanzine: true`). Las URLs viejas
 se sirve bajo `/blog/`. Layout propio: `src/layouts/FanzineLayout.astro`.
 
 `npm run build` corre antes `scripts/check-volumes.mjs`, que **falla si un
-volumen no tiene exactamente 16 `<Pliego>` con `n` del 1 al 16 sin
-repetir** (también se puede correr solo: `npm run check:volumes`).
+volumen no tiene N `<Pliego>` con N ≥ 16 y múltiplo de 4, `n` del 1 al N
+en orden y sin repetir, y portada/índice/fin/contraportada en las páginas
+1, 2, N-1 y N** (también se puede correr solo: `npm run check:volumes`).
+
+### Volumen 00 de prueba (`src/content/posts/vol-00/`)
+
+`/fanzine/vol-00` es un volumen de **20 páginas con contenido ficticio**
+que sirve de fixture para probar todo el sistema (pliegos, componentes,
+videos con fachada, presupuesto de datos, y más adelante el PDF de Typst).
+Tiene `prueba: true` en el frontmatter: eso lo saca del sitemap, del menú y
+del archivo `/fanzine`, le pone `noindex,nofollow` y muestra la marca
+"EDICIÓN DE PRUEBA" en la portada y en el pie de cada pliego. Todo lo suyo
+vive en dos carpetas: `src/content/posts/vol-00/` (el MDX) y
+`src/assets/fanzine/vol-00/` (fotos, mascota y `CREDITOS.md`).
+
+- **Apagarlo**: `draft: true` en `src/content/posts/vol-00/index.mdx`
+  (deja de generarse).
+- **Borrarlo**: borrar esas dos carpetas. Nada más lo referencia.
 
 Componentes disponibles dentro de un pliego:
 

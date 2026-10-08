@@ -39,7 +39,7 @@ const { Content } = await post.render();
 const title = `Vol. ${post.data.volume} — ${post.data.title}`;
 ---
 
-<FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme}>
+<FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme} prueba={post.data.prueba}>
   <article class="fz-volume-page">
     <Volumen>
       <Content />

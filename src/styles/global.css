@@ -251,3 +251,50 @@ a {
   padding: 0.6em 1.4em;
   cursor: pointer;
 }
+
+/* ── Utilidades de los volúmenes por pliegos ─────────────────────────── */
+.fz-small {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+.fz-mascota {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+}
+.fz-mascota img {
+  width: 180px;
+  height: auto;
+}
+.fz-fin-word {
+  font-family: 'Anton', var(--font-head);
+  font-size: clamp(3rem, 12cqw, 6rem);
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0 0 1rem;
+  text-align: center;
+  color: var(--accent);
+  -webkit-text-stroke: 2px var(--ink);
+}
+.fz-contra-datos {
+  padding: 1rem 1.1rem 2rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: center;
+}
+.fz-contra-datos img {
+  width: 180px;
+  height: auto;
+  margin: 0 auto 0.6rem;
+}
+.fz-contra-datos ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0;
+}
+.fz-contra-datos a {
+  color: inherit;
+}

@@ -1,9 +1,11 @@
 ---
 // ─────────────────────────────────────────────────────────────────────────
 // Un pliego = una página del volumen (media carta 5.5×8.5 in). Cada
-// volumen tiene exactamente 16, con `n` del 1 al 16 (el mismo número de
-// página del impreso en Typst, ver #9). Mapa fijo:
-//   1 portada · 2 índice · 3–14 contenido · 15 fin · 16 contraportada
+// volumen tiene N páginas (N ≥ 16 y múltiplo de 4; 16 por default, 20 el
+// volumen de prueba), con `n` del 1 al N (el mismo número de página del
+// impreso en Typst, ver #9). Mapa fijo:
+//   1 portada · 2 índice · 3–(N-2) contenido · N-1 fin · N contraportada
+// scripts/check-volumes.mjs valida todo eso antes del build.
 //
 // Uso en MDX:
 //   <Pliego n={3} tipo="normal" scheme="acido">...markdown/componentes...</Pliego>
@@ -24,7 +26,7 @@ import type { ImageSource } from '../../utils/resolveImage';
 export type PliegoTipo = 'portada' | 'indice' | 'normal' | 'relleno' | 'fin' | 'contraportada';
 
 interface Props {
-  /** Número de página, 1–16. */
+  /** Número de página, 1–N (N = total del volumen, múltiplo de 4). */
   n: number;
   scheme?: ColorSchemeName;
   /** Fondo a sangre: color (true) o imagen (ruta "/img/..." o import). */
@@ -36,8 +38,8 @@ interface Props {
 
 const { n, scheme, bleed = false, tipo = 'normal', bleedAlt = '' } = Astro.props;
 
-if (!Number.isInteger(n) || n < 1 || n > 16) {
-  throw new Error(`<Pliego n={${n}}>: n tiene que ser un entero entre 1 y 16.`);
+if (!Number.isInteger(n) || n < 1 || n > 64) {
+  throw new Error(`<Pliego n={${n}}>: n tiene que ser un entero entre 1 y 64 (el total del volumen lo valida scripts/check-volumes.mjs).`);
 }
 
 const hasContent = Astro.slots.has('default');
@@ -45,9 +47,9 @@ const bleedImage = typeof bleed === 'boolean' ? undefined : bleed;
 const hasNav = n > 1;
 const showNum = tipo !== 'portada' && tipo !== 'contraportada';
 // Lado en la doble página de desktop (ver Volumen.astro): 1 sola a la
-// derecha, 16 sola a la izquierda, pares a la izquierda, impares a la
-// derecha. Va como clase para que el CSS no tenga que mirar data-pliego.
-const side = n === 1 ? 'right' : n === 16 ? 'left' : n % 2 === 0 ? 'left' : 'right';
+// derecha, la última (par) sola a la izquierda, pares a la izquierda,
+// impares a la derecha. Va como clase para que el CSS no mire data-pliego.
+const side = n === 1 ? 'right' : n % 2 === 0 ? 'left' : 'right';
 const LABELS: Record<PliegoTipo, string> = {
   portada: 'Portada',
   indice: 'Índice',
@@ -269,6 +271,33 @@ const LABELS: Record<PliegoTipo, string> = {
     margin: 0 0 1rem;
     color: var(--accent);
     -webkit-text-stroke: 2px var(--ink);
+  }
+
+  /* ── Marca de "edición de prueba" (volúmenes con prueba: true) ────────
+     FanzineLayout pone data-prueba en <body>; acá sale la marca en el pie
+     de cada pliego, también al imprimir. */
+  :global([data-prueba]) .pliego::after {
+    content: 'EDICIÓN DE PRUEBA — contenido ficticio';
+    position: absolute;
+    left: 0.6rem;
+    bottom: 0.45rem;
+    z-index: 2;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--accent);
+    padding: 0.15em 0.5em;
+    border: 1px solid var(--ink);
+    pointer-events: none;
+  }
+  :global([data-prueba]) .pliego--portada::after,
+  :global([data-prueba]) .pliego--contraportada::after {
+    color: var(--paper);
+    background: var(--ink);
+    border-color: var(--paper);
   }
 
   /* ── Print: cada pliego, una página ────────────────────────────────── */

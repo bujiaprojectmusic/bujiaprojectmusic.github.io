@@ -18,9 +18,12 @@ interface Props {
   description?: string;
   // Esquema de color del volumen (se aplica a toda la página).
   colorScheme?: ColorSchemeName;
+  // Volumen de prueba: noindex,nofollow + franja "EDICIÓN DE PRUEBA" +
+  // data-prueba en <body> (los pliegos muestran la marca en su pie).
+  prueba?: boolean;
 }
 
-const { title, description = site.description, colorScheme = 'xerox' } = Astro.props;
+const { title, description = site.description, colorScheme = 'xerox', prueba = false } = Astro.props;
 const pageTitle = title ? `${site.title} - ${title}` : `${site.title} - Fanzine`;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}${href}`);
@@ -33,6 +36,7 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {prueba && <meta name="robots" content="noindex,nofollow" />}
     <link rel="icon" type="image/png" sizes="32x32" href={`${import.meta.env.BASE_URL}favicon-32x32.png`} />
     <link rel="icon" type="image/png" sizes="16x16" href={`${import.meta.env.BASE_URL}favicon-16x16.png`} />
     <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
@@ -41,7 +45,12 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
     <link rel="preload" as="font" type="font/woff2" href={`${import.meta.env.BASE_URL}fonts/space-mono-regular.woff2`} crossorigin />
     <ColorSchemeStyles />
   </head>
-  <body data-layout="fanzine" class:list={['fz-body', `scheme-${colorScheme}`]}>
+  <body data-layout="fanzine" data-prueba={prueba ? 'true' : undefined} class:list={['fz-body', `scheme-${colorScheme}`]}>
+    {prueba && (
+      <p class="fz-prueba-banner" role="note">
+        <strong>EDICIÓN DE PRUEBA</strong> — contenido ficticio para probar el sistema del fanzine. Nombres, bandas y anuncios son inventados.
+      </p>
+    )}
     <header class="fz-header fz-no-print">
       <a href={withBase('/')} class="fz-header__logo" aria-label={`${taller.logo.alt} — ir al sitio del taller`}>
         {taller.logo.image ? (
@@ -98,6 +107,17 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
 </style>
 
 <style>
+  .fz-prueba-banner {
+    margin: 0;
+    padding: 0.45rem 1rem;
+    background: var(--accent);
+    color: var(--ink);
+    border-bottom: var(--border-w) solid var(--ink);
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
   .fz-header {
     display: flex;
     align-items: center;
