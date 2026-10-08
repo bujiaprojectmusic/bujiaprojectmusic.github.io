@@ -145,6 +145,43 @@ import Polaroid from '../../components/Polaroid.astro';
 
 ---
 
+## 2b. Pliegos del fanzine (`Pliego`)
+
+Sólo para los volúmenes del fanzine (`src/content/posts/*.mdx` con
+`fanzine: true`). Cada `<Pliego>` es **una página** de media carta; un
+volumen tiene exactamente 16, con `n` del 1 al 16 (el mismo número de
+página del impreso):
+
+```mdx
+import Pliego from '../../components/fanzine/Pliego.astro';
+
+<Pliego n={1} tipo="portada"><Portada volume={1} title="…" image="/img/vol1-cover.jpg" /></Pliego>
+<Pliego n={2} tipo="indice"><Indice items={[{ page: "03", title: "Editorial" }]} /></Pliego>
+<Pliego n={3} scheme="rosa">
+  <SectionTitle scheme="rosa">Editorial</SectionTitle>
+
+  Texto en Markdown, componentes de este archivo, lo que sea.
+</Pliego>
+<Pliego n={4} bleed="/img/posts/foto.jpg" bleedAlt="…" />   {/* foto a sangre */}
+<Pliego n={7} tipo="relleno" />                              {/* TODO, sin contenido aún */}
+<Pliego n={15} tipo="fin" />
+<Pliego n={16} tipo="contraportada"><Contraportada texto="…" /></Pliego>
+```
+
+Props: `n` (obligatorio, 1–16), `tipo?` (`portada` | `indice` | `normal` |
+`relleno` | `fin` | `contraportada`, default `normal`), `scheme?` (esquema
+de color de esa página), `bleed?` (`true` = sin márgenes interiores, o una
+ruta `"/img/…"` para una foto a sangre, con `bleedAlt?`).
+
+Mapa fijo: 1 portada · 2 índice · 3–14 contenido · 15 fin · 16
+contraportada. Un pliego sin contenido muestra un placeholder "TODO" (y el
+de tipo `fin`, la palabra Fin). Desde el pliego 2, cada página trae el
+control "↑ Inicio / ≡ Índice" (anclas a `#pagina-1` y `#pagina-2`, sin
+JavaScript, oculto al imprimir). `npm run build` falla si faltan o sobran
+pliegos (`scripts/check-volumes.mjs`).
+
+---
+
 ## 3. Encabezados (h2/h3/h4)
 
 No hace falta ningún componente — escribí `##`, `###` o `####` normal en

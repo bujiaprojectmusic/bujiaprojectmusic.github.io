@@ -84,6 +84,7 @@ export const taller = {
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Servicios', href: '/catalogo' },
     { label: 'Blog', href: '/archive' },
+    { label: 'Fanzine', href: '/fanzine' },
   ],
 
   // Buscador (ícono de lupa) en el header completo.

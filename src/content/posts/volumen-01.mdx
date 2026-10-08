@@ -8,11 +8,12 @@ tags: ["fanzine", "taller", "reparacion"]
 description: "Primer volumen de La Jirafa Eléctrica: rebobinado de pastillas, playlist de agosto y fotos del taller."
 # TODO(Ricardo): subir la portada real a src/assets/img/vol1-cover.jpg y
 # descomentar. Con fanzine: true la portada la pinta <Portada> acá abajo,
-# así que este campo sólo se usa en el listado / layout de blog.
+# así que este campo sólo se usa en el listado de /fanzine.
 # cover: "/img/vol1-cover.jpg"
 author: Ripper
 ---
 
+import Pliego from '../../components/fanzine/Pliego.astro';
 import Portada from '../../components/Portada.astro';
 import Indice from '../../components/Indice.astro';
 import SectionTitle from '../../components/SectionTitle.astro';
@@ -20,59 +21,97 @@ import Polaroid from '../../components/Polaroid.astro';
 import Columnas from '../../components/Columnas.astro';
 import Contraportada from '../../components/Contraportada.astro';
 
+{/*
+  Un volumen = 16 pliegos (<Pliego n={1…16}>), con el mapa fijo:
+  1 portada · 2 índice · 3–14 contenido · 15 fin · 16 contraportada.
+  `n` es el mismo número de página del impreso. Las páginas sin contenido
+  todavía van como tipo="relleno" (placeholder TODO) — cuando haya texto o
+  fotos, se cambia a tipo="normal" y se escribe adentro.
+  scripts/check-volumes.mjs revisa que estén las 16 antes de compilar.
+*/}
+
 {/* TODO(Ricardo): la foto de portada todavía no existe. Subirla a
     src/assets/img/vol1-cover.jpg (se referencia como /img/vol1-cover.jpg)
     y la portada la toma sola; mientras tanto se muestra sin foto. */}
-<Portada
-  volume={1}
-  title="Fierros y Fuzz"
-  subtitle="Agosto 2026 — Texcoco"
-  image="/img/vol1-cover.jpg"
-/>
+<Pliego n={1} tipo="portada">
+  <Portada
+    volume={1}
+    title="Fierros y Fuzz"
+    subtitle="Agosto 2026 — Texcoco"
+    image="/img/vol1-cover.jpg"
+  />
+</Pliego>
 
-<Indice
-  items={[
-    { page: "03", title: "Editorial" },
-    { page: "05", title: "Taller: rebobinado de pastillas" },
-    { page: "10", title: "Playlist del mes" },
-    { page: "14", title: "Fotos del taller" },
-  ]}
-/>
+<Pliego n={2} tipo="indice">
+  <Indice
+    items={[
+      { page: "03", title: "Editorial" },
+      { page: "04", title: "Taller: rebobinado de pastillas" },
+      { page: "06", title: "Playlist del mes" },
+      { page: "07", title: "Fotos del taller" },
+      { page: "15", title: "Fin" },
+    ]}
+  />
+</Pliego>
 
-<SectionTitle scheme="rosa" pageBreak>Editorial</SectionTitle>
+<Pliego n={3} scheme="rosa">
+  <SectionTitle scheme="rosa">Editorial</SectionTitle>
 
-Este es el primer volumen de **La Jirafa Eléctrica**, el fanzine digital de
-Bujía Project Music. Acá va la editorial de arranque: por qué existe este
-zine, qué se van a encontrar cada mes, y el tono que le queremos dar —
-DIY, punk, sin filtro corporativo.
+  Este es el primer volumen de **La Jirafa Eléctrica**, el fanzine digital de
+  Bujía Project Music. Acá va la editorial de arranque: por qué existe este
+  zine, qué se van a encontrar cada mes, y el tono que le queremos dar —
+  DIY, punk, sin filtro corporativo.
+</Pliego>
 
-<SectionTitle scheme="acido" pageBreak>Taller: rebobinado de pastillas</SectionTitle>
+<Pliego n={4} scheme="acido">
+  <SectionTitle scheme="acido">Taller: rebobinado de pastillas</SectionTitle>
 
-<Columnas n={2}>
+  <Columnas n={2}>
 
-Acá va la crónica del taller de rebobinado de pastillas, en dos columnas
-para que se sienta a fanzine de verdad. Metan el texto real cuando lo
-tengan — este es solo el andamiaje.
+  Acá va la crónica del taller de rebobinado de pastillas, en dos columnas
+  para que se sienta a fanzine de verdad. Metan el texto real cuando lo
+  tengan — este es solo el andamiaje.
 
-Segunda mitad del texto de la columna. El componente `<Columnas n={2}>`
-ya trae el patrón "inner wrapper" para que la línea de lectura no se
-estire de más.
+  Segunda mitad del texto de la columna. El componente `<Columnas n={2}>`
+  ya trae el patrón "inner wrapper" para que la línea de lectura no se
+  estire de más.
 
-</Columnas>
+  </Columnas>
+</Pliego>
 
 {/* TODO(Ricardo): subir la foto a src/assets/img/taller-1.jpg. Mientras
     no exista se muestra un recuadro "Imagen pendiente" en su lugar. */}
-<Polaroid
-  src="/img/taller-1.jpg"
-  alt="Rebobinando una pastilla a mano"
-  caption="Rebobinado a mano, agosto 2026"
-  tilt={-4}
-/>
+<Pliego n={5} scheme="acido">
+  <Polaroid
+    src="/img/taller-1.jpg"
+    alt="Rebobinando una pastilla a mano"
+    caption="Rebobinado a mano, agosto 2026"
+    tilt={-4}
+  />
+</Pliego>
 
-<SectionTitle scheme="azul" pageBreak>Playlist del mes</SectionTitle>
+<Pliego n={6} scheme="azul">
+  <SectionTitle scheme="azul">Playlist del mes</SectionTitle>
 
-1. Banda uno — Canción uno
-2. Banda dos — Canción dos
-3. Banda tres — Canción tres
+  1. Banda uno — Canción uno
+  2. Banda dos — Canción dos
+  3. Banda tres — Canción tres
+</Pliego>
 
-<Contraportada texto="Bujía Project Music — Texcoco, MX" />
+{/* TODO(Ricardo): páginas 7–14, "Fotos del taller" y lo que siga. Cambiar
+    tipo="relleno" por tipo="normal" y escribir adentro. */}
+<Pliego n={7} tipo="relleno" />
+<Pliego n={8} tipo="relleno" />
+<Pliego n={9} tipo="relleno" />
+<Pliego n={10} tipo="relleno" />
+<Pliego n={11} tipo="relleno" />
+<Pliego n={12} tipo="relleno" />
+<Pliego n={13} tipo="relleno" />
+<Pliego n={14} tipo="relleno" />
+
+{/* TODO(Ricardo): página de Fin (créditos, agradecimientos, próximo número). */}
+<Pliego n={15} tipo="fin" />
+
+<Pliego n={16} tipo="contraportada">
+  <Contraportada texto="Bujía Project Music — Texcoco, MX" />
+</Pliego>

@@ -1,0 +1,26 @@
+---
+// Página de un volumen del fanzine: /fanzine/<slug>. Sólo posts con
+// fanzine: true (los demás siguen en /blog/<slug> con PostLayout). El MDX
+// del volumen trae sus 16 <Pliego>; acá sólo se envuelven en <Volumen>
+// (que arma las dobles páginas en desktop) dentro de FanzineLayout.
+import { getCollection } from 'astro:content';
+import FanzineLayout from '../../layouts/FanzineLayout.astro';
+import Volumen from '../../components/fanzine/Volumen.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => data.fanzine && !data.draft);
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const title = post.data.volume ? `Vol. ${post.data.volume} — ${post.data.title}` : post.data.title;
+---
+
+<FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme}>
+  <article class="fz-volume-page">
+    <Volumen>
+      <Content />
+    </Volumen>
+  </article>
+</FanzineLayout>

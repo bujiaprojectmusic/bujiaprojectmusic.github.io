@@ -1,55 +1,187 @@
 ---
+// Portada del fanzine: lista de volúmenes (y, si hubiera, otros posts de
+// la colección `posts` que no son volúmenes, que viven en /blog/<slug>).
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import FanzineLayout from '../../layouts/FanzineLayout.astro';
+import OptimizedImage from '../../components/OptimizedImage.astro';
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allPosts = await getCollection('posts', ({ data }) => !data.draft);
-const posts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const volumes = allPosts
+  .filter((p) => p.data.fanzine)
+  .sort((a, b) => (b.data.volume ?? 0) - (a.data.volume ?? 0) || b.data.date.valueOf() - a.data.date.valueOf());
+const others = allPosts
+  .filter((p) => !p.data.fanzine)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' });
 ---
 
-<BaseLayout>
-  <div class="container">
-    <ul class="post-list">
-      {posts.map((post) => (
+<FanzineLayout title="Fanzine" description="La Jirafa Eléctrica: el fanzine digital de Bujía Project Music.">
+  <div class="fz-index">
+    <header class="fz-index__head">
+      <p class="fz-index__eyebrow">Fanzine</p>
+      <h1 class="fz-index__title">La Jirafa Eléctrica</h1>
+      <p class="fz-index__sub">Volúmenes de 16 páginas, media carta, para leer de corrido o imprimir.</p>
+    </header>
+
+    <ul class="fz-index__list">
+      {volumes.map((post) => (
         <li>
-          <a href={`${import.meta.env.BASE_URL}blog/${post.slug}`}>
-            {post.data.volume && <span class="post-list__vol">Vol. {post.data.volume}</span>}
-            <h2>{post.data.title}</h2>
-            {post.data.description && <p>{post.data.description}</p>}
+          <a href={`${base}/fanzine/${post.slug}`} class="fz-index__card">
+            <span class="fz-index__cover">
+              {post.data.cover ? (
+                <OptimizedImage src={post.data.cover} alt={post.data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(max-width: 600px) 40vw, 220px" print={false} />
+              ) : (
+                <span class="fz-index__cover-ph" aria-hidden="true">Vol. {post.data.volume}</span>
+              )}
+            </span>
+            <span class="fz-index__body">
+              {post.data.volume && <span class="fz-index__vol">Volumen {post.data.volume}</span>}
+              <span class="fz-index__name">{post.data.title}</span>
+              <span class="fz-index__date">{fmt.format(post.data.date)}</span>
+              {post.data.description && <span class="fz-index__desc">{post.data.description}</span>}
+            </span>
           </a>
         </li>
       ))}
     </ul>
+
+    {others.length > 0 && (
+      <section class="fz-index__others">
+        <h2>Otros posts</h2>
+        <ul>
+          {others.map((post) => (
+            <li><a href={`${base}/blog/${post.slug}`}>{post.data.title}</a></li>
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 
   <style>
-    .post-list {
+    .fz-index {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem 3rem;
+    }
+    .fz-index__head {
+      margin-bottom: 2rem;
+    }
+    .fz-index__eyebrow {
+      font-family: var(--font-head);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 0.75rem;
+      background: var(--accent);
+      display: inline-block;
+      padding: 0.25em 0.7em;
+      margin: 0 0 0.6rem;
+    }
+    .fz-index__title {
+      font-family: 'Anton', var(--font-head);
+      font-weight: 400;
+      text-transform: uppercase;
+      font-size: clamp(2.4rem, 8vw, 4.5rem);
+      line-height: 0.95;
+      margin: 0 0 0.5rem;
+    }
+    .fz-index__sub {
+      margin: 0;
+      opacity: 0.8;
+    }
+    .fz-index__list {
       list-style: none;
-      margin: 3rem 0;
+      margin: 0;
       padding: 0;
       display: grid;
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
-    .post-list a {
-      display: block;
+    .fz-index__card {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 1.25rem;
+      align-items: center;
       text-decoration: none;
+      color: var(--ink);
+      background: #fff;
       border: var(--border-w) solid var(--ink);
       border-radius: var(--radius);
-      padding: 1.5rem;
-      background: #fff;
+      padding: 1rem;
+      transition: box-shadow 0.15s ease, transform 0.15s ease;
     }
-    .post-list__vol {
+    .fz-index__card:hover {
+      box-shadow: 6px 6px 0 var(--accent);
+      transform: translate(-3px, -3px);
+    }
+    .fz-index__cover {
+      display: block;
+      aspect-ratio: 11 / 17;
+      background: var(--ink);
+      color: var(--paper);
+      border: 3px solid var(--ink);
+      overflow: hidden;
+    }
+    .fz-index__cover :global(img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .fz-index__cover-ph {
+      display: flex;
+      align-items: flex-end;
+      height: 100%;
+      padding: 0.6rem;
+      box-sizing: border-box;
+      font-family: var(--font-head);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+    .fz-index__body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .fz-index__vol {
       font-family: var(--font-head);
       font-weight: 700;
       font-size: 0.75rem;
       text-transform: uppercase;
       background: var(--accent);
       padding: 0.15em 0.6em;
-      display: inline-block;
-      margin-bottom: 0.5em;
+      align-self: flex-start;
     }
-    .post-list h2 {
+    .fz-index__name {
       font-family: var(--font-head);
-      margin: 0 0 0.3em;
+      font-weight: 700;
+      font-size: 1.4rem;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .fz-index__date {
+      font-family: var(--font-head);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .fz-index__desc {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .fz-index__others {
+      margin-top: 3rem;
+    }
+    .fz-index__others h2 {
+      font-family: var(--font-head);
+      text-transform: uppercase;
+      font-size: 1rem;
+    }
+    @media (max-width: 520px) {
+      .fz-index__card {
+        grid-template-columns: 100px 1fr;
+        gap: 0.9rem;
+      }
     }
   </style>
-</BaseLayout>
+</FanzineLayout>

@@ -32,16 +32,52 @@ Si preferís correr sin Docker: `npm install && npm run dev`.
 
 Copiá `src/content/posts/volumen-01.mdx` como punto de partida. El
 frontmatter define metadata (`volume`, `date`, `colorScheme`, `tags`...) y
-el cuerpo usa los componentes punk:
+el cuerpo son **16 pliegos** (`<Pliego n={1}>` … `<Pliego n={16}>`), uno
+por página de media carta, con este mapa fijo (el mismo del impreso):
+
+| n | tipo | qué va |
+|---|---|---|
+| 1 | `portada` | `<Portada volume title subtitle image />` |
+| 2 | `indice` | `<Indice items={[{ page: "03", title: "…" }, …]} />` — los `page` son los `n` de los pliegos y linkean a `#pagina-N` |
+| 3–14 | `normal` (o `relleno` mientras no haya contenido) | texto Markdown, `<SectionTitle>`, `<Columnas>`, `<Polaroid>`, los componentes de `COMPONENTES_MDX.md`… |
+| 15 | `fin` | página de Fin (créditos, próximo número) |
+| 16 | `contraportada` | `<Contraportada texto="" />` |
+
+```mdx
+import Pliego from '../../components/fanzine/Pliego.astro';
+
+<Pliego n={3} scheme="acido">
+  <SectionTitle scheme="acido">Editorial</SectionTitle>
+
+  Texto normal en Markdown…
+</Pliego>
+
+<Pliego n={7} tipo="relleno" />   {/* placeholder TODO hasta tener contenido */}
+```
+
+Cómo se ve: en móvil cada pliego va a todo el ancho, uno debajo de otro;
+en desktop (≥ 1024 px) se agrupan como revista abierta — página 1 sola,
+(2–3), (4–5) … (14–15) y 16 sola. Desde el pliego 2 hay un control
+"↑ Inicio / ≡ Índice" (anclas, sin JavaScript). El volumen se sirve en
+`/fanzine/<slug>` (la URL vieja `/blog/<slug>` redirige) con el layout
+propio del fanzine (`src/layouts/FanzineLayout.astro`).
+
+`npm run build` corre antes `scripts/check-volumes.mjs`, que **falla si un
+volumen no tiene exactamente 16 `<Pliego>` con `n` del 1 al 16 sin
+repetir** (también se puede correr solo: `npm run check:volumes`).
+
+Componentes disponibles dentro de un pliego:
 
 - `<Portada volume={} title="" subtitle="" image="" />`
 - `<Indice items={[{page, title}, ...]} />`
-- `<SectionTitle scheme="rosa|acido|azul|negro" pageBreak>...</SectionTitle>`
+- `<SectionTitle scheme="rosa|acido|azul|negro">...</SectionTitle>`
 - `<Columnas n={2|3}>...</Columnas>`
 - `<Polaroid src="" alt="" caption="" tilt={-4} />`
 - `<Contraportada texto="" />`
 
-`pageBreak` en `<SectionTitle>` mete el salto de página como `<div>`
+`pageBreak` en `<SectionTitle>` ya no hace falta adentro de un pliego (la
+página la define el pliego); sigue existiendo para posts sin pliegos. Mete
+el salto de página como `<div>`
 standalone *antes* del título (nunca en el título mismo — el `clip-path`
 del sticker rompe con `break-before` aplicado directo, como ya habías
 aprendido en Ghost).
@@ -93,8 +129,6 @@ tenías en Code Injection, portado a un archivo CSS normal.
 
 ## Pendiente / a tu criterio
 
-- Traer las fuentes Space Mono reales a `public/fonts/` (dejé los
-  `@font-face` apuntando ahí).
 - Migrar contenido existente de Ghost a `.mdx` (puedo ayudarte a exportar
   vía la Content API de Ghost y convertir a MDX si querés automatizarlo).
 - Búsqueda, RSS, sitemap (el integration de `@astrojs/sitemap` ya está

@@ -12,20 +12,34 @@ interface Item {
 }
 interface Props {
   items: Item[];
+  // Si true (default), cada ítem es un enlace a #pagina-<page>, el id que
+  // genera <Pliego n={page}>. Sin JavaScript.
+  linkPages?: boolean;
 }
-const { items } = Astro.props;
+const { items, linkPages = true } = Astro.props;
+const anchor = (page: string) => `#pagina-${parseInt(page, 10)}`;
 ---
 
 <section class="fz-indice fz-page-num">
   <h2 class="fz-indice__title">Índice</h2>
   <ol class="fz-indice__list">
-    {items.map((item) => (
-      <li>
-        <span class="fz-indice__page">{item.page}</span>
-        <span class="fz-indice__dots" aria-hidden="true"></span>
-        <span class="fz-indice__item-title">{item.title}</span>
-      </li>
-    ))}
+    {items.map((item) =>
+      linkPages && Number.isInteger(parseInt(item.page, 10)) ? (
+        <li>
+          <a href={anchor(item.page)} class="fz-indice__link">
+            <span class="fz-indice__page">{item.page}</span>
+            <span class="fz-indice__dots" aria-hidden="true"></span>
+            <span class="fz-indice__item-title">{item.title}</span>
+          </a>
+        </li>
+      ) : (
+        <li>
+          <span class="fz-indice__page">{item.page}</span>
+          <span class="fz-indice__dots" aria-hidden="true"></span>
+          <span class="fz-indice__item-title">{item.title}</span>
+        </li>
+      ),
+    )}
   </ol>
 </section>
 
@@ -48,12 +62,19 @@ const { items } = Astro.props;
     margin: 0;
     padding: 0;
   }
-  .fz-indice__list li {
+  .fz-indice__list li,
+  .fz-indice__link {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
     font-family: var(--font-head);
     margin-bottom: 0.6rem;
+  }
+  .fz-indice__link {
+    flex: 1;
+    margin-bottom: 0;
+    text-decoration: none;
+    color: inherit;
   }
   .fz-indice__page {
     font-weight: 700;
