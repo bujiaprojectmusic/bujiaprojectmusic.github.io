@@ -5,6 +5,9 @@
 // "Volúmenes", y un hueco para el bloque de descarga de PDFs de #9),
 // footer mínimo. Importa print.css y aplica el colorScheme del volumen.
 // Lo usan /fanzine, /volumenes y /fanzine/<slug>. Sin JavaScript.
+// La lectura es scroll vertical continuo. El atajo fijo "↑ Inicio"
+// (y, en un volumen, "≡ Índice" vía el slot `jump`) salta por anclas;
+// no hay pasar de página. La paginación vive sólo en @media print.
 // ─────────────────────────────────────────────────────────────────────────
 import '../styles/global.css';
 import '../styles/print.css';
@@ -18,8 +21,9 @@ interface Props {
   description?: string;
   // Esquema de color del volumen (se aplica a toda la página).
   colorScheme?: ColorSchemeName;
-  // Volumen de prueba: noindex,nofollow + franja "EDICIÓN DE PRUEBA" +
-  // data-prueba en <body> (los pliegos muestran la marca en su pie).
+  // Volumen de prueba: noindex,nofollow + franja "EDICIÓN DE PRUEBA" arriba
+  // de la página + data-prueba en <body> (al imprimir, cada página lleva
+  // la marca en el pie; ver Pliego.astro).
   prueba?: boolean;
 }
 
@@ -45,7 +49,7 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
     <link rel="preload" as="font" type="font/woff2" href={`${import.meta.env.BASE_URL}fonts/space-mono-regular.woff2`} crossorigin />
     <ColorSchemeStyles />
   </head>
-  <body data-layout="fanzine" data-prueba={prueba ? 'true' : undefined} class:list={['fz-body', `scheme-${colorScheme}`]}>
+  <body id="inicio" data-layout="fanzine" data-prueba={prueba ? 'true' : undefined} class:list={['fz-body', `scheme-${colorScheme}`]}>
     {prueba && (
       <p class="fz-prueba-banner" role="note">
         <strong>EDICIÓN DE PRUEBA</strong> — contenido ficticio para probar el sistema del fanzine. Nombres, bandas y anuncios son inventados.
@@ -87,11 +91,16 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
         <a href={withBase('/')}>Volver al taller</a>
       </p>
     </footer>
+
+    <nav class="fz-jump fz-no-print" aria-label="Atajos del fanzine">
+      <a href="#inicio">↑ Inicio</a>
+      <slot name="jump" />
+    </nav>
   </body>
 </html>
 
 <style is:global>
-  /* Scroll suave para los enlaces "↑ Inicio / ≡ Índice" de cada pliego,
+  /* Scroll suave para las anclas del índice y el atajo "↑ Inicio",
      sólo si la persona no pidió menos movimiento. */
   @media (prefers-reduced-motion: no-preference) {
     html:has(.fz-body) {
@@ -162,9 +171,39 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
   }
   .fz-footer {
     border-top: var(--border-w) solid var(--ink);
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 1rem 4.5rem;
     text-align: center;
     font-size: 0.8rem;
+  }
+  .fz-jump {
+    position: fixed;
+    right: 14px;
+    bottom: 16px;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    max-width: calc(100vw - 28px);
+  }
+  .fz-jump :global(a) {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.45em 0.75em;
+    line-height: 1.2;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .fz-jump :global(a:hover),
+  .fz-jump :global(a:focus-visible) {
+    background: var(--accent);
   }
   .fz-footer p {
     margin: 0;

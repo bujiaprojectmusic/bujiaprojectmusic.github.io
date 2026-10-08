@@ -55,10 +55,14 @@ import Pliego from '../../components/fanzine/Pliego.astro';
 <Pliego n={7} tipo="relleno" />   {/* placeholder TODO hasta tener contenido */}
 ```
 
-Cómo se ve: en móvil cada pliego va a todo el ancho, uno debajo de otro;
-en desktop (≥ 1024 px) se agrupan como revista abierta — página 1 sola,
-(2–3), (4–5) … (14–15) y 16 sola. Desde el pliego 2 hay un control
-"↑ Inicio / ≡ Índice" (anclas, sin JavaScript). El volumen se sirve en **`/fanzine/vol-NN`** (dos dígitos,
+Cómo se ve: **en la web es una página con scroll vertical continuo**,
+una sola columna, con los componentes punk apilados (portada, índice,
+piezas, fin, contraportada). No hay doble página ni pasar de página en
+pantalla; los `<Pliego tipo="relleno">` (páginas en blanco del
+cuadernillo) no se muestran. El índice apunta a `#pagina-N` y hay un
+atajo fijo "↑ Inicio / ≡ Índice". **Las páginas existen sólo al
+imprimir** (`@media print`: cada `<Pliego>` es una hoja, portada sola,
+N páginas con N ≥ 16 y múltiplo de 4). El volumen se sirve en **`/fanzine/vol-NN`** (dos dígitos,
 sale del `volume` del frontmatter, no del nombre del archivo ni del
 título; `volume` es obligatorio con `fanzine: true`). Las URLs viejas
 (`/blog/<archivo>`, `/fanzine/<archivo>`) se generan como redirección
@@ -76,8 +80,9 @@ en orden y sin repetir, y portada/índice/fin/contraportada en las páginas
 que sirve de fixture para probar todo el sistema (pliegos, componentes,
 videos con fachada, presupuesto de datos, y más adelante el PDF de Typst).
 Tiene `prueba: true` en el frontmatter: eso lo saca del sitemap, del menú y
-del archivo `/fanzine`, le pone `noindex,nofollow` y muestra la marca
-"EDICIÓN DE PRUEBA" en la portada y en el pie de cada pliego. Todo lo suyo
+del archivo `/fanzine`, le pone `noindex,nofollow`, muestra la franja
+"EDICIÓN DE PRUEBA" arriba de la página web y, al imprimir, la marca en el
+pie de cada página. Todo lo suyo
 vive en dos carpetas: `src/content/posts/vol-00/` (el MDX) y
 `src/assets/fanzine/vol-00/` (fotos, mascota y `CREDITOS.md`).
 

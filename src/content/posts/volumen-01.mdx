@@ -22,12 +22,13 @@ import Columnas from '../../components/Columnas.astro';
 import Contraportada from '../../components/Contraportada.astro';
 
 {/*
-  Un volumen = 16 pliegos (<Pliego n={1…16}>), con el mapa fijo:
-  1 portada · 2 índice · 3–14 contenido · 15 fin · 16 contraportada.
-  `n` es el mismo número de página del impreso. Las páginas sin contenido
-  todavía van como tipo="relleno" (placeholder TODO) — cuando haya texto o
-  fotos, se cambia a tipo="normal" y se escribe adentro.
-  scripts/check-volumes.mjs revisa que estén las 16 antes de compilar.
+  Un volumen = 16 pliegos (<Pliego n={1…16}>), con el mapa fijo del
+  CUADERNILLO IMPRESO: 1 portada · 2 índice · 3–14 contenido · 15 fin ·
+  16 contraportada. `n` es el número de página del papel y el ancla
+  #pagina-N del índice en la web. En pantalla no hay páginas: el
+  contenido se apila y se scrollea. tipo="relleno" es una página en
+  blanco del impreso y no se muestra en la web. scripts/check-volumes.mjs
+  revisa que estén las 16 antes de compilar.
 */}
 
 {/* TODO(Ricardo): la foto de portada todavía no existe. Subirla a
