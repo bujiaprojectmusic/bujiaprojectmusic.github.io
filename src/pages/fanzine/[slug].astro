@@ -1,20 +1,42 @@
 ---
-// Página de un volumen del fanzine: /fanzine/<slug>. Sólo posts con
-// fanzine: true (los demás siguen en /blog/<slug> con PostLayout). El MDX
-// del volumen trae sus 16 <Pliego>; acá sólo se envuelven en <Volumen>
-// (que arma las dobles páginas en desktop) dentro de FanzineLayout.
+// Página de un volumen del fanzine: /fanzine/vol-NN (el slug sale del
+// número de volumen, ver utils/fanzine.ts). Sólo posts con fanzine: true;
+// los demás siguen en /blog/<slug> con PostLayout. El MDX del volumen trae
+// sus 16 <Pliego>; acá sólo se envuelven en <Volumen> (que arma las dobles
+// páginas en desktop) dentro de FanzineLayout.
+//
+// Además, si el nombre del archivo no coincide con vol-NN (p. ej.
+// volumen-01.mdx), /fanzine/<archivo> se genera como redirección a la URL
+// nueva, para que ninguna URL vieja quede en 404.
 import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import Volumen from '../../components/fanzine/Volumen.astro';
+import { fanzineSlug, fanzinePath } from '../../utils/fanzine';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => data.fanzine && !data.draft);
-  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+  const seen = new Map<string, string>();
+  const paths = [];
+  for (const post of posts) {
+    const slug = fanzineSlug(post);
+    if (seen.has(slug)) {
+      throw new Error(`Dos volúmenes con el mismo número (${slug}): ${seen.get(slug)} y ${post.id}.`);
+    }
+    seen.set(slug, post.id);
+    paths.push({ params: { slug }, props: { post, redirectTo: undefined } });
+    if (post.slug !== slug) {
+      paths.push({ params: { slug: post.slug }, props: { post, redirectTo: fanzinePath(post) } });
+    }
+  }
+  return paths;
 }
 
-const { post } = Astro.props;
+const { post, redirectTo } = Astro.props;
+if (redirectTo) {
+  return Astro.redirect(redirectTo, 301);
+}
 const { Content } = await post.render();
-const title = post.data.volume ? `Vol. ${post.data.volume} — ${post.data.title}` : post.data.title;
+const title = `Vol. ${post.data.volume} — ${post.data.title}`;
 ---
 
 <FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme}>

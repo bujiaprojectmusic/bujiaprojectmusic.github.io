@@ -1,6 +1,11 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import { listFanzineRedirects } from './scripts/fanzine-redirects.mjs';
+
+// URLs viejas del fanzine que sólo existen para redirigir a /fanzine/vol-NN
+// (meta refresh + canonical). No van al sitemap.
+const fanzineRedirects = new Set(listFanzineRedirects());
 
 export default defineConfig({
   // Dominio real del sitio (GitHub Pages con dominio propio). De acá salen
@@ -15,7 +20,12 @@ export default defineConfig({
   // .github/workflows/deploy.yml) y no reprocesar las fotos que no
   // cambiaron. Está en .gitignore.
   cacheDir: './.astro-cache',
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => !fanzineRedirects.has(new URL(page).pathname.replace(/\/$/, '')),
+    }),
+  ],
   markdown: {
     shikiConfig: {
       theme: 'monokai',

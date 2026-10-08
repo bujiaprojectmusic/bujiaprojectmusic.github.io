@@ -44,6 +44,9 @@ const posts = defineCollection({
     coverAlt: z.string().optional(),
     author: z.string().default('Ripper'),
     draft: z.boolean().default(false),
+  }).refine((data) => !data.fanzine || data.volume != null, {
+    message: 'Un post con fanzine: true necesita `volume`: la URL del volumen es /fanzine/vol-NN y sale de ese número.',
+    path: ['volume'],
   }),
 });
 

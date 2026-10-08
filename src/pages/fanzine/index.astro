@@ -4,6 +4,7 @@
 import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import OptimizedImage from '../../components/OptimizedImage.astro';
+import { fanzinePath } from '../../utils/fanzine';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allPosts = await getCollection('posts', ({ data }) => !data.draft);
@@ -27,7 +28,7 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
     <ul class="fz-index__list">
       {volumes.map((post) => (
         <li>
-          <a href={`${base}/fanzine/${post.slug}`} class="fz-index__card">
+          <a href={fanzinePath(post)} class="fz-index__card">
             <span class="fz-index__cover">
               {post.data.cover ? (
                 <OptimizedImage src={post.data.cover} alt={post.data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(max-width: 600px) 40vw, 220px" print={false} />
