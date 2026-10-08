@@ -47,6 +47,10 @@ body {
 
 img {
   max-width: 100%;
+  /* Las imágenes optimizadas traen width/height (para reservar espacio y
+     evitar CLS); height: auto evita que ese atributo fije la altura y
+     la foto se deforme al escalar por ancho. */
+  height: auto;
   display: block;
 }
 /* Las fotos optimizadas se envuelven en <picture> (AVIF/WebP + variante
