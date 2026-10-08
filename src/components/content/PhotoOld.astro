@@ -40,6 +40,9 @@ const { src, alt, caption, tilt = -2, priority = false } = Astro.props;
 <style>
   .photo-old {
     display: table;
+    /* Las cintas sobresalen 14 px por lado; se descuentan del ancho para
+       que a todo el ancho (móvil) no provoquen scroll horizontal. */
+    max-width: calc(100% - 28px);
     margin: 2rem auto;
     transform: rotate(var(--tilt));
   }

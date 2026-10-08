@@ -299,8 +299,11 @@ import { direccionTexto, horario, whatsapp, mapa } from '../../../data/taller';
   </Columnas>
 </Pliego>
 
-<Pliego n={14} scheme="negro">
-  <PostCover variant="stamp" title="La guitarra fea" tag="Opinión" colorScheme="negro" />
+{/* En la web el pliego ya no pinta fondo propio, así que los esquemas
+    oscuros (negro/carbon) dejarían texto claro sobre papel claro: se usa
+    uno de papel claro. */}
+<Pliego n={14} scheme="overol">
+  <PostCover variant="stamp" title="La guitarra fea" tag="Opinión" colorScheme="overol" />
 
   <ImageSide src="/fanzine/vol-00/patinetas.jpeg" alt="Pila de patinetas usadas, con rayones y gráficas gastadas" side="right" width="40%" caption="Feas, usadas y a punto de ser guitarra." />
 

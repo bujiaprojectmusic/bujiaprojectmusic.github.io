@@ -51,7 +51,7 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
   </head>
   <body id="inicio" data-layout="fanzine" data-prueba={prueba ? 'true' : undefined} class:list={['fz-body', `scheme-${colorScheme}`]}>
     {prueba && (
-      <p class="fz-prueba-banner" role="note">
+      <p class="fz-prueba-banner fz-no-print" role="note">
         <strong>EDICIÓN DE PRUEBA</strong> — contenido ficticio para probar el sistema del fanzine. Nombres, bandas y anuncios son inventados.
       </p>
     )}
