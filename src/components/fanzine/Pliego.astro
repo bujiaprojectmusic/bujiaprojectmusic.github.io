@@ -1,0 +1,289 @@
+---
+// ─────────────────────────────────────────────────────────────────────────
+// Un pliego = una página del volumen (media carta 5.5×8.5 in). Cada
+// volumen tiene exactamente 16, con `n` del 1 al 16 (el mismo número de
+// página del impreso en Typst, ver #9). Mapa fijo:
+//   1 portada · 2 índice · 3–14 contenido · 15 fin · 16 contraportada
+//
+// Uso en MDX:
+//   <Pliego n={3} tipo="normal" scheme="acido">...markdown/componentes...</Pliego>
+//   <Pliego n={7} tipo="relleno" />        ← placeholder TODO hasta tener contenido
+//
+// - Móvil (< 768 px): cada pliego a todo el ancho, uno debajo de otro.
+// - Desktop (≥ 1024 px): dobles páginas como cuadernillo real: 1 sola (a
+//   la derecha), (2–3), (4–5) … (14–15), 16 sola (a la izquierda). Es CSS
+//   grid puro (grid-column según n), sin JavaScript.
+// - Print: cada pliego es una página (break-before), sin agrupar.
+// - En los pliegos 2–16 hay un control "↑ Inicio / ≡ Índice" (anclas a
+//   #pagina-1 y #pagina-2), oculto al imprimir.
+// ─────────────────────────────────────────────────────────────────────────
+import type { ColorSchemeName } from '../../config/site';
+import OptimizedImage from '../OptimizedImage.astro';
+import type { ImageSource } from '../../utils/resolveImage';
+
+export type PliegoTipo = 'portada' | 'indice' | 'normal' | 'relleno' | 'fin' | 'contraportada';
+
+interface Props {
+  /** Número de página, 1–16. */
+  n: number;
+  scheme?: ColorSchemeName;
+  /** Fondo a sangre: color (true) o imagen (ruta "/img/..." o import). */
+  bleed?: boolean | ImageSource;
+  tipo?: PliegoTipo;
+  /** Texto alternativo si `bleed` es una imagen. */
+  bleedAlt?: string;
+}
+
+const { n, scheme, bleed = false, tipo = 'normal', bleedAlt = '' } = Astro.props;
+
+if (!Number.isInteger(n) || n < 1 || n > 16) {
+  throw new Error(`<Pliego n={${n}}>: n tiene que ser un entero entre 1 y 16.`);
+}
+
+const hasContent = Astro.slots.has('default');
+const bleedImage = typeof bleed === 'boolean' ? undefined : bleed;
+const hasNav = n > 1;
+const showNum = tipo !== 'portada' && tipo !== 'contraportada';
+// Lado en la doble página de desktop (ver Volumen.astro): 1 sola a la
+// derecha, 16 sola a la izquierda, pares a la izquierda, impares a la
+// derecha. Va como clase para que el CSS no tenga que mirar data-pliego.
+const side = n === 1 ? 'right' : n === 16 ? 'left' : n % 2 === 0 ? 'left' : 'right';
+const LABELS: Record<PliegoTipo, string> = {
+  portada: 'Portada',
+  indice: 'Índice',
+  normal: `Página ${n}`,
+  relleno: `Página ${n}`,
+  fin: 'Fin',
+  contraportada: 'Contraportada',
+};
+---
+
+<section
+  id={`pagina-${n}`}
+  data-pliego={n}
+  data-tipo={tipo}
+  class:list={[
+    'pliego',
+    `pliego--${tipo}`,
+    `pliego--${side}`,
+    scheme && `scheme-${scheme}`,
+    { 'pliego--bleed': bleed !== false, 'pliego--has-nav': hasNav, 'pliego--empty': !hasContent },
+  ]}
+  aria-label={LABELS[tipo]}
+>
+  {bleedImage && (
+    <OptimizedImage
+      src={bleedImage}
+      alt={bleedAlt}
+      class="pliego__bg"
+      widths={[480, 768, 1024, 1440]}
+      sizes="(max-width: 767px) 100vw, (max-width: 1023px) 600px, 560px"
+      loading={n === 1 ? 'eager' : 'lazy'}
+      fetchpriority={n === 1 ? 'high' : undefined}
+      decoding={n === 1 ? 'sync' : 'async'}
+      context={`Pliego ${n}`}
+    />
+  )}
+
+  {hasNav && (
+    <nav class="pliego__nav fz-no-print" aria-label={`Navegación desde la página ${n}`}>
+      <a href="#pagina-1" title="Volver al inicio del volumen">↑ Inicio</a>
+      <a href="#pagina-2" title="Ir al índice">≡ Índice</a>
+    </nav>
+  )}
+
+  <div class="pliego__in">
+    {hasContent ? (
+      <slot />
+    ) : tipo === 'fin' ? (
+      <div class="pliego__fin">
+        <p class="pliego__fin-word">Fin</p>
+        {/* TODO: texto de cierre del volumen (créditos, agradecimientos, próximo número). */}
+        <p class="pliego__todo">TODO: texto de cierre del volumen</p>
+      </div>
+    ) : (
+      <div class="pliego__relleno">
+        {/* TODO: contenido pendiente para esta página. */}
+        <p class="pliego__todo">TODO · página {n}</p>
+        <p class="pliego__todo-sub">Contenido pendiente</p>
+      </div>
+    )}
+  </div>
+
+  {showNum && <span class="pliego__num" aria-hidden="true">{n}</span>}
+</section>
+
+<style>
+  .pliego {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    /* Proporción media carta (5.5 × 8.5 in). Si el contenido es más alto,
+       la página crece (min-height automática), no se recorta. */
+    aspect-ratio: 11 / 17;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    color: var(--ink);
+    border: var(--border-w) solid var(--ink);
+    overflow: hidden;
+  }
+  .pliego__in {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1.1rem 2.2rem;
+  }
+  /* Reservar lugar para el control de navegación, para que no tape el
+     contenido (sobre todo a 390 px). */
+  .pliego--has-nav .pliego__in {
+    padding-top: 2.7rem;
+  }
+  .pliego__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+  .pliego--bleed .pliego__in {
+    padding: 0;
+  }
+
+  /* ── Navegación "↑ Inicio / ≡ Índice" ─────────────────────────────── */
+  .pliego__nav {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+    display: flex;
+    gap: 0.3rem;
+  }
+  .pliego__nav a {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.25em 0.6em;
+    line-height: 1.2;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .pliego__nav a:hover,
+  .pliego__nav a:focus-visible {
+    background: var(--accent);
+  }
+
+  /* ── Número de página ──────────────────────────────────────────────── */
+  .pliego__num {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+
+  /* ── Tipos ─────────────────────────────────────────────────────────── */
+  .pliego--portada,
+  .pliego--contraportada {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .pliego--portada .pliego__in,
+  .pliego--contraportada .pliego__in {
+    padding: 0;
+  }
+  /* Los componentes Portada / Indice / Contraportada ya existentes se
+     usan ADENTRO del pliego: les sacamos el marco propio para que la
+     página sea el marco. */
+  .pliego :global(.fz-portada),
+  .pliego :global(.fz-contraportada) {
+    flex: 1;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    min-height: 0;
+  }
+  .pliego :global(.fz-indice) {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 0.5rem 0;
+  }
+  /* Los <div class="fz-page-num"> vacíos que mete <SectionTitle pageBreak>
+     (marcadores de salto de página) no hacen falta adentro de un pliego.
+     Sólo los vacíos: Indice y Contraportada también llevan esa clase. */
+  .pliego :global(.fz-page-num:empty) {
+    display: none;
+  }
+  .pliego--relleno {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0 14px,
+      color-mix(in srgb, var(--ink) 7%, transparent) 14px 28px
+    );
+  }
+  .pliego__relleno,
+  .pliego__fin {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .pliego__todo {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    border: 3px dashed var(--ink);
+    padding: 0.5em 1em;
+    margin: 0;
+    opacity: 0.7;
+  }
+  .pliego__todo-sub {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin: 0.6rem 0 0;
+  }
+  .pliego__fin-word {
+    font-family: 'Anton', var(--font-head);
+    font-size: clamp(3rem, 12cqw, 6rem);
+    text-transform: uppercase;
+    line-height: 1;
+    margin: 0 0 1rem;
+    color: var(--accent);
+    -webkit-text-stroke: 2px var(--ink);
+  }
+
+  /* ── Print: cada pliego, una página ────────────────────────────────── */
+  @media print {
+    .pliego {
+      aspect-ratio: auto;
+      height: 7.7in;
+      border: 0;
+      break-inside: avoid;
+    }
+    .pliego + .pliego {
+      break-before: page;
+    }
+    .pliego__num {
+      opacity: 1;
+    }
+  }
+</style>

@@ -59,4 +59,23 @@
     font-size: 9.5pt;
     line-height: 1.35;
   }
+
+  /* Volúmenes por pliegos (src/components/fanzine/Pliego.astro): la
+     página la define cada <Pliego> (una por página, break-before), así
+     que los márgenes negativos / saltos propios de Portada, Índice y
+     Contraportada de arriba no aplican adentro de un pliego. El PDF
+     oficial sale de Typst (#9); esto es sólo el respaldo de "imprimir". */
+  .fz-volume .fz-portada,
+  .fz-volume .fz-indice,
+  .fz-volume .fz-contraportada {
+    margin: 0;
+    min-height: 0;
+    break-after: auto;
+  }
+  .fz-volume .fz-page-num {
+    break-before: auto;
+  }
+  .fz-volume .fz-cols-2 .fz-cols__inner {
+    column-gap: 1rem;
+  }
 }

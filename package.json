@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/check-volumes.mjs && astro build",
+    "check:volumes": "node scripts/check-volumes.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
