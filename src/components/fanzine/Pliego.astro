@@ -120,20 +120,29 @@ const LABELS: Record<PliegoTipo, string> = {
     position: relative;
     box-sizing: border-box;
     width: 100%;
-    /* Proporción media carta (5.5 × 8.5 in). Si el contenido es más alto,
-       la página crece (min-height automática), no se recorta. */
-    aspect-ratio: 11 / 17;
-    display: flex;
-    flex-direction: column;
+    /* Proporción media carta (5.5 × 8.5 in) como MÍNIMO: un ::before con
+       aspect-ratio comparte la celda con el contenido, así que la página
+       mide lo que diga la proporción o lo que mida el contenido, lo que
+       sea más alto (nunca se recorta). */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     background: var(--paper);
     color: var(--ink);
     border: var(--border-w) solid var(--ink);
     overflow: hidden;
   }
+  .pliego::before {
+    content: '';
+    grid-row: 1;
+    grid-column: 1;
+    width: 100%;
+    aspect-ratio: 11 / 17;
+  }
   .pliego__in {
+    grid-row: 1;
+    grid-column: 1;
     position: relative;
     z-index: 1;
-    flex: 1;
     display: flex;
     flex-direction: column;
     padding: 1.25rem 1.1rem 2.2rem;
@@ -303,10 +312,12 @@ const LABELS: Record<PliegoTipo, string> = {
   /* ── Print: cada pliego, una página ────────────────────────────────── */
   @media print {
     .pliego {
-      aspect-ratio: auto;
       height: 7.7in;
       border: 0;
       break-inside: avoid;
+    }
+    .pliego::before {
+      display: none;
     }
     .pliego + .pliego {
       break-before: page;
