@@ -83,8 +83,8 @@ export async function prepararCache() {
   console.log(`✔ caché: qr-muestra.svg, foto-300/150(-bn).jpg (original ${P.foto} intacta)`);
 }
 
-export function compilar(bin, fuente, salida, variante) {
-  const args = ['compile', '--root', RAIZ, '--font-path', FUENTES, '--ignore-system-fonts', '--creation-timestamp', EPOCH];
+export function compilar(bin, fuente, salida, variante, extra = []) {
+  const args = ['compile', '--root', RAIZ, '--font-path', FUENTES, '--ignore-system-fonts', '--creation-timestamp', process.env.SOURCE_DATE_EPOCH ?? EPOCH, ...extra];
   if (variante) args.push('--input', `variante=${variante}`);
   args.push(fuente, salida);
   execFileSync(bin, args, { cwd: RAIZ, stdio: 'inherit' });

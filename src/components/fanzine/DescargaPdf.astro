@@ -1,0 +1,66 @@
+---
+// Bloque de descarga de los PDF de un volumen (issue #9): "para leer"
+// (pantalla) y "para imprenta". Los pesos salen de print/build/manifest.json;
+// sin manifest (build local sin Typst) dice "PDF no disponible en este
+// build" y el sitio compila igual. Va en el slot "download" de
+// FanzineLayout. Sin JavaScript; los volúmenes no tienen window.print().
+import { impresoDe, mb } from '../../utils/impreso';
+
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const v = impresoDe(slug);
+---
+
+<div class="fz-descarga">
+  {v ? (
+    <>
+      <a class="fz-descarga__btn" href={`${base}/fanzine/${slug}/${v.pdfs.pantalla.archivo}`} download>
+        Descargar PDF para leer <span>({mb(v.pdfs.pantalla.bytes)})</span>
+      </a>
+      <a class="fz-descarga__btn fz-descarga__btn--imprenta" href={`${base}/fanzine/${slug}/${v.pdfs.imprenta.archivo}`} download>
+        Descargar PDF para imprenta <span>({mb(v.pdfs.imprenta.bytes)})</span>
+      </a>
+    </>
+  ) : (
+    <span class="fz-descarga__nada">PDF no disponible en este build</span>
+  )}
+</div>
+
+<style>
+  .fz-descarga {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: flex-end;
+  }
+  .fz-descarga__btn {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--accent);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.45em 0.8em;
+    line-height: 1.2;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .fz-descarga__btn--imprenta {
+    background: var(--paper);
+  }
+  .fz-descarga__btn span {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .fz-descarga__nada {
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+</style>

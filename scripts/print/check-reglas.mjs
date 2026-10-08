@@ -145,7 +145,8 @@ const PATRONES_A_MANO = [
 export function medidasAMano() {
   const hits = [];
   const dir = path.join(RAIZ, 'print');
-  const typ = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? typ(path.join(d, e.name)) : e.name.endsWith('.typ') ? [path.join(d, e.name)] : []);
+  // print/build/ (ignorada por git) no se revisa.
+  const typ = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? (e.name === 'build' && d === dir ? [] : typ(path.join(d, e.name))) : e.name.endsWith('.typ') ? [path.join(d, e.name)] : []);
   for (const f of typ(dir)) {
     fs.readFileSync(f, 'utf8').split('\n').forEach((l, i) => {
       const sinComentario = l.replace(/\/\/.*$/, '');

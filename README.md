@@ -118,8 +118,14 @@ El fanzine en papel se genera con **Typst** (versión fijada en
 de 4) viven en **`print/reglas.json`** y están documentadas, con la hoja de
 prueba de impresión y el checklist físico, en
 [`docs/IMPRESO.md`](docs/IMPRESO.md). Comandos: `npm run print:install`,
-`npm run print:prueba`, `npm run print:verify`, `npm run print:check`. Los
-PDF se generan en CI (artifact `impreso-prueba`) y no se commitean.
+`npm run print` (los dos PDF de cada volumen: pantalla e imprenta, con
+chequeos de desborde, índice, ppi, fuentes y QR), `npm run print:test`
+(fixtures), `npm run print:prueba` / `print:verify` (hoja de prueba) y
+`npm run print:check` (reglas vs docs). Los PDF se generan en CI
+(artifacts `fanzine-pdfs` e `impreso-prueba`), se copian a
+`dist/fanzine/<slug>/` y no se commitean; en `/fanzine/vol-NN` hay botones
+"Descargar PDF para leer / para imprenta". Si una pieza no cabe en su
+página, el build falla y dice cuál: el texto nunca se achica.
 
 ## Personalización (colores, tipografía, redes)
 

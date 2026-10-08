@@ -50,6 +50,9 @@ const posts = defineCollection({
     // al archivo /fanzine, y muestra la marca "EDICIÓN DE PRUEBA" en la
     // portada y en el pie de cada pliego. Un solo flag para apagarlo.
     prueba: z.boolean().default(false),
+    // Opciones del impreso (issue #9). multimedia: qué pasa con los videos
+    // y playlists en el PDF: "qr" (default) = QR + leyenda; "omitir" = nada.
+    impreso: z.object({ multimedia: z.enum(['qr', 'omitir']).default('qr') }).default({}),
   }).refine((data) => !data.fanzine || data.volume != null, {
     message: 'Un post con fanzine: true necesita `volume`: la URL del volumen es /fanzine/vol-NN y sale de ese número.',
     path: ['volume'],

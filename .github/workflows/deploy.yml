@@ -50,7 +50,57 @@ jobs:
           restore-keys: |
             astro-assets-${{ runner.os }}-
 
+      # Impreso (issue #9): Typst fijado (print/TYPST_VERSION, sha256) y
+      # poppler para los chequeos; `npm run print` exporta, compila y
+      # verifica los PDF de todos los volúmenes y escribe
+      # print/build/manifest.json, que `npm run build` lee para el bloque de
+      # descarga y copia los PDF a dist/fanzine/<slug>/. Los PDF no se
+      # commitean: en PRs quedan en el artifact `fanzine-pdfs`.
+      - name: poppler-utils (pdfinfo, pdffonts, pdftoppm, pdftotext)
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends poppler-utils
+
+      - name: Caché del binario de Typst
+        uses: actions/cache@v4
+        with:
+          path: print/build/typst-dl
+          key: typst-${{ runner.os }}-${{ hashFiles('print/TYPST_VERSION', 'print/typst.sha256') }}
+
+      - name: Instalar Typst (versión fijada, sha256 verificado)
+        run: npm run print:install
+
+      - run: print/build/bin/typst --version
+
+      - name: Caché de variantes de fotos del impreso
+        uses: actions/cache@v4
+        with:
+          path: |
+            print/build/vol-*/img
+          key: impreso-img-${{ runner.os }}-${{ hashFiles('src/assets/**', 'print/componentes.json', 'print/reglas.json', 'package-lock.json') }}
+          restore-keys: |
+            impreso-img-${{ runner.os }}-
+
+      - name: Generar y verificar los PDF del fanzine (Typst)
+        run: npm run print -- --dos-veces
+
+      - name: Resumen del impreso
+        run: cat print/build/resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tests del motor de impresión (fixtures)
+        run: npm run print:test
+
       - run: npm run build
+
+      - name: PDF en dist
+        run: ls -la dist/fanzine/*/ && test -z "$(git ls-files '*.pdf')"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fanzine-pdfs
+          path: |
+            print/build/vol-*/jirafa-*.pdf
+            print/build/manifest.json
+            print/build/resumen.md
+          if-no-files-found: error
 
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
