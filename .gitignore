@@ -4,3 +4,5 @@ dist/
 .astro-cache/
 .env
 .DS_Store
+# Caché y salidas del impreso (Typst): se generan en CI, no se commitean
+print/build/

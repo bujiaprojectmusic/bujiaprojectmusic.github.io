@@ -1,0 +1,122 @@
+{
+  "$comentario": "Reglas del impreso de La Jirafa Eléctrica (issue #16). ÚNICO lugar donde se escriben medidas y tamaños: lo leen print/lib/base.typ (json), scripts/print/*.mjs y docs/IMPRESO.md (tablas generadas con `npm run print:check -- --write`). Unidad: pt (1 in = 72 pt) salvo que el nombre diga otra cosa.",
+  "version": 2,
+  "formato": {
+    "corte": { "ancho_pt": 396, "alto_pt": 612, "ancho_in": 5.5, "alto_in": 8.5, "orientacion": "vertical (media carta)" },
+    "sangrado_pt": 9,
+    "sangrado_in": 0.125,
+    "bleedbox": { "ancho_pt": 414, "alto_pt": 630 },
+    "marcas_corte": {
+      "grosor_pt": 0.25,
+      "largo_pt": 18,
+      "inicio_desde_corte_pt": 9,
+      "color": "negro 100 %",
+      "solo_imprenta": true,
+      "nota": "empiezan en el borde del BleedBox (9 pt del corte) y van 18 pt hacia afuera; no entran en el sangrado"
+    },
+    "mediabox_imprenta": { "ancho_pt": 450, "alto_pt": 666, "ancho_in": 6.25, "alto_in": 9.25, "offset_trim_pt": 27, "offset_bleed_pt": 18 },
+    "pantalla": { "ancho_pt": 396, "alto_pt": 612, "sangrado": false, "marcas": false },
+    "cuadernillo": { "hoja_ancho_pt": 792, "hoja_alto_pt": 612, "hoja": "carta horizontal", "paginas_por_cara": 2, "doble_cara": true, "voltear_por": "borde corto" }
+  },
+  "paginas": {
+    "multiplo": 4,
+    "minimo": 4,
+    "recomendado_min": 12,
+    "recomendado_max": 24,
+    "aviso_mas_de": 28,
+    "tope": null,
+    "fijas": { "portada": 1, "indice": 2, "fin": "N-1", "contraportada": "N" },
+    "piezas": "3 … N-2",
+    "pliego_central": "N/2 y N/2+1 (único par continuo en papel; la única doble página donde una foto puede cruzar el lomo)",
+    "relleno": "si el contenido no cierra en múltiplo de 4, páginas de relleno diseñadas antes del Fin; nunca texto inventado",
+    "ejemplo_total": 20
+  },
+  "margenes": {
+    "superior_pt": 36,
+    "inferior_pt": 45,
+    "exterior_pt": 36,
+    "interior_pt": 45,
+    "caja_texto": { "ancho_pt": 315, "alto_pt": 531, "ancho_in": 4.375, "alto_in": 7.375 },
+    "zona_segura_pt": 18,
+    "zona_segura_in": 0.25,
+    "lomo_minimo_pt": 27,
+    "binding": "left",
+    "recto_verso": "impar = derecha (recto), lomo a la izquierda; par = izquierda (verso), lomo a la derecha",
+    "creep": "no se compensa: con 4–6 hojas de bond de 75–90 g desplaza menos de 0.5 mm y lo absorbe el margen exterior"
+  },
+  "tipografia": {
+    "fuentes": { "titulos": "Anton", "texto": "Space Mono", "variantes_texto": ["Regular", "Bold", "Italic", "BoldItalic"] },
+    "estilos": {
+      "cuerpo_1col": { "uso": "Cuerpo, 1 columna", "fuente": "Space Mono", "peso": "regular", "pt": 9.5, "interlinea_pt": 13.5, "minimo_pt": 9 },
+      "cuerpo_2col": { "uso": "Cuerpo, 2 columnas", "fuente": "Space Mono", "peso": "regular", "pt": 9, "interlinea_pt": 12.5, "minimo_pt": 9 },
+      "pie": { "uso": "Pies de foto, créditos, leyenda de QR", "fuente": "Space Mono", "peso": "regular", "pt": 7.5, "interlinea_pt": 10, "minimo_pt": 7 },
+      "folio": { "uso": "Folio", "fuente": "Space Mono", "peso": "bold", "pt": 8, "interlinea_pt": null, "minimo_pt": 7 },
+      "indice": { "uso": "Entradas del índice", "fuente": "Space Mono", "peso": "regular", "pt": 10, "interlinea_pt": 14, "minimo_pt": 9 },
+      "titulo": { "uso": "Título de pieza", "fuente": "Anton", "peso": "regular", "pt": 22, "pt_max": 48, "interlinea_factor": 1.05, "minimo_pt": 18 },
+      "subtitulo": { "uso": "Subtítulo (h3)", "fuente": "Anton", "peso": "regular", "pt": 13, "interlinea_factor": 1.1, "minimo_pt": 12 },
+      "calado": { "uso": "Texto calado (claro sobre negro/color)", "fuente": "Space Mono", "peso": "bold", "pt": 10, "interlinea_pt": null, "minimo_pt": 10 }
+    },
+    "medida": { "caracteres_por_linea": 54, "maximo_caracteres": 60, "ancho_columna_pt": 315 },
+    "columnas": { "maximo": 2, "separacion_pt": 12, "ancho_minimo_pt": 140, "tres_en_web_se_imprimen_en": 2 },
+    "alineacion": "izquierda (sin justificar: monoespaciada)",
+    "lang": "es",
+    "guiones": true,
+    "viudas_huerfanas": "costo alto",
+    "escalar_texto": false,
+    "nota": "el texto nunca se achica para que quepa: nada de scale() sobre texto ni tamaños por debajo de minimo_pt; si no cabe, el build falla (#9)"
+  },
+  "folio": {
+    "fuente": "Space Mono",
+    "peso": "bold",
+    "pt": 8,
+    "digitos": 2,
+    "linea_base_desde_corte_inferior_pt": 27,
+    "alineacion": "margen exterior",
+    "visible_en": "páginas 2 … N-1 (no en portada ni contraportada)",
+    "pestana_blanca_sobre_sangre": true,
+    "pestana_relleno_pt": 3
+  },
+  "imagenes": {
+    "ppi_objetivo": 300,
+    "ppi_advertencia_desde": 150,
+    "ppi_advertencia_hasta": 299,
+    "ppi_error_menor_a": 150,
+    "pantalla_ppi": 150,
+    "pantalla_jpeg_calidad": 75,
+    "portada_sangre_in": { "ancho": 5.75, "alto": 8.75 },
+    "portada_px_minimo_300ppi": 2625,
+    "portada_px_recomendado": 2700,
+    "formatos": ["jpeg", "png", "webp", "svg"],
+    "color": "sRGB (impresión digital/copistería; no se convierte a CMYK)",
+    "texturas": "vectoriales (tiling de Typst, formas); sin filtros SVG rasterizados",
+    "originales": "nunca se editan; las variantes viven en print/build/ (ignorada por git)"
+  },
+  "bn": {
+    "esquema": "xerox",
+    "punto_negro_pct": 5,
+    "punto_blanco_pct": 95,
+    "gamma": 1.1,
+    "gris_minimo_fondo_pct": 15,
+    "negro_solido_max_pct_pagina": 25,
+    "texto_sobre": "blanco o negro sólido; nunca sobre medio tono ni foto",
+    "sangrado": false,
+    "marcas": false,
+    "ancho_pt": 396,
+    "alto_pt": 612
+  },
+  "prueba": {
+    "muestras_space_mono_pt": [7, 7.5, 8, 9, 9.5, 10, 12],
+    "muestras_anton_pt": [12, 18, 24, 36],
+    "cadena": "ñ á é í ó ú ü ¿ ¡",
+    "calado_pt": 10,
+    "qr_in": 0.6,
+    "qr_url": "https://bujiaprojectmusic.com/fanzine/vol-01",
+    "foto": "src/assets/img/nosotros/IMG_2408.jpeg",
+    "foto_lado_in": 2,
+    "cuadro_in": 1,
+    "grises_paso_pct": 10,
+    "paginas": 4,
+    "doble_cara_cruz_margen_pt": 36,
+    "doble_cara_cruz_largo_pt": 36
+  }
+}
