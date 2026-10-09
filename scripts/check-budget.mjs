@@ -207,6 +207,7 @@ async function medir(browser, base, ruta) {
     }
   });
   const dominios = [...new Set(terceros.map((r) => new URL(r.url).host))];
+  const bytesTerceros = terceros.reduce((a, r) => a + r.bytes, 0);
   const lista = [...recursos.values()].filter((r) => r.bytes > 0).sort((a, b) => b.bytes - a.bytes);
   await context.close();
   return {
@@ -215,7 +216,7 @@ async function medir(browser, base, ruta) {
     completa,
     alto_px: alto,
     peticiones: recursos.size,
-    terceros: { n: terceros.length, dominios },
+    terceros: { n: terceros.length, bytes: bytesTerceros, dominios },
     pesados: lista.slice(0, TOP).map((r) => ({ url: r.url.replace(base, ''), bytes: r.bytes, tipo: r.tipo, fase: r.fase })),
     fallidos: [...recursos.values()].filter((r) => r.fallo || (r.estado ?? 200) >= 400).map((r) => ({ url: r.url.replace(base, ''), estado: r.estado, fallo: r.fallo })),
     pendientes: [...recursos.values()].filter((r) => !r.terminado && !r.fallo).map((r) => r.url.replace(base, '')),
@@ -261,7 +262,7 @@ function tablaMd(m, filas, modo) {
   l.push('|---|---:|---:|:-:|');
   for (const f of filas) l.push(`| ${f.metrica} | ${fmt(f.bytes)} | ≤ ${fmtLim(f.limite)} | ${icono(f.ok)} |`);
   l.push('');
-  l.push(`Imágenes: ${fmt(m.completa.imagenes)} (primera vista ${fmt(m.primera.imagenes)}) · peticiones: ${m.peticiones} · a terceros: **${m.terceros.n}**${m.terceros.dominios.length ? ` (${m.terceros.dominios.join(', ')})` : ''} · alto de página: ${m.alto_px} px`);
+  l.push(`Imágenes: ${fmt(m.completa.imagenes)} (primera vista ${fmt(m.primera.imagenes)}) · peticiones: ${m.peticiones} · a terceros: **${m.terceros.n}**${m.terceros.n ? ` (${fmt(m.terceros.bytes)}; ${m.terceros.dominios.join(', ')})` : ''} · alto de página: ${m.alto_px} px`);
   l.push('');
   l.push(`Recursos más pesados (${m.pesados.length}):`);
   for (const r of m.pesados) l.push(`- ${fmt(r.bytes)} · ${r.tipo} · \`${r.url}\`${r.fase === 'scroll' ? ' (cargó al hacer scroll)' : ''}`);
