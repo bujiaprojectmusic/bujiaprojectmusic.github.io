@@ -5,8 +5,6 @@ import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 import { listarVolumenes } from '../../utils/volumenes';
-// PRUEBA TEMPORAL (#8, criterio 4): imagen grande sin optimizar. Se revierte.
-import pruebaGrande from '../../assets/img/ilustracion.png';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // Volúmenes compuestos (src/content/volumenes/*.yml) y MDX (issue #13);
@@ -21,7 +19,6 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
 
 <FanzineLayout title="Fanzine" description="La Jirafa Elektrika: el fanzine digital de Bujía Project Music.">
   <div class="fz-index">
-    <img src={pruebaGrande.src} alt="" width="390" />
     <header class="fz-index__head">
       <p class="fz-index__eyebrow">Fanzine</p>
       <h1 class="fz-index__title">La Jirafa Elektrika</h1>
