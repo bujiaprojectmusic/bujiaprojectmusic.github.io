@@ -88,6 +88,9 @@ jobs:
       - name: Tests del motor de impresión (fixtures)
         run: npm run print:test
 
+      - name: Tests de esquemas y composición de volúmenes (#13)
+        run: npm run test:content
+
       - run: npm run build
 
       - name: PDF en dist

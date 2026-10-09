@@ -17,6 +17,8 @@ export const GEMELOS = new Set([
   'Pliego', 'Portada', 'Indice', 'SectionTitle', 'Columnas', 'Polaroid', 'Contraportada',
   'PostCover', 'ImageFull', 'ImageSide', 'Gallery', 'Xerox', 'PhotoOld', 'Quote', 'Note', 'Divider',
   'VideoPoster', 'VideoOldTV', 'VideoCinema', 'BeforeAfter', 'OptimizedImage', 'DatosTaller',
+  // Piezas (#13): <Pagina> es la página relativa y <Foto n> la foto n del frontmatter (las resuelve sources/piezas.ts).
+  'Pagina', 'Foto',
 ]);
 /** Etiquetas HTML con gemelo (contenedores genéricos). */
 export const HTML_OK = new Set(['p', 'div', 'span', 'ul', 'ol', 'li', 'strong', 'b', 'em', 'i', 'a', 'br', 'hr', 'small', 'figure', 'figcaption', 'blockquote']);
@@ -115,7 +117,7 @@ export function leerImports(tree: any): { componentes: Map<string, string>; tall
   return { componentes, taller };
 }
 
-function props(ctx: Contexto, el: any): Record<string, unknown> {
+export function props(ctx: Contexto, el: any): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const a of el.attributes ?? []) {
     if (a.type !== 'mdxJsxAttribute') {

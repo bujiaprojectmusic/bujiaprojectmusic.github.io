@@ -11,6 +11,7 @@ import sharp from 'sharp';
 import QRCode from 'qrcode';
 import { listarVolumenes, leerFuente, volumeSlug, type FuenteVolumen } from './sources/posts.ts';
 import { parsearMdx, leerImports, pliegos as leerPliegos, ErrorExport, type Contexto, type PliegoCrudo } from './lib/mdx.ts';
+import { listarVolumenesCompuestos } from './sources/piezas.ts';
 import type { Volumen, Pliego, Foto, Nodo } from './lib/tipos.ts';
 import { colorSchemes, taller as sitioTaller } from '../../src/config/site.ts';
 import * as taller from '../../src/data/taller.ts';
@@ -27,6 +28,8 @@ const rel = (p: string) => path.relative(RAIZ, p).split(path.sep).join('/');
 function rutaMaster(src: string, archivoMdx: string): string {
   if (src.startsWith('/img/')) return path.join(RAIZ, 'src', 'assets', 'img', src.slice(5));
   if (src.startsWith('/fanzine/')) return path.join(RAIZ, 'src', 'assets', 'fanzine', src.slice(9));
+  if (src.startsWith('/piezas/')) return path.join(RAIZ, 'src', 'assets', 'piezas', src.slice(8));
+  if (src.startsWith('/src/assets/')) return path.join(RAIZ, src.slice(1));
   if (src.startsWith('./') || src.startsWith('../')) return path.resolve(RAIZ, path.dirname(archivoMdx), src);
   return path.join(RAIZ, src.replace(/^\//, ''));
 }
@@ -91,16 +94,19 @@ function urlVideo(props: Record<string, any>): string {
   return props.kind === 'playlist' ? `https://www.youtube.com/playlist?list=${props.id}` : `https://www.youtube.com/watch?v=${props.id}`;
 }
 
-export async function exportar(fuente: FuenteVolumen, salidaDir: string): Promise<Volumen> {
+/** Fuente con los pliegos ya numerados (adaptador piezas, issue #13). */
+export interface FuenteCompuesta {
+  slug: string;
+  archivo: string;
+  frontmatter: Record<string, any>;
+  pliegos: (PliegoCrudo & { archivo?: string; relleno?: string })[];
+  avisos?: string[];
+  creditos?: string[];
+}
+
+export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDir: string): Promise<Volumen> {
   const fm = fuente.frontmatter;
-  const avisos: string[] = [];
-  const tree = parsearMdx(fuente.cuerpo);
-  const { componentes, taller: idsTaller } = leerImports(tree);
-  const datos = new Map<string, unknown>();
-  for (const id of idsTaller) {
-    if (!(id in taller)) throw new ErrorExport(`${fuente.archivo}: importa \`${id}\` de src/data/taller.ts, que no existe.`);
-    datos.set(id, (taller as any)[id]);
-  }
+  const avisos: string[] = [...('avisos' in fuente ? fuente.avisos ?? [] : [])];
   const slug = fuente.slug;
   const urlVol = `${SITIO}/fanzine/${slug}`;
   const paginaDeLiga = (url: string): number | null => {
@@ -109,8 +115,20 @@ export async function exportar(fuente: FuenteVolumen, salidaDir: string): Promis
     if (m[1] != null && volumeSlug(Number(m[1])) !== slug) return null;
     return Number(m[2]);
   };
-  const ctx: Contexto = { archivo: fuente.archivo, lineaBase: fuente.lineaBase, componentes, datos, paginaDeLiga, avisos };
-  const crudos = leerPliegos(ctx, tree);
+  let crudos: (PliegoCrudo & { archivo?: string; relleno?: string })[];
+  if ('pliegos' in fuente) {
+    crudos = fuente.pliegos;
+  } else {
+    const tree = parsearMdx(fuente.cuerpo);
+    const { componentes, taller: idsTaller } = leerImports(tree);
+    const datos = new Map<string, unknown>();
+    for (const id of idsTaller) {
+      if (!(id in taller)) throw new ErrorExport(`${fuente.archivo}: importa \`${id}\` de src/data/taller.ts, que no existe.`);
+      datos.set(id, (taller as any)[id]);
+    }
+    const ctx: Contexto = { archivo: fuente.archivo, lineaBase: fuente.lineaBase, componentes, datos, paginaDeLiga, avisos };
+    crudos = leerPliegos(ctx, tree);
+  }
 
   // ── Mapa de páginas: N = mayor n; faltantes → relleno diseñado ─────────
   const porN = new Map<number, PliegoCrudo>();
@@ -206,9 +224,9 @@ export async function exportar(fuente: FuenteVolumen, salidaDir: string): Promis
   for (let n = 1; n <= N; n++) {
     const c = porN.get(n);
     if (!c || (c.tipo === 'relleno' && !c.hijos.length)) {
-      const tipoRelleno = geo.relleno.orden[relleno++ % geo.relleno.orden.length];
+      const tipoRelleno = c?.relleno ?? geo.relleno.orden[relleno++ % geo.relleno.orden.length];
       if (!c) avisos.push(`pág. ${n}: no hay <Pliego n={${n}}>; va una página de relleno diseñada (${tipoRelleno}).`);
-      else avisos.push(`pág. ${n}: <Pliego tipo="relleno">; va una página de relleno diseñada (${tipoRelleno}).`);
+      else if (!c.relleno) avisos.push(`pág. ${n}: <Pliego tipo="relleno">; va una página de relleno diseñada (${tipoRelleno}).`);
       pliegos.push({ n, tipo: 'relleno', esquema: null, relleno: tipoRelleno, nodos: [] });
       continue;
     }
@@ -220,7 +238,7 @@ export async function exportar(fuente: FuenteVolumen, salidaDir: string): Promis
     }
     // bleed: imagen (id de foto) o true (fondo de color ink del esquema), como en Pliego.astro.
     const bleed = typeof c.props.bleed === 'string' ? { bleed: c.props.bleed } : c.props.bleed === true ? { bleed_color: true } : {};
-    pliegos.push({ n, tipo: c.tipo as Pliego['tipo'], esquema: c.esquema, nodos, origen: { archivo: fuente.archivo, linea: c.linea }, ...bleed } as Pliego);
+    pliegos.push({ n, tipo: c.tipo as Pliego['tipo'], esquema: c.esquema, nodos, origen: { archivo: c.archivo ?? fuente.archivo, linea: c.linea }, ...bleed } as Pliego);
   }
 
   // ── Índice (página 2) ──────────────────────────────────────────────────
@@ -263,7 +281,7 @@ export async function exportar(fuente: FuenteVolumen, salidaDir: string): Promis
     qrs,
     avisos,
     origen: fuente.archivo,
-    ...({ mascota: mascota.id, logo: logo.id, qr_volumen: qrVolumen, qr_colabora: qrColabora, creditos: { autor: String(fm.author ?? 'Ripper'), fotografos: [...fotografos], mascota: geo.mascota.credito }, taller: { direccion: taller.direccionTexto, horario: taller.horario.map((h) => ({ dias: h.dias, texto: h.texto })), whatsapp: taller.whatsapp.numeroTexto, web: SITIO.replace(/^https?:\/\//, ''), servicios: { titulo: sitioTaller.catalog.title, subtitulo: sitioTaller.catalog.subtitle }, anuncios: [...sitioTaller.announcementBar.messages] } } as any),
+    ...({ mascota: mascota.id, logo: logo.id, qr_volumen: qrVolumen, qr_colabora: qrColabora, creditos: { autor: String(fm.author ?? 'Ripper'), fotografos: [...new Set([...fotografos, ...(fm.fotos_creditos ?? [])])], mascota: geo.mascota.credito, piezas: 'creditos' in fuente ? fuente.creditos ?? [] : [] }, taller: { direccion: taller.direccionTexto, horario: taller.horario.map((h) => ({ dias: h.dias, texto: h.texto })), whatsapp: taller.whatsapp.numeroTexto, web: SITIO.replace(/^https?:\/\//, ''), servicios: { titulo: sitioTaller.catalog.title, subtitulo: sitioTaller.catalog.subtitle }, anuncios: [...sitioTaller.announcementBar.messages] } } as any),
   };
   fs.mkdirSync(salidaDir, { recursive: true });
   fs.writeFileSync(path.join(salidaDir, 'volumen.json'), JSON.stringify(vol, null, 2));
@@ -274,8 +292,15 @@ async function main() {
   const args = process.argv.slice(2);
   const fixture = args.includes('--fixture') ? args[args.indexOf('--fixture') + 1] : null;
   const salida = args.includes('--salida') ? args[args.indexOf('--salida') + 1] : null;
-  const fuentes = fixture ? [leerFuente(RAIZ, fixture)] : listarVolumenes(RAIZ);
+  const datosTaller = new Map<string, unknown>(Object.entries(taller));
+  const fuentes: (FuenteVolumen | FuenteCompuesta)[] = fixture ? [leerFuente(RAIZ, fixture)] : [...listarVolumenes(RAIZ), ...listarVolumenesCompuestos(RAIZ, datosTaller)];
   if (!fuentes.length) { console.log('(no hay volúmenes con fanzine: true)'); return; }
+  fuentes.sort((a, b) => a.frontmatter.volume - b.frontmatter.volume);
+  const vistos = new Map<string, string>();
+  for (const f of fuentes) {
+    if (vistos.has(f.slug)) throw new ErrorExport(`Dos volúmenes con el mismo número (${f.slug}): ${vistos.get(f.slug)} y ${f.archivo}. Marcá el MDX viejo con legado: true.`);
+    vistos.set(f.slug, f.archivo);
+  }
   for (const f of fuentes) {
     const dir = salida ? path.resolve(RAIZ, salida) : path.join(RAIZ, 'print', 'build', f.slug);
     const v = await exportar(f, dir);

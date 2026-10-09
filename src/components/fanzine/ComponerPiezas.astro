@@ -1,0 +1,63 @@
+---
+// Pinta las páginas de un volumen compuesto (issue #13) en orden: cada
+// pieza (sus <Pagina> → <Pliego> con número final), los rellenos, el Fin y
+// la contraportada. Las piezas se renderizan UNA POR UNA en este
+// frontmatter con Astro.slots.render (slot función por default), fijando antes
+// el contexto que leen <Pagina> y <Foto>: así no importa que Astro pinte
+// hermanos en paralelo cuando están en el template.
+import type { CollectionEntry } from 'astro:content';
+import Pliego from './Pliego.astro';
+import Relleno from './Relleno.astro';
+import Contraportada from '../Contraportada.astro';
+import DatosTaller from './DatosTaller.astro';
+import { setPiezaActual } from '../../utils/piezaActual';
+import type { Composicion } from '../../utils/componer';
+
+interface PiezaRender {
+  Content: any;
+  pieza: CollectionEntry<'piezas'>;
+  desde: number;
+}
+interface Props {
+  composicion: Composicion;
+  piezas: PiezaRender[];
+  numero: number;
+  scheme?: string;
+  prueba: boolean;
+  contraportada: string;
+}
+const { composicion, piezas, numero, scheme, prueba, contraportada } = Astro.props;
+
+const htmlDe = new Map<string, string>();
+for (const r of piezas) {
+  setPiezaActual({ pieza: r.pieza, desde: r.desde, scheme, prueba });
+  htmlDe.set(r.pieza.id, await Astro.slots.render('default', [r]));
+}
+setPiezaActual(null);
+const creditos = piezas.map((r) => `${r.pieza.data.titulo}: ${r.pieza.data.credito}`).join(' · ');
+---
+
+{composicion.paginas.map((p) => {
+  if (p.tipo === 'pieza') return p.rel === 1 ? <Fragment set:html={htmlDe.get(p.pieza.id)} /> : null;
+  if (p.tipo === 'relleno') return <Relleno n={p.n} tipo={p.relleno} declarado={p.declarado} />;
+  if (p.tipo === 'fin') {
+    return (
+      <Pliego n={p.n} tipo="fin">
+        <p class="fz-fin-word">Fin</p>
+        <p class="fz-small">
+          <strong>Créditos.</strong> {creditos}. Mascota: ilustración por encargo (crédito pendiente de confirmar). Tipografías: Space Mono y Anton (OFL).
+        </p>
+        <p class="fz-small">Hecho en Texcoco con Astro, viruta y café frío. Próximo volumen: Vol. {String(numero + 1).padStart(2, '0')}.</p>
+      </Pliego>
+    );
+  }
+  if (p.tipo === 'contraportada') {
+    return (
+      <Pliego n={p.n} tipo="contraportada">
+        <Contraportada texto={contraportada} />
+        <DatosTaller />
+      </Pliego>
+    );
+  }
+  return null;
+})}

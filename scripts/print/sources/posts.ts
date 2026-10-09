@@ -47,7 +47,8 @@ export function listarVolumenes(raiz: string): FuenteVolumen[] {
   for (const f of listarMdx(path.join(raiz, 'src', 'content', 'posts'))) {
     const src = fs.readFileSync(f, 'utf8');
     const { data } = matter(src);
-    if (!data.fanzine || data.draft) continue;
+    // legado: true = migrado al modelo piezas + volumenes (#13); lo exporta el otro adaptador.
+    if (!data.fanzine || data.draft || data.legado) continue;
     out.push(leerFuente(raiz, f));
   }
   const vistos = new Map<string, string>();

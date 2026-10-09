@@ -197,7 +197,9 @@
     align(center, text(font: fuente-titulos, size: pt(estilos.titulo.pt_max) * 1.6, fill: c.accent, stroke: 1pt + negro, upper("Fin")))
     v(10pt)
     texto("cuerpo_2col", quien: "Fin créditos", {
-      strong("Créditos."); [ Textos: #C.autor.]
+      strong("Créditos.")
+      let piezas = C.at("piezas", default: ())
+      if piezas.len() > 0 { [ #piezas.join(" · ").] } else { [ Textos: #C.autor.] }
       if C.fotografos.len() > 0 { [ Fotos: #C.fotografos.join(", ").] }
       [ #C.mascota.]
       parbreak()

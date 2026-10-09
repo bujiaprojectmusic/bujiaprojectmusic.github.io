@@ -14,17 +14,15 @@
 // ─────────────────────────────────────────────────────────────────────────
 import type { ImageMetadata } from 'astro';
 
-export const PUBLIC_PREFIX = '/img/';
-export const ASSETS_PREFIX = '/src/assets/img/';
-// Assets del fanzine (fotos por volumen, mascota): "/fanzine/vol-00/x.jpg"
-// → src/assets/fanzine/vol-00/x.jpg.
-export const FANZINE_PREFIX = '/fanzine/';
-export const FANZINE_ASSETS_PREFIX = '/src/assets/fanzine/';
+// Los prefijos y toAssetPath() viven en rutasAssets.ts (módulo puro, sin
+// import.meta.glob) y se re-exportan desde acá para no cambiar los imports.
+export { PUBLIC_PREFIX, ASSETS_PREFIX, FANZINE_PREFIX, FANZINE_ASSETS_PREFIX, PIEZAS_PREFIX, PIEZAS_ASSETS_PREFIX, toAssetPath } from './rutasAssets';
+import { PUBLIC_PREFIX, ASSETS_PREFIX, FANZINE_PREFIX, FANZINE_ASSETS_PREFIX, PIEZAS_PREFIX, PIEZAS_ASSETS_PREFIX, toAssetPath } from './rutasAssets';
 
 // Mapa "/src/assets/img/foo.jpg" → módulo con el ImageMetadata (eager:
 // se resuelve una sola vez al compilar; no hay que importar cada foto).
 const images = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/{img,fanzine}/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,avif,gif,svg}',
+  '/src/assets/{img,fanzine,piezas}/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,avif,gif,svg}',
   { eager: true },
 );
 
@@ -32,17 +30,6 @@ export type ImageSource = string | ImageMetadata | null | undefined;
 
 export function isImageMetadata(src: unknown): src is ImageMetadata {
   return typeof src === 'object' && src !== null && 'src' in src && 'width' in src && 'height' in src;
-}
-
-// "/img/x.jpg" → "/src/assets/img/x.jpg". Rutas que ya apuntan a
-// src/assets se dejan como están; cualquier otra se devuelve igual.
-export function toAssetPath(src: string): string {
-  const base = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
-  let path = src.trim();
-  if (base && path.startsWith(`${base}/`)) path = path.slice(base.length);
-  if (path.startsWith(PUBLIC_PREFIX)) return ASSETS_PREFIX + path.slice(PUBLIC_PREFIX.length);
-  if (path.startsWith(FANZINE_PREFIX)) return FANZINE_ASSETS_PREFIX + path.slice(FANZINE_PREFIX.length);
-  return path;
 }
 
 // Para no repetir la misma advertencia en cada página que use la foto.
@@ -77,6 +64,8 @@ export function availableImages(): string[] {
   return Object.keys(images).map((k) =>
     k.startsWith(FANZINE_ASSETS_PREFIX)
       ? FANZINE_PREFIX + k.slice(FANZINE_ASSETS_PREFIX.length)
-      : PUBLIC_PREFIX + k.slice(ASSETS_PREFIX.length),
+      : k.startsWith(PIEZAS_ASSETS_PREFIX)
+        ? PIEZAS_PREFIX + k.slice(PIEZAS_ASSETS_PREFIX.length)
+        : PUBLIC_PREFIX + k.slice(ASSETS_PREFIX.length),
   );
 }

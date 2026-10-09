@@ -1,0 +1,47 @@
+---
+titulo: "Taller: rebobinado de pastillas"
+seccion: cronica-de-taller
+autor: "Ripper"
+credito: "Texto y fotos: Ripper"
+licencia: permiso-no-exclusivo
+consentimiento_ref: "2026-08-rebobinado#propio-taller"
+paginas: 2
+# TODO(Ricardo): la foto del rebobinado todavía no existe. Cuando esté,
+# guardarla a 2400 px como src/assets/piezas/2026-08-rebobinado-pastillas/01.jpg
+# y agregarla acá: { src: "/piezas/2026-08-rebobinado-pastillas/01.jpg", alt: "…", pie: "…", credito: "Ripper", personas_identificables: false }
+fotos: []
+draft: false
+---
+
+import Pagina from '../../../components/fanzine/Pagina.astro';
+import SectionTitle from '../../../components/SectionTitle.astro';
+import Columnas from '../../../components/Columnas.astro';
+import Polaroid from '../../../components/Polaroid.astro';
+
+{/* Migrado de volumen-01.mdx (págs. 4–5). TODO: crónica real. */}
+
+<Pagina n={1} scheme="acido">
+  <SectionTitle scheme="acido">Taller: rebobinado de pastillas</SectionTitle>
+
+  <Columnas n={2}>
+
+  Acá va la crónica del taller de rebobinado de pastillas, en dos columnas
+  para que se sienta a fanzine de verdad. Metan el texto real cuando lo
+  tengan — este es solo el andamiaje.
+
+  Segunda mitad del texto de la columna. El componente `<Columnas n={2}>`
+  ya trae el patrón "inner wrapper" para que la línea de lectura no se
+  estire de más.
+
+  </Columnas>
+</Pagina>
+
+<Pagina n={2} scheme="acido">
+  {/* TODO(Ricardo): cuando exista la foto, cambiar por <Foto n={1} estilo="polaroid" />. */}
+  <Polaroid
+    src="/img/taller-1.jpg"
+    alt="Rebobinando una pastilla a mano"
+    caption="Rebobinado a mano, agosto 2026"
+    tilt={-4}
+  />
+</Pagina>

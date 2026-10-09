@@ -1,0 +1,41 @@
+# ─────────────────────────────────────────────────────────────────────────
+# PLANTILLA de volumen (issue #13). Copiá este archivo como
+#   src/content/volumenes/vol-NN.yml   (NN = numero con dos dígitos)
+# Los archivos que empiezan con "_" no entran en la colección. Validado por
+# src/content/schemas.ts (.strict()). El volumen se publica en /fanzine/vol-NN.
+#
+# Mapa de páginas: 1 portada, 2 índice (generado), piezas desde la 3,
+# Fin = N-1, contraportada = N. N no se escribe: se calcula al componer y
+# se redondea al siguiente múltiplo de 4. Los huecos se rellenan con
+# páginas diseñadas (colabora | notas | taller) y salen como aviso en el
+# build; para elegir cuál, declaralas abajo. Traslapes y piezas draft son
+# error.
+# ─────────────────────────────────────────────────────────────────────────
+numero: 2
+titulo: "Título del volumen"
+# Mes del volumen (se muestra mes y año) y fecha de publicación (cron).
+fecha: 2026-11-01
+publishDate: 2026-11-15
+# rosa | acido | azul | negro | bujia | xerox | flyer | taller | rojo | overol | kraft | carbon | naranja | oliva
+colorScheme: rosa
+descripcion: "Una línea para el listado de /fanzine."
+portada:
+  # Foto a sangre (5.75 × 8.75 in): ≥ 2625 px de lado largo para 300 ppi,
+  # recomendado 2700. Vive en src/assets/piezas/vol-NN/portada.jpg.
+  # imagen: "/piezas/vol-02/portada.jpg"
+  alt: "Qué se ve en la portada"
+  credito: "Nombre"
+  # subtitulo: "Noviembre 2026 — Texcoco"
+# Piezas en orden, con la página FINAL donde empieza cada una. `pieza` es la
+# carpeta de src/content/piezas/. También se pueden declarar rellenos.
+piezas:
+  - { pieza: 2026-10-slug-de-la-pieza, desde: 3 }
+  - { pieza: 2026-10-otra-pieza, desde: 5 }
+  - { relleno: notas, desde: 8 }
+# paginas_minimo: 16   # opcional: rellenar hasta este múltiplo de 4 aunque sobren páginas
+contraportada:
+  texto: "Bujía Project Music — Texcoco, MX"
+impreso:
+  # qr (default): videos y playlists salen como QR en el PDF; omitir: no salen.
+  multimedia: qr
+draft: true
