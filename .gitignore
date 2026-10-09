@@ -6,3 +6,5 @@ dist/
 .DS_Store
 # Caché y salidas del impreso (Typst): se generan en CI, no se commitean
 print/build/
+# Reporte del presupuesto de datos (npm run check:budget en CI)
+budget-reporte.json

@@ -180,6 +180,31 @@ acuerdo de colaboración editorial** (textos en
 `src/content/pages/fanzine-manifiesto.mdx` y `fanzine-acuerdo.mdx`,
 ligados desde el header y el footer del fanzine).
 
+## Presupuesto de datos (issue #8)
+
+El fanzine tiene que ser vistoso pero ligero. Los límites viven **sólo en
+[`budget.json`](budget.json)** (móvil 390×844, caché vacía, bytes
+transferidos comprimidos): primera vista ≤ 300 KB, HTML ≤ 30 KB, CSS ≤ 25 KB,
+fuentes ≤ 60 KB, JS ≤ 5 KB y página/volumen completo (scroll hasta el final)
+≤ 3 MB. Los PDF descargables no cuentan. `npm run check:budget` sirve `dist/`
+con gzip (como GitHub Pages), mide cada página con Chromium (Playwright) y
+escribe una tabla por página con las 6 métricas, los recursos más pesados y
+las peticiones a terceros. `/fanzine` y cada `/fanzine/vol-NN` **tumban el
+CI** si rebasan; `/`, `/nosotros` y `/archive/primera-skatelecaster` sólo
+avisan. Corre en `.github/workflows/deploy.yml` en cada PR y en `main`, con
+el resumen en el *Job summary*. En local:
+
+```sh
+npm run build
+npx playwright install chromium   # una vez
+npm run check:budget              # sirve dist/ y mide
+npm run check:budget -- --url http://localhost:4321   # contra npx astro preview (sin gzip)
+npm run check:budget -- --paginas /fanzine/vol-00 --json reporte.json --md resumen.md
+```
+
+Si no hay `dist/` corré `npm run build` primero (sin Typst también sirve
+para medir: el bloque de descarga sólo dice "PDF no disponible").
+
 ## Personalización (colores, tipografía, redes)
 
 Todo vive en `src/config/site.ts`:
