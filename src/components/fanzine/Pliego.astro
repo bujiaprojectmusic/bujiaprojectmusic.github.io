@@ -17,6 +17,8 @@
 //   sin caja. El control "↑ Inicio / ≡ Índice" vive una sola vez en el
 //   layout, no en cada pliego.
 // - Print: cada pliego es una página (break-before), con número.
+// - tipo="portada": después de la sección va la tarjeta de descarga de
+//   PDF (DescargaPdf.astro), sólo en pantalla.
 // ─────────────────────────────────────────────────────────────────────────
 import type { ColorSchemeName } from '../../config/site';
 import OptimizedImage from '../OptimizedImage.astro';
@@ -44,8 +46,9 @@ if (!Number.isInteger(n) || n < 1 || n > 64) {
 }
 
 const hasContent = Astro.slots.has('default');
-const descargaBajoPortada = tipo === 'portada' && process.env.DESCARGA_VARIANTE === 'portada';
-const slugUrl = Astro.url.pathname.replace(/\/$/, '').split('/').pop() ?? '';
+// Debajo de la portada va la tarjeta de descarga de PDF (issues #9/#10).
+// El slug es el último tramo de la URL del volumen (/fanzine/vol-NN).
+const slugVolumen = tipo === 'portada' ? (Astro.url.pathname.replace(/\/$/, '').split('/').pop() ?? '') : '';
 const bleedImage = typeof bleed === 'boolean' ? undefined : bleed;
 const showNum = tipo !== 'portada' && tipo !== 'contraportada';
 const LABELS: Record<PliegoTipo, string> = {
@@ -105,7 +108,7 @@ const LABELS: Record<PliegoTipo, string> = {
 
   {showNum && <span class="pliego__num" aria-hidden="true">{n}</span>}
 </section>
-{descargaBajoPortada && <DescargaPdf slug={slugUrl} variante="portada" />}
+{tipo === 'portada' && <DescargaPdf slug={slugVolumen} />}
 
 <style>
   /* ── Pantalla: un tramo más del scroll, no una página ─────────────── */

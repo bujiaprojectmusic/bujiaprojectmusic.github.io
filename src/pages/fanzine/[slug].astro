@@ -11,7 +11,6 @@
 import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import Volumen from '../../components/fanzine/Volumen.astro';
-import DescargaPdf from '../../components/fanzine/DescargaPdf.astro';
 import { fanzineSlug, fanzinePath } from '../../utils/fanzine';
 
 export async function getStaticPaths() {
@@ -38,20 +37,15 @@ if (redirectTo) {
 }
 const { Content } = await post.render();
 const title = `Vol. ${post.data.volume} — ${post.data.title}`;
-const variante = (process.env.DESCARGA_VARIANTE ?? 'header') as 'header' | 'portada' | 'final' | 'flotante';
-const slug = fanzineSlug(post);
 ---
 
 <FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme} prueba={post.data.prueba}>
-  {/* PDFs de Typst (issue #9): pantalla e imprenta, generados en CI. */}
-  {variante === 'header' && <DescargaPdf slot="download" slug={slug} />}
+  {/* La tarjeta de descarga de PDF (issues #9/#10) la pinta Pliego.astro
+      debajo de la portada (tipo="portada"); el header queda limpio. */}
   <a slot="jump" href="#pagina-2">≡ Índice</a>
-  {variante === 'final' && <a slot="jump" href="#descargas">⬇ PDF</a>}
-  {variante === 'flotante' && <DescargaPdf slot="jump" slug={slug} variante="flotante" />}
   <article class="fz-volume-page post-body">
     <Volumen>
       <Content />
     </Volumen>
   </article>
-  {variante === 'final' && <DescargaPdf slug={slug} variante="final" />}
 </FanzineLayout>

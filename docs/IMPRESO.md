@@ -249,8 +249,9 @@ npm run print:test        # fixtures de tests/print/fixtures/ (node --test)
 npm run build             # Astro + copia de los PDF a dist/fanzine/<slug>/
 ```
 
-Sin Typst, `npm run build` sigue funcionando: el bloque de descarga dice
-"PDF no disponible en este build" y no se copia nada. En CI el impreso es
+Sin Typst, `npm run build` sigue funcionando: la tarjeta de descarga de
+debajo de la portada se reemplaza por "PDF no disponible en este build" y
+no se copia nada. En CI el impreso es
 obligatorio (`copy-dist.mjs` falla sin manifest).
 
 Pasos de `scripts/print/build.mjs`:

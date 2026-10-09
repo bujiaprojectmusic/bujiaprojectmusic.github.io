@@ -2,8 +2,8 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Layout del fanzine La Jirafa Eléctrica: inmersivo, sin la barra de
 // anuncios ni el header grande del taller. Header mínimo (logo → /,
-// "Volúmenes", y un hueco para el bloque de descarga de PDFs de #9),
-// footer mínimo. Importa print.css y aplica el colorScheme del volumen.
+// "Fanzine", "Volúmenes"), footer mínimo. La descarga de PDF (#9/#10) no
+// va en el header: es la tarjeta que Pliego pinta debajo de la portada. Importa print.css y aplica el colorScheme del volumen.
 // Lo usan /fanzine, /volumenes y /fanzine/<slug>. Sin JavaScript.
 // La lectura es scroll vertical continuo. El atajo fijo "↑ Inicio"
 // (y, en un volumen, "≡ Índice" vía el slot `jump`) salta por anclas;
@@ -75,10 +75,6 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
         <a href={withBase('/fanzine')}>Fanzine</a>
         <a href={withBase('/volumenes')}>Volúmenes</a>
       </nav>
-      {/* Hueco para el bloque de descarga de PDFs (issue #9). Hoy vacío. */}
-      <div class="fz-header__download">
-        <slot name="download" />
-      </div>
     </header>
 
     <main class="fz-main">
@@ -162,9 +158,6 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
     text-decoration: none;
     color: inherit;
     border-bottom: 3px solid var(--accent);
-  }
-  .fz-header__download:empty {
-    display: none;
   }
   .fz-main {
     min-height: 60vh;
