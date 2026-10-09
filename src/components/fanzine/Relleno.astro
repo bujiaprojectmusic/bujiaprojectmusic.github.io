@@ -1,0 +1,52 @@
+---
+// Página de relleno DISEÑADA de un volumen compuesto (issue #13): cubre
+// un hueco del mapa de páginas (o uno declarado en el yml) con contenido
+// real del sitio: `colabora` (llamado a colaborar + liga), `notas` (hoja
+// para dibujar; en la web sólo el título) o `taller` (servicios y datos
+// del taller). En el impreso (#9) la pinta print/lib/paginas.typ.
+import Pliego from './Pliego.astro';
+import SectionTitle from '../SectionTitle.astro';
+import { taller } from '../../config/site';
+import { direccionTexto, horario, whatsapp } from '../../data/taller';
+
+interface Props {
+  n: number;
+  tipo: 'colabora' | 'notas' | 'taller';
+  /** true = declarado en el yml (se muestra también en la web); false =
+      hueco rellenado solo: en la web no se ve (como el tipo="relleno" de
+      los MDX), en el impreso Typst pinta la página diseñada. */
+  declarado?: boolean;
+}
+const { n, tipo, declarado = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+{!declarado ? (
+  <Pliego n={n} tipo="relleno" />
+) : (
+<Pliego n={n} tipo="normal" scheme="acido">
+  {tipo === 'colabora' && (
+    <>
+      <SectionTitle scheme="acido">Colabora</SectionTitle>
+      <p>La Jirafa Eléctrica se arma con lo que la gente manda: fotos de su instrumento, crónicas de tocadas, tutoriales, dibujos, quejas. No hace falta escribir bonito; hace falta tener algo que contar.</p>
+      <p>Mandalo al taller (WhatsApp <a href={whatsapp.url} target="_blank" rel="noreferrer noopener">{whatsapp.numeroTexto}</a>) o dejalo en persona en {direccionTexto}. Todo se publica con crédito y con permiso. Más en <a href={`${base}/fanzine`}>bujiaprojectmusic.com/fanzine</a>.</p>
+    </>
+  )}
+  {tipo === 'notas' && (
+    <>
+      <SectionTitle scheme="acido">Notas</SectionTitle>
+      <p class="fz-small">Página para dibujar o anotar en el impreso.</p>
+    </>
+  )}
+  {tipo === 'taller' && (
+    <>
+      <SectionTitle scheme="acido">El taller</SectionTitle>
+      <p><strong>{taller.catalog.title}.</strong> {taller.catalog.subtitle}.</p>
+      <ul>
+        {taller.announcementBar.messages.map((m) => <li>{m}</li>)}
+      </ul>
+      <p class="fz-small">{direccionTexto}. {horario.map((h) => `${h.dias}: ${h.texto}`).join(' · ')}. WhatsApp {whatsapp.numeroTexto}.</p>
+    </>
+  )}
+</Pliego>
+)}

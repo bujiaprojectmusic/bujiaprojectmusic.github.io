@@ -11,6 +11,11 @@ description: "Primer volumen de La Jirafa Eléctrica: rebobinado de pastillas, p
 # así que este campo sólo se usa en el listado de /fanzine.
 # cover: "/img/vol1-cover.jpg"
 author: Ripper
+# Migrado al modelo piezas + volumenes (issue #13): el volumen vivo es
+# src/content/volumenes/vol-01.yml con src/content/piezas/2026-08-*. Este
+# MDX queda como legado (no genera /fanzine/vol-01) y sus URLs viejas
+# /blog/volumen-01 y /fanzine/volumen-01 siguen redirigiendo a /fanzine/vol-01.
+legado: true
 ---
 
 import Pliego from '../../components/fanzine/Pliego.astro';

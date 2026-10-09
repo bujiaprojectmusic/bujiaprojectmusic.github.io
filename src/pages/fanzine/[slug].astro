@@ -1,51 +1,131 @@
 ---
 // Página de un volumen del fanzine: /fanzine/vol-NN (el slug sale del
-// número de volumen, ver utils/fanzine.ts). Sólo posts con fanzine: true;
-// los demás siguen en /blog/<slug> con PostLayout. El MDX del volumen trae
-// sus N <Pliego> (mapa del cuadernillo impreso); en esta página se leen
-// en una columna con scroll continuo. La paginación queda en @media print.
+// número de volumen, ver utils/fanzine.ts y utils/componer.ts).
 //
-// Además, si el nombre del archivo no coincide con vol-NN (p. ej.
-// volumen-01.mdx), /fanzine/<archivo> se genera como redirección a la URL
-// nueva, para que ninguna URL vieja quede en 404.
-import { getCollection } from 'astro:content';
+// Dos orígenes (issue #13):
+// - src/content/volumenes/vol-NN.yml: el volumen se COMPONE acá con sus
+//   piezas (src/content/piezas/**): portada y contraportada del yml,
+//   índice generado, cada <Pagina> de cada pieza como <Pliego> con su
+//   número final, huecos con páginas de relleno, Fin en N-1.
+// - src/content/posts/**.mdx con fanzine: true (vol-00 de prueba): el MDX
+//   trae sus N <Pliego>. Un MDX con legado: true ya no genera /fanzine/vol-NN
+//   (lo genera el yml) pero conserva la redirección de /fanzine/<archivo>.
+// En pantalla se lee en una columna con scroll continuo; la paginación es
+// del impreso.
+import { getCollection, type CollectionEntry } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import Volumen from '../../components/fanzine/Volumen.astro';
+import Pliego from '../../components/fanzine/Pliego.astro';
+import Portada from '../../components/Portada.astro';
+import Indice from '../../components/Indice.astro';
+import ComponerPiezas from '../../components/fanzine/ComponerPiezas.astro';
 import { fanzineSlug, fanzinePath } from '../../utils/fanzine';
+import { componerVolumen, type VolumenCompuesto } from '../../utils/volumenes';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => data.fanzine && !data.draft);
+  const ymls = await getCollection('volumenes', ({ data }) => !data.draft);
   const seen = new Map<string, string>();
   const paths = [];
+  const usoGlobal = new Map<string, string>();
+  for (const entry of ymls) {
+    const compuesto = await componerVolumen(entry, usoGlobal);
+    if (seen.has(compuesto.slug)) throw new Error(`Dos volúmenes con el mismo número (${compuesto.slug}): ${seen.get(compuesto.slug)} y ${entry.id}.yml.`);
+    seen.set(compuesto.slug, `${entry.id}.yml`);
+    paths.push({ params: { slug: compuesto.slug }, props: { compuesto, post: undefined, redirectTo: undefined } });
+  }
   for (const post of posts) {
     const slug = fanzineSlug(post);
-    if (seen.has(slug)) {
-      throw new Error(`Dos volúmenes con el mismo número (${slug}): ${seen.get(slug)} y ${post.id}.`);
+    if (!post.data.legado) {
+      if (seen.has(slug)) {
+        throw new Error(`Dos volúmenes con el mismo número (${slug}): ${seen.get(slug)} y ${post.id}. Marcá el MDX con legado: true si ya migró al yml.`);
+      }
+      seen.set(slug, post.id);
+      paths.push({ params: { slug }, props: { post, compuesto: undefined, redirectTo: undefined } });
     }
-    seen.set(slug, post.id);
-    paths.push({ params: { slug }, props: { post, redirectTo: undefined } });
     if (post.slug !== slug) {
-      paths.push({ params: { slug: post.slug }, props: { post, redirectTo: fanzinePath(post) } });
+      paths.push({ params: { slug: post.slug }, props: { post, compuesto: undefined, redirectTo: fanzinePath(post) } });
     }
   }
   return paths;
 }
 
-const { post, redirectTo } = Astro.props;
+interface Props {
+  post?: CollectionEntry<'posts'>;
+  compuesto?: VolumenCompuesto;
+  redirectTo?: string;
+}
+const { post, compuesto, redirectTo } = Astro.props;
 if (redirectTo) {
   return Astro.redirect(redirectTo, 301);
 }
-const { Content } = await post.render();
-const title = `Vol. ${post.data.volume} — ${post.data.title}`;
+
+// ── Volumen compuesto desde yml ───────────────────────────────────────────
+let title = '';
+let description: string | undefined;
+let colorScheme: any = 'negro';
+let prueba = false;
+let Content: any = null;
+let piezasRender: { Content: any; pieza: CollectionEntry<'piezas'>; desde: number }[] = [];
+if (compuesto) {
+  const v = compuesto.entry.data;
+  title = `Vol. ${v.numero} — ${v.titulo}`;
+  description = v.descripcion;
+  colorScheme = v.colorScheme;
+  prueba = v.prueba;
+  const vistos = new Set<string>();
+  for (const p of compuesto.composicion.paginas) {
+    if (p.tipo !== 'pieza' || vistos.has(p.pieza.id)) continue;
+    vistos.add(p.pieza.id);
+    const entry = compuesto.piezas.get(p.pieza.id)!;
+    const { Content: C } = await entry.render();
+    piezasRender.push({ Content: C, pieza: entry, desde: p.desde });
+  }
+} else if (post) {
+  title = `Vol. ${post.data.volume} — ${post.data.title}`;
+  description = post.data.description;
+  colorScheme = post.data.colorScheme;
+  prueba = post.data.prueba;
+  Content = (await post.render()).Content;
+}
+const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' });
 ---
 
-<FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme} prueba={post.data.prueba}>
+<FanzineLayout title={title} description={description} colorScheme={colorScheme} prueba={prueba}>
   {/* La tarjeta de descarga de PDF (issues #9/#10) la pinta Pliego.astro
       debajo de la portada (tipo="portada"); el header queda limpio. */}
   <a slot="jump" href="#pagina-2">≡ Índice</a>
   <article class="fz-volume-page post-body">
     <Volumen>
-      <Content />
+      {compuesto ? (
+        <>
+          {/* Portada (pág. 1) e índice (pág. 2) desde el yml y la composición. */}
+          <Pliego n={1} tipo="portada">
+            <Portada
+              volume={compuesto.entry.data.numero}
+              title={compuesto.entry.data.titulo}
+              subtitle={compuesto.entry.data.portada.subtitulo ?? `${fmt.format(compuesto.entry.data.fecha)} — Texcoco`}
+              image={compuesto.entry.data.portada.imagen}
+            />
+            {compuesto.entry.data.portada.credito && <p class="fz-small">Foto de portada: {compuesto.entry.data.portada.credito}</p>}
+          </Pliego>
+          <Pliego n={2} tipo="indice">
+            <Indice items={compuesto.composicion.indice.map((i) => ({ page: String(i.pagina).padStart(2, '0'), title: `${i.titulo} — ${i.autor}` }))} />
+          </Pliego>
+          <ComponerPiezas
+            composicion={compuesto.composicion}
+            piezas={piezasRender}
+            numero={compuesto.entry.data.numero}
+            scheme={compuesto.entry.data.colorScheme}
+            prueba={prueba}
+            contraportada={compuesto.entry.data.contraportada.texto}
+          >
+            {(r: any) => <r.Content />}
+          </ComponerPiezas>
+        </>
+      ) : (
+        <Content />
+      )}
     </Volumen>
   </article>
 </FanzineLayout>

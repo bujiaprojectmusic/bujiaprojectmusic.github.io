@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "node scripts/check-volumes.mjs && astro build && node scripts/print/copy-dist.mjs",
+    "build": "node scripts/check-volumes.mjs && astro build && node scripts/check-dist-volumenes.mjs && node scripts/print/copy-dist.mjs",
     "check:volumes": "node scripts/check-volumes.mjs",
     "preview": "astro preview",
     "astro": "astro",
@@ -16,7 +16,8 @@
     "print:verify": "node scripts/print/verify-prueba.mjs",
     "print": "node scripts/print/build.mjs",
     "print:export": "tsx scripts/print/export.ts",
-    "print:test": "node --test tests/print/fixtures.test.mjs tests/print/impose.test.mjs"
+    "print:test": "node --test tests/print/fixtures.test.mjs tests/print/impose.test.mjs",
+    "test:content": "node --import tsx --test tests/content/schemas.test.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.0",

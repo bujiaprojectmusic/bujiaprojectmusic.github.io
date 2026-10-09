@@ -1,6 +1,7 @@
-import { defineCollection, z, type SchemaContext } from 'astro:content';
+import { defineCollection, reference, z, type SchemaContext } from 'astro:content';
+import { piezaSchema, volumenSchema } from './schemas';
 import { colorSchemes } from '../config/site';
-import { toAssetPath } from '../utils/resolveImage';
+import { toAssetPath } from '../utils/rutasAssets';
 
 // Campo de imagen del frontmatter. Se escribe igual que siempre
 // ("/img/posts/may16/portada.png") pero por debajo usa el helper image()
@@ -53,6 +54,11 @@ const posts = defineCollection({
     // Opciones del impreso (issue #9). multimedia: qué pasa con los videos
     // y playlists en el PDF: "qr" (default) = QR + leyenda; "omitir" = nada.
     impreso: z.object({ multimedia: z.enum(['qr', 'omitir']).default('qr') }).default({}),
+    // true = volumen migrado al modelo piezas + volumenes (issue #13): el
+    // MDX queda como legado, fuera de /fanzine y de los listados, pero sus
+    // URLs viejas (/blog/<slug>, /fanzine/<archivo>) siguen redirigiendo
+    // a /fanzine/vol-NN, que ahora sale de src/content/volumenes/vol-NN.yml.
+    legado: z.boolean().default(false),
   }).refine((data) => !data.fanzine || data.volume != null, {
     message: 'Un post con fanzine: true necesita `volume`: la URL del volumen es /fanzine/vol-NN y sale de ese número.',
     path: ['volume'],
@@ -197,4 +203,25 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { posts, hero, catalog, journal, about, guitars, pages };
+// Colección "piezas" (issue #13): cada colaboración es un archivo
+// src/content/piezas/<AAAA-MM-slug>/index.mdx con su frontmatter (título,
+// sección, autor, crédito, licencia, consentimiento_ref, paginas, fotos) y
+// el cuerpo marcado con <Pagina n={1}>…<Pagina n={paginas}>. El esquema
+// vive en schemas.ts (lo reutiliza el export del impreso). Los archivos
+// que empiezan con "_" (plantilla) no entran en la colección.
+const piezas = defineCollection({
+  type: 'content',
+  schema: ({ image }) => piezaSchema(image),
+});
+
+// Colección "volumenes" (issue #13): src/content/volumenes/vol-NN.yml
+// arma un volumen eligiendo piezas y asignando la página final donde
+// empieza cada una. Portada = 1, índice = 2 (generado), Fin = N-1,
+// contraportada = N; N se calcula (múltiplo de 4) y los huecos se
+// rellenan con páginas diseñadas (src/utils/componer.ts).
+const volumenes = defineCollection({
+  type: 'data',
+  schema: ({ image }) => volumenSchema(image, reference),
+});
+
+export const collections = { posts, hero, catalog, journal, about, guitars, pages, piezas, volumenes };

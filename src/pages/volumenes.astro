@@ -1,11 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
 import FanzineLayout from '../layouts/FanzineLayout.astro';
-import { fanzinePath } from '../utils/fanzine';
+import { listarVolumenes } from '../utils/volumenes';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const posts = await getCollection('posts', ({ data }) => data.fanzine && !data.draft && !data.prueba);
-const volumes = posts.sort((a, b) => (b.data.volume ?? 0) - (a.data.volume ?? 0));
+// Volúmenes yml y MDX (issue #13), sin los de prueba.
+const volumes = (await listarVolumenes()).filter((v) => !v.prueba);
 ---
 
 <FanzineLayout title="Volúmenes" description="Todos los volúmenes de La Jirafa Eléctrica.">
@@ -14,9 +13,9 @@ const volumes = posts.sort((a, b) => (b.data.volume ?? 0) - (a.data.volume ?? 0)
     <ul class="vol-list">
       {volumes.map((v) => (
         <li>
-          <a href={fanzinePath(v)}>
-            <span class="vol-list__n">Vol. {v.data.volume}</span>
-            <span>{v.data.title}</span>
+          <a href={`${base}/fanzine/${v.slug}`}>
+            <span class="vol-list__n">Vol. {v.numero}</span>
+            <span>{v.titulo}</span>
           </a>
         </li>
       ))}

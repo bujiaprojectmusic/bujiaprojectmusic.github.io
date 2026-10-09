@@ -1,0 +1,27 @@
+# Volumen 01 "Fierros y Fuzz", migrado de src/content/posts/volumen-01.mdx
+# (issue #13). El MDX queda como legado (legado: true) y sus URLs viejas
+# redirigen acá. Las páginas 7–14 siguen sin contenido (TODO en el MDX
+# original): se rellenan con páginas diseñadas hasta cerrar en 16.
+numero: 1
+titulo: "Fierros y Fuzz"
+fecha: 2026-08-01
+publishDate: 2026-08-01
+colorScheme: rosa
+descripcion: "Primer volumen de La Jirafa Eléctrica: rebobinado de pastillas, playlist de agosto y fotos del taller."
+portada:
+  # TODO(Ricardo): foto de portada real, ≥ 2700 px de lado largo, en
+  # src/assets/piezas/vol-01/portada.jpg → imagen: "/piezas/vol-01/portada.jpg"
+  alt: ""
+  subtitulo: "Agosto 2026 — Texcoco"
+# Cierra en 16 como el MDX original: las págs. 7–14 se rellenan hasta que
+# haya piezas.
+paginas_minimo: 16
+piezas:
+  - { pieza: 2026-08-editorial, desde: 3 }
+  - { pieza: 2026-08-rebobinado-pastillas, desde: 4 }
+  - { pieza: 2026-08-playlist-agosto, desde: 6 }
+  # TODO(Ricardo): "Fotos del taller" y lo que siga, de la pág. 7 a la 14.
+contraportada:
+  texto: "Bujía Project Music — Texcoco, MX"
+impreso:
+  multimedia: qr

@@ -1,0 +1,51 @@
+---
+// Página RELATIVA de una pieza (issue #13): <Pagina n={1}> … <Pagina n={paginas}>
+// en src/content/piezas/<AAAA-MM-slug>/index.mdx. Al componer el volumen
+// (vol-NN.yml) cada <Pagina> se vuelve un <Pliego> con su número FINAL
+// (desde + n − 1), así que la web (#6), el presupuesto (#8) y el impreso
+// (#9/#10) siguen viendo el mismo marcado. La última página agrega la
+// línea de crédito de la pieza. Sólo props literales.
+import Pliego from './Pliego.astro';
+import { getPiezaActual } from '../../utils/piezaActual';
+import type { ColorSchemeName } from '../../config/site';
+
+interface Props {
+  /** Número de página dentro de la pieza, 1…paginas. */
+  n: number;
+  scheme?: ColorSchemeName;
+  /** Foto a sangre ("/piezas/<carpeta>/foto.jpg") para esta página. */
+  bleed?: string;
+  bleedAlt?: string;
+}
+const { n, scheme, bleed, bleedAlt } = Astro.props;
+const { pieza, desde, scheme: schemeVol } = getPiezaActual('Pagina');
+const total = pieza.data.paginas;
+if (!Number.isInteger(n) || n < 1 || n > total) {
+  throw new Error(`${pieza.id}: <Pagina n={${n}}> fuera de 1…${total} (paginas: ${total} en el frontmatter).`);
+}
+const final = desde + n - 1;
+const esquema = (scheme ?? pieza.data.scheme ?? schemeVol) as ColorSchemeName | undefined;
+---
+
+<Pliego n={final} scheme={esquema} bleed={bleed ?? false} bleedAlt={bleedAlt}>
+  <slot />
+  {n === total && (
+    <p class="fz-credito"><span>{pieza.data.credito}</span>{pieza.data.bio && <span class="fz-credito__bio"> · {pieza.data.bio}</span>}</p>
+  )}
+</Pliego>
+
+<style>
+  .fz-credito {
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    border-top: 2px solid var(--ink);
+    padding-top: 0.4rem;
+    margin: 1.2rem 0 0;
+  }
+  .fz-credito__bio {
+    font-family: var(--font-body);
+    letter-spacing: 0;
+    opacity: 0.8;
+  }
+</style>

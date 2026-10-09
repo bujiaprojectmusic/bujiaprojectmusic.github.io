@@ -1,0 +1,76 @@
+---
+# ─────────────────────────────────────────────────────────────────────────
+# PLANTILLA de pieza (issue #13). Copiá esta carpeta/archivo como
+#   src/content/piezas/<AAAA-MM-slug>/index.mdx
+# Los archivos que empiezan con "_" no entran en la colección ni generan
+# rutas. Todas las claves de abajo están validadas por src/content/schemas.ts
+# (.strict(): una clave que no esté acá rompe el build). Ningún dato de
+# contacto: ni correos ni teléfonos en ningún campo.
+# ─────────────────────────────────────────────────────────────────────────
+titulo: "Título de la pieza"
+# cronica-de-taller | entrevista | resena | fotoensayo | opinion | diy
+seccion: cronica-de-taller
+# Nombre o seudónimo tal como se publica.
+autor: "Nombre"
+# Línea de crédito tal como sale impresa (texto y fotos).
+credito: "Texto y fotos: Nombre"
+# bio: "Hasta 280 caracteres, opcional."
+# redes: "@usuario o URL. No sale en el impreso."
+# permiso-no-exclusivo (default) | cc-by-nc-4.0 | cc-by-sa-4.0 | dominio-publico
+licencia: permiso-no-exclusivo
+# Referencia INTERNA al consentimiento guardado fuera del repo (sin "@" ni
+# 8+ dígitos seguidos): "<carpeta>#<canal>-<fecha>".
+consentimiento_ref: "2026-10-slug#correo-2026-10-03"
+# Cuántas páginas de media carta ocupa (1–12) = cantidad de <Pagina> abajo.
+paginas: 2
+# Fotos: masters de 2400 px de lado largo en src/assets/piezas/<AAAA-MM-slug>/,
+# escritas como "/piezas/<AAAA-MM-slug>/foto.jpg". Cada una necesita alt,
+# pie, credito y personas_identificables (si hay gente reconocible, el
+# consentimiento tiene que cubrirla). En el cuerpo se usan con <Foto n={1} />.
+fotos: []
+#  - src: "/piezas/2026-10-slug/01.jpg"
+#    alt: "Qué se ve en la foto"
+#    pie: "Pie de foto"
+#    credito: "Nombre"
+#    personas_identificables: false
+# Videos o playlists de YouTube (el título es obligatorio: va en el QR del impreso).
+multimedia: []
+#  - { tipo: video, id: "C1vfbwwdtOQ", titulo: "Guitar Set Up 101" }
+# scheme: acido   # esquema de color de la pieza (opcional; si no, el del volumen)
+draft: true
+---
+
+import Pagina from '../../components/fanzine/Pagina.astro';
+import Foto from '../../components/fanzine/Foto.astro';
+import SectionTitle from '../../components/SectionTitle.astro';
+import Columnas from '../../components/Columnas.astro';
+import Quote from '../../components/content/Quote.astro';
+import Note from '../../components/content/Note.astro';
+import VideoPoster from '../../components/content/VideoPoster.astro';
+
+{/*
+  Cuerpo de la pieza, marcado por páginas de media carta: <Pagina n={1}> …
+  <Pagina n={paginas}>. El volumen (src/content/volumenes/vol-NN.yml) decide
+  en qué página final empieza; acá los números son relativos.
+  REGLA DEL IMPRESO (#9): los componentes sólo reciben props LITERALES
+  (cadenas, números, booleanos, arreglos/objetos literales). Nada de
+  expresiones JS ni variables. Texto de relleno marcado TODO.
+*/}
+
+<Pagina n={1}>
+  <SectionTitle scheme="acido">Título de la pieza</SectionTitle>
+
+  TODO: primer párrafo.
+
+  <Foto n={1} />
+</Pagina>
+
+<Pagina n={2}>
+  <Columnas n={2}>
+
+  TODO: texto en dos columnas.
+
+  </Columnas>
+
+  <Quote cite="Alguien">TODO: cita destacada.</Quote>
+</Pagina>

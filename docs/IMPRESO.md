@@ -392,6 +392,17 @@ imprimir) y el bloque desplegable "Cómo imprimir y engrapar".
 4. N/4 hojas: apilalas como salen, doblá la pila a la mitad con la portada
    afuera y dos grapas en el lomo.
 
+## Volúmenes compuestos (piezas + yml, issue #13)
+
+El export tiene dos adaptadores en `scripts/print/sources/`: `posts.ts`
+(un MDX con `<Pliego>`, como vol-00) y `piezas.ts` (un `vol-NN.yml` con
+piezas de `src/content/piezas/**`). El segundo reutiliza los esquemas zod
+de `src/content/schemas.ts` y la composición de `src/utils/componer.ts`
+(la misma que usa la web), arma portada, índice, páginas de cada pieza
+(`<Pagina n>` → pliego `desde + n − 1`, `<Foto n>` → la foto n del
+frontmatter con pie + crédito), rellenos, Fin con los créditos de las
+piezas y contraportada. `consentimiento_ref` y `redes` no salen al JSON.
+
 ## Qué reutiliza el motor del volumen (#9)
 
 - `print/lib/base.typ`: `configurar(paginas: N)` (hoja, márgenes

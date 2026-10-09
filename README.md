@@ -28,7 +28,52 @@ el contenedor, y no te pisa el bind mount del código.
 
 Si preferís correr sin Docker: `npm install && npm run dev`.
 
-## Escribir un volumen nuevo
+## Piezas y volúmenes (pipeline editorial, issue #13)
+
+Desde el #13 el contenido del fanzine se separa en **piezas** y
+**volúmenes**:
+
+- Una **pieza** es una colaboración: `src/content/piezas/<AAAA-MM-slug>/index.mdx`
+  con frontmatter validado (`titulo`, `seccion`, `autor`, `credito`,
+  `licencia`, `consentimiento_ref`, `paginas`, `fotos`…) y el cuerpo
+  marcado por páginas relativas `<Pagina n={1}>` … `<Pagina n={paginas}>`.
+  Las fotos van como masters de 2400 px en `src/assets/piezas/<AAAA-MM-slug>/`
+  y se declaran en `fotos` (con `alt`, `pie`, `credito`,
+  `personas_identificables`); en el cuerpo se ponen con `<Foto n={1} />`
+  (o `estilo="side|polaroid|vieja|xerox"`). Sin datos de contacto:
+  `consentimiento_ref` es una referencia interna y rechaza correos y
+  teléfonos; una clave desconocida rompe el build.
+- Un **volumen** es `src/content/volumenes/vol-NN.yml`: `numero`, `titulo`,
+  `fecha`, `publishDate`, `colorScheme`, `portada`, y `piezas` en orden con
+  la página **final** donde empieza cada una (`desde`). Portada = 1, índice
+  = 2 (generado), piezas desde la 3, Fin = N-1, contraportada = N; N se
+  calcula (múltiplo de 4). Los huecos se rellenan con páginas diseñadas
+  (`colabora | notas | taller`, aviso en el build): en el impreso salen
+  diseñadas y en la web no se ven, salvo que se declaren en el yml con
+  `{ relleno: notas, desde: 8 }` (entonces también se muestran en
+  pantalla); traslapes y piezas `draft` son error.
+  `paginas_minimo: 16` rellena hasta ahí aunque sobren páginas.
+
+**Agregar una pieza**: copiá `src/content/piezas/_plantilla.mdx` a
+`src/content/piezas/<AAAA-MM-slug>/index.mdx`, llená el frontmatter, poné
+las fotos en `src/assets/piezas/<AAAA-MM-slug>/`, escribí el cuerpo en
+`<Pagina>` con props literales (nada de expresiones JS: el impreso las
+exporta) y dejá `draft: true` hasta que esté aprobada. `npm run
+test:content` valida esquemas y composición sin compilar el sitio.
+
+**Armar un volumen**: copiá `src/content/volumenes/_plantilla.yml` a
+`vol-NN.yml`, listá las piezas con su `desde` y `draft: false` en las
+piezas. `npm run build` compone `/fanzine/vol-NN` (y
+`scripts/check-dist-volumenes.mjs` revisa sobre el HTML que los pliegos,
+el índice, los créditos y las fotos estén bien); `npm run print` saca
+los PDF del mismo yml. `volumen-01.mdx` quedó como legado (`legado: true`):
+`/fanzine/vol-01` sale de `vol-01.yml` y `/blog/volumen-01` sigue
+redirigiendo.
+
+## Escribir un volumen nuevo (modelo viejo: un MDX con pliegos)
+
+Este modelo sigue valiendo para fixtures como `vol-00`; para contenido
+real usá piezas + volúmenes (arriba).
 
 Copiá `src/content/posts/volumen-01.mdx` como punto de partida. El
 frontmatter define metadata (`volume`, `date`, `colorScheme`, `tags`...) y
