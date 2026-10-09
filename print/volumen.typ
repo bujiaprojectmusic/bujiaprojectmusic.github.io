@@ -15,7 +15,7 @@
 // Los headings sólo existen para los marcadores (bookmarks) del PDF de
 // pantalla: el look lo pinta cada gemelo.
 #show heading: it => it.body
-#set document(title: "La Jirafa Eléctrica Vol. " + str(vol.volumen) + " — " + vol.titulo, author: vol.autor)
+#set document(title: "La Jirafa Elektrika Vol. " + str(vol.volumen) + " — " + vol.titulo, author: vol.autor)
 #set text(fill: negro)
 
 #render-volumen(vol)

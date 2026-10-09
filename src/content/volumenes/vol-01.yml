@@ -7,7 +7,7 @@ titulo: "Fierros y Fuzz"
 fecha: 2026-08-01
 publishDate: 2026-08-01
 colorScheme: rosa
-descripcion: "Primer volumen de La Jirafa Eléctrica: rebobinado de pastillas, playlist de agosto y fotos del taller."
+descripcion: "Primer volumen de La Jirafa Elektrika: rebobinado de pastillas, playlist de agosto y fotos del taller."
 portada:
   # TODO(Ricardo): foto de portada real, ≥ 2700 px de lado largo, en
   # src/assets/piezas/vol-01/portada.jpg → imagen: "/piezas/vol-01/portada.jpg"

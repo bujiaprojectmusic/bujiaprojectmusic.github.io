@@ -68,9 +68,9 @@ async function construirVolumen(bin, jsonPath) {
   }
   // Cuadernillos (#10): carta horizontal, 2 páginas por cara, orden de reglas.mjs.
   pdfs.cuadernillo = path.join(dir, `jirafa-${slug}-cuadernillo.pdf`);
-  const impC = await Q.cuadernillo(pdfs.imprenta, pdfs.cuadernillo, 'trim', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo`);
+  const impC = await Q.cuadernillo(pdfs.imprenta, pdfs.cuadernillo, 'trim', `La Jirafa Elektrika Vol. ${vol.volumen} — cuadernillo`);
   pdfs.cuadernilloXerox = path.join(dir, `jirafa-${slug}-cuadernillo-xerox.pdf`);
-  const impX = await Q.cuadernillo(pdfs.xerox, pdfs.cuadernilloXerox, 'media', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo xerox`);
+  const impX = await Q.cuadernillo(pdfs.xerox, pdfs.cuadernilloXerox, 'media', `La Jirafa Elektrika Vol. ${vol.volumen} — cuadernillo xerox`);
   // Cómo imprimir y engrapar (1 página, aparte del cuadernillo).
   pdfs.comoImprimir = path.join(dir, `jirafa-${slug}-como-imprimir.pdf`);
   {
@@ -157,9 +157,9 @@ async function construirVolumen(bin, jsonPath) {
       otra[nombre] = tmp;
     }
     otra.cuadernillo = path.join(dir, '.otra-cuadernillo.pdf');
-    await Q.cuadernillo(otra.imprenta, otra.cuadernillo, 'trim', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo`);
+    await Q.cuadernillo(otra.imprenta, otra.cuadernillo, 'trim', `La Jirafa Elektrika Vol. ${vol.volumen} — cuadernillo`);
     otra.cuadernilloXerox = path.join(dir, '.otra-cuadernillo-xerox.pdf');
-    await Q.cuadernillo(otra.xerox, otra.cuadernilloXerox, 'media', `La Jirafa Eléctrica Vol. ${vol.volumen} — cuadernillo xerox`);
+    await Q.cuadernillo(otra.xerox, otra.cuadernilloXerox, 'media', `La Jirafa Elektrika Vol. ${vol.volumen} — cuadernillo xerox`);
     otra.comoImprimir = path.join(dir, '.otra-como.pdf');
     compilar(bin, path.join(RAIZ, 'print', 'como-imprimir.typ'), otra.comoImprimir, null, ['--input', `volumen=${jsonRel}`]);
     determinismo = {};

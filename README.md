@@ -1,4 +1,4 @@
-# La Jirafa Eléctrica — base Astro
+# La Jirafa Elektrika — base Astro
 
 Base para migrar el fanzine de Ghost a un sitio estático con **Astro + MDX**,
 desplegado en **GitHub Pages**. Reemplaza:

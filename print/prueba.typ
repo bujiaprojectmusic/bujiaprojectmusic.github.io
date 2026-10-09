@@ -1,4 +1,4 @@
-// Hoja de prueba de impresión de La Jirafa Eléctrica (issue #16).
+// Hoja de prueba de impresión de La Jirafa Elektrika (issue #16).
 // Se compila en 3 variantes (pantalla / imprenta / bn) con:
 //   typst compile --root . --font-path print/fonts --ignore-system-fonts \
 //     --input variante=imprenta print/prueba.typ print/build/jirafa-prueba-impresion-imprenta.pdf
@@ -42,7 +42,7 @@
 
 // ── Página 1: reglas, cuadro de 1 in, guías ────────────────────────────
 = Hoja de prueba de impresión
-#text(size: pt(estilos.cuerpo_1col.pt))[La Jirafa Eléctrica · variante *#etiqueta* · Typst #sys.version · reglas.json v#reglas.version]
+#text(size: pt(estilos.cuerpo_1col.pt))[La Jirafa Elektrika · variante *#etiqueta* · Typst #sys.version · reglas.json v#reglas.version]
 
 #v(6pt)
 #regla-in()

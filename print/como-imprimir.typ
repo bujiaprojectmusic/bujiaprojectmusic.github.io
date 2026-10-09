@@ -14,11 +14,11 @@
 #let ctx = (vol: vol, variante: variante)
 
 #show: configurar.with(paginas: none)
-#set document(title: "Cómo imprimir y engrapar — La Jirafa Eléctrica Vol. " + str(vol.volumen))
+#set document(title: "Cómo imprimir y engrapar — La Jirafa Elektrika Vol. " + str(vol.volumen))
 
 #block(below: 8pt, rotate(-2deg, reflow: true, box(fill: negro, inset: (x: 10pt, y: 5pt),
   text(font: fuente-titulos, size: pt(estilos.titulo.pt_max) * 0.6, fill: blanco, upper("Cómo imprimir y engrapar")))))
-#texto("pie", quien: "como-imprimir")[La Jirafa Eléctrica · Vol. #vol-nn(vol.volumen) · #vol.titulo · #str(vol.paginas) páginas = #str(hojas) hojas carta]
+#texto("pie", quien: "como-imprimir")[La Jirafa Elektrika · Vol. #vol-nn(vol.volumen) · #vol.titulo · #str(vol.paginas) páginas = #str(hojas) hojas carta]
 
 #v(8pt)
 #texto("cuerpo_1col", quien: "como-imprimir")[
