@@ -1,113 +1,257 @@
 ---
-// Bloque de descarga de los PDF de un volumen (issue #9): "para leer"
-// (pantalla) y "para imprenta". Los pesos salen de print/build/manifest.json;
-// sin manifest (build local sin Typst) dice "PDF no disponible en este
-// build" y el sitio compila igual. Va en el slot "download" de
-// FanzineLayout. Sin JavaScript; los volúmenes no tienen window.print().
+// Bloque de descarga de los PDF de un volumen (issue #9/#10). Pesos de
+// print/build/manifest.json; sin manifest dice "PDF no disponible en este
+// build" y el sitio compila igual. Sin JavaScript.
+//
+// variante:
+//  - "header"   → chips en el header (como estaba).
+//  - "portada"  → tarjeta "Llévatelo" debajo de la portada del volumen.
+//  - "final"    → franja "Llévatelo en PDF" al final del volumen (#descargas).
+//  - "flotante" → botón "⬇ PDF" en la barra fija de abajo que despliega el menú.
 import { impresoDe, mb } from '../../utils/impreso';
 
 interface Props {
   slug: string;
+  variante?: 'header' | 'portada' | 'final' | 'flotante';
 }
-const { slug } = Astro.props;
+const { slug, variante = 'header' } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const v = impresoDe(slug);
+const href = (k: keyof NonNullable<typeof v>['pdfs']) => `${base}/fanzine/${slug}/${v!.pdfs[k].archivo}`;
+const hojas = v ? (v.pdfs.cuadernillo.hojas ?? v.paginas / 4) : 0;
 ---
 
-<div class="fz-descarga">
-  {v ? (
-    <>
-      <a class="fz-descarga__btn" href={`${base}/fanzine/${slug}/${v.pdfs.pantalla.archivo}`} download>
-        Descargar PDF para leer <span>({mb(v.pdfs.pantalla.bytes)})</span>
+{variante === 'header' && (
+  <div class="fz-descarga">
+    {v ? (
+      <>
+        <a class="fz-descarga__btn" href={href('pantalla')} download>Descargar PDF para leer <span>({mb(v.pdfs.pantalla.bytes)})</span></a>
+        <a class="fz-descarga__btn fz-descarga__btn--imprenta" href={href('imprenta')} download>Descargar PDF para imprenta <span>({mb(v.pdfs.imprenta.bytes)})</span></a>
+        <a class="fz-descarga__btn fz-descarga__btn--casa" href={href('cuadernillo')} download>Cuadernillo carta, color <span>({mb(v.pdfs.cuadernillo.bytes)})</span></a>
+        <a class="fz-descarga__btn fz-descarga__btn--casa" href={href('cuadernilloXerox')} download>Cuadernillo carta, xerox <span>({mb(v.pdfs.cuadernilloXerox.bytes)})</span></a>
+        <a class="fz-descarga__btn fz-descarga__btn--casa" href={href('xerox')} download>PDF xerox, página por página <span>({mb(v.pdfs.xerox.bytes)})</span></a>
+        <a class="fz-descarga__btn fz-descarga__btn--casa" href={href('comoImprimir')} download>Cómo imprimir (1 pág.) <span>({mb(v.pdfs.comoImprimir.bytes)})</span></a>
+        <details class="fz-descarga__como">
+          <summary>Cómo imprimir y engrapar</summary>
+          <ol>
+            <li><strong>Elegí la versión:</strong> cuadernillo <em>color</em> para imprimir, cuadernillo <em>xerox</em> para fotocopiar en blanco y negro.</li>
+            <li><strong>Papel carta, horizontal, al 100 %</strong> (sin "ajustar a página"). Cada cara trae dos páginas de media carta.</li>
+            <li><strong>Doble cara, voltear por el borde corto.</strong></li>
+            <li><strong>{hojas} hojas:</strong> apilalas como salen, doblá la pila a la mitad con la portada afuera y poné <strong>dos grapas en el lomo</strong>.</li>
+          </ol>
+        </details>
+      </>
+    ) : (
+      <span class="fz-descarga__nada">PDF no disponible en este build</span>
+    )}
+  </div>
+)}
+
+{variante === 'portada' && v && (
+  <aside class="fz-lleva" aria-label="Descargar el volumen en PDF">
+    <span class="fz-lleva__sticker" aria-hidden="true">Gratis</span>
+    <div class="fz-lleva__txt">
+      <p class="fz-lleva__kicker">Llévatelo</p>
+      <p class="fz-lleva__h">Este volumen<br />en PDF</p>
+      <p class="fz-lleva__p">Léelo en el celular o imprímelo y engrápalo: {v.paginas} páginas de media carta, {hojas} hojas carta.</p>
+    </div>
+    <div class="fz-lleva__btns">
+      <a class="fz-lleva__btn fz-lleva__btn--leer" href={href('pantalla')} download>
+        <b>Para leer</b><small>PDF pantalla · {mb(v.pdfs.pantalla.bytes)}</small>
       </a>
-      <a class="fz-descarga__btn fz-descarga__btn--imprenta" href={`${base}/fanzine/${slug}/${v.pdfs.imprenta.archivo}`} download>
-        Descargar PDF para imprenta <span>({mb(v.pdfs.imprenta.bytes)})</span>
+      <a class="fz-lleva__btn" href={href('cuadernillo')} download>
+        <b>Para imprimir en casa</b><small>Cuadernillo carta · {mb(v.pdfs.cuadernillo.bytes)}</small>
       </a>
-      {/* Cuadernillo en casa y versión xerox (issue #10). */}
-      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.cuadernillo.archivo}`} download>
-        Cuadernillo carta, color <span>({mb(v.pdfs.cuadernillo.bytes)})</span>
-      </a>
-      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.cuadernilloXerox.archivo}`} download>
-        Cuadernillo carta, xerox <span>({mb(v.pdfs.cuadernilloXerox.bytes)})</span>
-      </a>
-      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.xerox.archivo}`} download>
-        PDF xerox, página por página <span>({mb(v.pdfs.xerox.bytes)})</span>
-      </a>
-      <a class="fz-descarga__btn fz-descarga__btn--casa" href={`${base}/fanzine/${slug}/${v.pdfs.comoImprimir.archivo}`} download>
-        Cómo imprimir (1 pág.) <span>({mb(v.pdfs.comoImprimir.bytes)})</span>
-      </a>
-      <details class="fz-descarga__como">
-        <summary>Cómo imprimir y engrapar</summary>
-        <ol>
-          <li><strong>Elegí la versión:</strong> cuadernillo <em>color</em> para imprimir, cuadernillo <em>xerox</em> para fotocopiar en blanco y negro.</li>
-          <li><strong>Papel carta, horizontal, al 100 %</strong> (sin "ajustar a página"). Cada cara trae dos páginas de media carta.</li>
-          <li><strong>Doble cara, voltear por el borde corto.</strong></li>
-          <li><strong>{v.pdfs.cuadernillo.hojas ?? v.paginas / 4} hojas:</strong> apilalas como salen, doblá la pila a la mitad con la portada afuera y poné <strong>dos grapas en el lomo</strong>.</li>
-        </ol>
-      </details>
-    </>
-  ) : (
-    <span class="fz-descarga__nada">PDF no disponible en este build</span>
-  )}
-</div>
+      <p class="fz-lleva__mas">
+        También:
+        <a href={href('cuadernilloXerox')} download>cuadernillo xerox</a> ·
+        <a href={href('xerox')} download>xerox página por página</a> ·
+        <a href={href('imprenta')} download>imprenta</a> ·
+        <a href={href('comoImprimir')} download>cómo imprimir</a>
+      </p>
+    </div>
+  </aside>
+)}
+
+{variante === 'final' && v && (
+  <section class="fz-franja" id="descargas" aria-label="Descargar el volumen en PDF">
+    <div class="fz-franja__in">
+      <header class="fz-franja__head">
+        <p class="fz-franja__kicker">Vol. {String(v.volumen).padStart(2, '0')} · {v.paginas} págs. · PDF gratis</p>
+        <h2 class="fz-franja__h">Llévatelo<br />en PDF</h2>
+      </header>
+      <div class="fz-franja__cols">
+        <div class="fz-franja__col">
+          <h3>Leer</h3>
+          <a class="fz-franja__btn fz-franja__btn--main" href={href('pantalla')} download>PDF pantalla <span>{mb(v.pdfs.pantalla.bytes)}</span></a>
+          <p>Página por página, para celular o tablet.</p>
+        </div>
+        <div class="fz-franja__col">
+          <h3>Imprimir en casa</h3>
+          <a class="fz-franja__btn" href={href('cuadernillo')} download>Cuadernillo color <span>{mb(v.pdfs.cuadernillo.bytes)}</span></a>
+          <a class="fz-franja__btn" href={href('cuadernilloXerox')} download>Cuadernillo xerox <span>{mb(v.pdfs.cuadernilloXerox.bytes)}</span></a>
+          <a class="fz-franja__btn" href={href('xerox')} download>Xerox pág. por pág. <span>{mb(v.pdfs.xerox.bytes)}</span></a>
+        </div>
+        <div class="fz-franja__col">
+          <h3>Imprenta</h3>
+          <a class="fz-franja__btn" href={href('imprenta')} download>PDF imprenta <span>{mb(v.pdfs.imprenta.bytes)}</span></a>
+          <a class="fz-franja__btn" href={href('comoImprimir')} download>Cómo imprimir <span>{mb(v.pdfs.comoImprimir.bytes)}</span></a>
+          <p>Con sangrado y marcas de corte.</p>
+        </div>
+      </div>
+      <ol class="fz-franja__pasos">
+        <li><strong>Carta horizontal, al 100 %</strong>, sin "ajustar a página".</li>
+        <li><strong>Doble cara</strong>, voltear por el borde corto.</li>
+        <li><strong>{hojas} hojas:</strong> dobla la pila a la mitad, portada afuera, <strong>dos grapas</strong> en el lomo.</li>
+      </ol>
+    </div>
+  </section>
+)}
+
+{variante === 'flotante' && v && (
+  <details class="fz-flot">
+    <summary class="fz-flot__btn">⬇ PDF</summary>
+    <div class="fz-flot__panel">
+      <p class="fz-flot__t">Llévatelo · Vol. {String(v.volumen).padStart(2, '0')}</p>
+      <p class="fz-flot__g">Leer</p>
+      <a href={href('pantalla')} download>PDF pantalla <span>{mb(v.pdfs.pantalla.bytes)}</span></a>
+      <p class="fz-flot__g">Imprimir en casa</p>
+      <a href={href('cuadernillo')} download>Cuadernillo color <span>{mb(v.pdfs.cuadernillo.bytes)}</span></a>
+      <a href={href('cuadernilloXerox')} download>Cuadernillo xerox <span>{mb(v.pdfs.cuadernilloXerox.bytes)}</span></a>
+      <a href={href('xerox')} download>Xerox pág. por pág. <span>{mb(v.pdfs.xerox.bytes)}</span></a>
+      <p class="fz-flot__g">Imprenta</p>
+      <a href={href('imprenta')} download>PDF imprenta <span>{mb(v.pdfs.imprenta.bytes)}</span></a>
+      <a href={href('comoImprimir')} download>Cómo imprimir <span>{mb(v.pdfs.comoImprimir.bytes)}</span></a>
+      <p class="fz-flot__n">{hojas} hojas carta, doble cara, borde corto, dos grapas.</p>
+    </div>
+  </details>
+)}
 
 <style>
-  .fz-descarga {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    justify-content: flex-end;
-  }
+  /* ── header (como estaba) ─────────────────────────────────────────── */
+  .fz-descarga { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: flex-end; }
   .fz-descarga__btn {
-    font-family: var(--font-head);
-    font-weight: 700;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--ink);
-    background: var(--accent);
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    padding: 0.45em 0.8em;
-    line-height: 1.2;
+    font-family: var(--font-head); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em;
+    text-transform: uppercase; text-decoration: none; color: var(--ink); background: var(--accent);
+    border: 2px solid var(--ink); border-radius: 999px; padding: 0.45em 0.8em; line-height: 1.2;
     box-shadow: 2px 2px 0 var(--ink);
   }
-  .fz-descarga__btn--imprenta,
-  .fz-descarga__btn--casa {
-    background: var(--paper);
-  }
-  .fz-descarga__como {
-    flex-basis: 100%;
-    font-size: 0.75rem;
-    line-height: 1.45;
-  }
+  .fz-descarga__btn--imprenta, .fz-descarga__btn--casa { background: var(--paper); }
+  .fz-descarga__como { flex-basis: 100%; font-size: 0.75rem; line-height: 1.45; }
   .fz-descarga__como summary {
-    cursor: pointer;
-    font-family: var(--font-head);
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    text-align: right;
+    cursor: pointer; font-family: var(--font-head); font-weight: 700; text-transform: uppercase;
+    font-size: 0.7rem; letter-spacing: 0.04em; text-align: right;
   }
-  .fz-descarga__como ol {
-    margin: 0.4rem 0 0;
-    padding-left: 1.2rem;
-    text-align: left;
-    max-width: 34rem;
-    margin-left: auto;
+  .fz-descarga__como ol { margin: 0.4rem 0 0; padding-left: 1.2rem; text-align: left; max-width: 34rem; margin-left: auto; }
+  .fz-descarga__como li { margin-bottom: 0.25rem; }
+  .fz-descarga__btn span { font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .fz-descarga__nada { font-size: 0.7rem; opacity: 0.7; }
+
+  /* ── A: tarjeta "Llévatelo" bajo la portada ───────────────────────── */
+  .fz-lleva {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 1.25rem 2rem;
+    align-items: center;
+    margin: -0.5rem 0 2.5rem;
+    padding: 1.4rem 1.6rem 1.5rem;
+    background: var(--accent);
+    color: var(--ink);
+    border: var(--border-w) solid var(--ink);
+    border-radius: var(--radius);
+    box-shadow: 8px 8px 0 var(--ink);
   }
-  .fz-descarga__como li {
-    margin-bottom: 0.25rem;
+  .fz-lleva__sticker {
+    position: absolute; top: -1.1rem; right: 1.2rem; transform: rotate(6deg);
+    font-family: 'Anton', var(--font-head); text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 1.1rem; line-height: 1; padding: 0.45em 0.8em;
+    background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 999px;
   }
-  .fz-descarga__btn span {
-    font-weight: 400;
-    text-transform: none;
-    letter-spacing: 0;
+  .fz-lleva__kicker {
+    margin: 0; font-family: var(--font-head); font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.14em; font-size: 0.75rem;
   }
-  .fz-descarga__nada {
-    font-size: 0.7rem;
-    opacity: 0.7;
+  .fz-lleva__h {
+    margin: 0.1rem 0 0.6rem; font-family: 'Anton', var(--font-head); text-transform: uppercase;
+    font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 0.92; letter-spacing: 0.01em;
   }
+  .fz-lleva__p { margin: 0; font-size: 0.85rem; line-height: 1.5; max-width: 28rem; }
+  .fz-lleva__btns { display: flex; flex-direction: column; gap: 0.6rem; }
+  .fz-lleva__btn {
+    display: flex; flex-direction: column; gap: 0.15rem; text-decoration: none; color: var(--ink);
+    background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; padding: 0.7rem 1rem 0.75rem;
+    box-shadow: 4px 4px 0 var(--ink); transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .fz-lleva__btn:hover, .fz-lleva__btn:focus-visible { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+  .fz-lleva__btn--leer { background: var(--ink); color: var(--paper); }
+  .fz-lleva__btn b { font-family: var(--font-head); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.95rem; }
+  .fz-lleva__btn small { font-size: 0.72rem; opacity: 0.85; }
+  .fz-lleva__mas { margin: 0.2rem 0 0; font-size: 0.72rem; line-height: 1.7; }
+  .fz-lleva__mas a { color: inherit; font-weight: 700; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+  @media (max-width: 640px) {
+    .fz-lleva { grid-template-columns: 1fr; gap: 1rem; padding: 1.3rem 1.1rem 1.3rem; box-shadow: 5px 5px 0 var(--ink); }
+    .fz-lleva__sticker { font-size: 0.9rem; right: 0.9rem; }
+  }
+
+  /* ── B: franja "Llévatelo en PDF" al final del volumen ────────────── */
+  .fz-franja {
+    margin: 0 0 0; padding: 2.5rem 1.25rem 2.75rem;
+    background: var(--ink); color: var(--paper);
+    border-top: var(--border-w) solid var(--ink);
+    background-image: repeating-linear-gradient(135deg, transparent 0 22px, rgba(255,255,255,0.04) 22px 24px);
+  }
+  .fz-franja__in { max-width: 900px; margin: 0 auto; }
+  .fz-franja__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.5rem 1rem; margin-bottom: 1.5rem; }
+  .fz-franja__kicker { margin: 0; order: 2; font-family: var(--font-head); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.72rem; color: var(--accent); }
+  .fz-franja__h {
+    margin: 0; order: 1; font-family: 'Anton', var(--font-head); text-transform: uppercase;
+    font-size: clamp(3rem, 9vw, 5.5rem); line-height: 0.88; color: var(--accent);
+  }
+  .fz-franja__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .fz-franja__col { border: 3px solid var(--paper); border-radius: 14px; padding: 1rem 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .fz-franja__col h3 { margin: 0 0 0.3rem; font-family: var(--font-head); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); }
+  .fz-franja__col p { margin: 0.2rem 0 0; font-size: 0.72rem; line-height: 1.5; opacity: 0.8; }
+  .fz-franja__btn {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; text-decoration: none;
+    font-family: var(--font-head); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.78rem;
+    color: var(--ink); background: var(--paper); border: 2px solid var(--paper); border-radius: 999px; padding: 0.55em 0.9em;
+    box-shadow: 3px 3px 0 var(--accent);
+  }
+  .fz-franja__btn--main { background: var(--accent); border-color: var(--accent); box-shadow: 3px 3px 0 var(--paper); font-size: 0.9rem; }
+  .fz-franja__btn span { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 0.72rem; white-space: nowrap; }
+  .fz-franja__btn:hover, .fz-franja__btn:focus-visible { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--accent); }
+  .fz-franja__pasos { margin: 1.5rem 0 0; padding-left: 1.3rem; font-size: 0.78rem; line-height: 1.55; columns: 3; column-gap: 1.5rem; }
+  .fz-franja__pasos li { break-inside: avoid; margin-bottom: 0.3rem; }
+  @media (max-width: 720px) {
+    .fz-franja__cols { grid-template-columns: 1fr; }
+    .fz-franja__pasos { columns: 1; }
+  }
+
+  /* ── C: botón flotante "⬇ PDF" con menú desplegable ──────────────── */
+  .fz-flot { position: relative; }
+  .fz-flot__btn {
+    list-style: none; cursor: pointer; display: inline-block;
+    font-family: var(--font-head); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--ink); background: var(--accent); border: 2px solid var(--ink); border-radius: 999px; padding: 0.45em 0.75em;
+    line-height: 1.2; box-shadow: 2px 2px 0 var(--ink);
+  }
+  .fz-flot__btn::-webkit-details-marker { display: none; }
+  .fz-flot[open] .fz-flot__btn { background: var(--ink); color: var(--paper); }
+  .fz-flot__panel {
+    position: absolute; right: 0; bottom: calc(100% + 0.6rem); width: min(19rem, calc(100vw - 28px));
+    display: flex; flex-direction: column; gap: 0.3rem;
+    background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 14px;
+    padding: 0.9rem 0.9rem 0.8rem; box-shadow: 6px 6px 0 var(--ink);
+  }
+  .fz-flot__t { margin: 0 0 0.3rem; font-family: 'Anton', var(--font-head); text-transform: uppercase; font-size: 1.3rem; line-height: 1; }
+  .fz-flot__g { margin: 0.45rem 0 0.1rem; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; opacity: 0.75; }
+  .fz-flot__panel a {
+    display: flex; justify-content: space-between; gap: 0.5rem; text-decoration: none; color: var(--ink);
+    font-family: var(--font-head); font-weight: 700; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em;
+    background: transparent; border: 2px solid var(--ink); border-radius: 999px; padding: 0.4em 0.75em; box-shadow: none; line-height: 1.25;
+  }
+  .fz-flot__panel a:hover, .fz-flot__panel a:focus-visible { background: var(--accent); }
+  .fz-flot__panel a span { font-weight: 400; text-transform: none; letter-spacing: 0; opacity: 0.8; white-space: nowrap; }
+  .fz-flot__n { margin: 0.5rem 0 0; font-size: 0.66rem; line-height: 1.45; opacity: 0.8; }
 </style>

@@ -21,6 +21,7 @@
 import type { ColorSchemeName } from '../../config/site';
 import OptimizedImage from '../OptimizedImage.astro';
 import type { ImageSource } from '../../utils/resolveImage';
+import DescargaPdf from './DescargaPdf.astro';
 
 export type PliegoTipo = 'portada' | 'indice' | 'normal' | 'relleno' | 'fin' | 'contraportada';
 
@@ -43,6 +44,8 @@ if (!Number.isInteger(n) || n < 1 || n > 64) {
 }
 
 const hasContent = Astro.slots.has('default');
+const descargaBajoPortada = tipo === 'portada' && process.env.DESCARGA_VARIANTE === 'portada';
+const slugUrl = Astro.url.pathname.replace(/\/$/, '').split('/').pop() ?? '';
 const bleedImage = typeof bleed === 'boolean' ? undefined : bleed;
 const showNum = tipo !== 'portada' && tipo !== 'contraportada';
 const LABELS: Record<PliegoTipo, string> = {
@@ -102,6 +105,7 @@ const LABELS: Record<PliegoTipo, string> = {
 
   {showNum && <span class="pliego__num" aria-hidden="true">{n}</span>}
 </section>
+{descargaBajoPortada && <DescargaPdf slug={slugUrl} variante="portada" />}
 
 <style>
   /* ── Pantalla: un tramo más del scroll, no una página ─────────────── */

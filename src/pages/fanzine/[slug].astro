@@ -38,15 +38,20 @@ if (redirectTo) {
 }
 const { Content } = await post.render();
 const title = `Vol. ${post.data.volume} — ${post.data.title}`;
+const variante = (process.env.DESCARGA_VARIANTE ?? 'header') as 'header' | 'portada' | 'final' | 'flotante';
+const slug = fanzineSlug(post);
 ---
 
 <FanzineLayout title={title} description={post.data.description} colorScheme={post.data.colorScheme} prueba={post.data.prueba}>
   {/* PDFs de Typst (issue #9): pantalla e imprenta, generados en CI. */}
-  <DescargaPdf slot="download" slug={fanzineSlug(post)} />
+  {variante === 'header' && <DescargaPdf slot="download" slug={slug} />}
   <a slot="jump" href="#pagina-2">≡ Índice</a>
+  {variante === 'final' && <a slot="jump" href="#descargas">⬇ PDF</a>}
+  {variante === 'flotante' && <DescargaPdf slot="jump" slug={slug} variante="flotante" />}
   <article class="fz-volume-page post-body">
     <Volumen>
       <Content />
     </Volumen>
   </article>
+  {variante === 'final' && <DescargaPdf slug={slug} variante="final" />}
 </FanzineLayout>
