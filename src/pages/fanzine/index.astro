@@ -5,6 +5,8 @@ import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 import { listarVolumenes } from '../../utils/volumenes';
+// PRUEBA TEMPORAL (#8, criterio 4): imagen grande sin optimizar. Se revierte.
+import pruebaGrande from '../../assets/img/ilustracion.png';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // Volúmenes compuestos (src/content/volumenes/*.yml) y MDX (issue #13);
