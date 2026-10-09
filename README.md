@@ -1,4 +1,4 @@
-# La Jirafa Eléctrica — base Astro
+# La Jirafa Elektrika — base Astro
 
 Base para migrar el fanzine de Ghost a un sitio estático con **Astro + MDX**,
 desplegado en **GitHub Pages**. Reemplaza:
@@ -168,11 +168,17 @@ chequeos de desborde, índice, ppi, fuentes y QR), `npm run print:test`
 (fixtures), `npm run print:prueba` / `print:verify` (hoja de prueba) y
 `npm run print:check` (reglas vs docs). Los PDF se generan en CI
 (artifacts `fanzine-pdfs` e `impreso-prueba`), se copian a
-`dist/fanzine/<slug>/` y no se commitean; en `/fanzine/vol-NN` hay botones
-"Descargar PDF para leer / para imprenta", el **cuadernillo en carta**
-(color y xerox) para imprimir en casa a doble cara y engrapar, la versión
-xerox página por página y "Cómo imprimir". Si una pieza no cabe en su
-página, el build falla y dice cuál: el texto nunca se achica.
+`dist/fanzine/<slug>/` y no se commitean; en `/fanzine/vol-NN`, debajo
+de la portada, va la tarjeta "Llévatelo: este volumen en PDF"
+(`DescargaPdf.astro`): "Para leer" (pantalla), "Para imprimir en casa"
+(**cuadernillo en carta** a color, a doble cara y engrapar) y, como ligas
+chicas, el cuadernillo xerox, la versión xerox página por página, el PDF
+de imprenta y "Cómo imprimir", más los pasos para engrapar. Si una pieza
+no cabe en su página, el build falla y dice cuál: el texto nunca se achica.
+En `/fanzine/colabora` están el **manifiesto** y los **principios y
+acuerdo de colaboración editorial** (textos en
+`src/content/pages/fanzine-manifiesto.mdx` y `fanzine-acuerdo.mdx`,
+ligados desde el header y el footer del fanzine).
 
 ## Personalización (colores, tipografía, redes)
 

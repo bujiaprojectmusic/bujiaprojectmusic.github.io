@@ -19,7 +19,6 @@ import Pliego from '../../components/fanzine/Pliego.astro';
 import Portada from '../../components/Portada.astro';
 import Indice from '../../components/Indice.astro';
 import ComponerPiezas from '../../components/fanzine/ComponerPiezas.astro';
-import DescargaPdf from '../../components/fanzine/DescargaPdf.astro';
 import { fanzineSlug, fanzinePath } from '../../utils/fanzine';
 import { componerVolumen, type VolumenCompuesto } from '../../utils/volumenes';
 
@@ -66,7 +65,6 @@ let title = '';
 let description: string | undefined;
 let colorScheme: any = 'negro';
 let prueba = false;
-let slug = '';
 let Content: any = null;
 let piezasRender: { Content: any; pieza: CollectionEntry<'piezas'>; desde: number }[] = [];
 if (compuesto) {
@@ -75,7 +73,6 @@ if (compuesto) {
   description = v.descripcion;
   colorScheme = v.colorScheme;
   prueba = v.prueba;
-  slug = compuesto.slug;
   const vistos = new Set<string>();
   for (const p of compuesto.composicion.paginas) {
     if (p.tipo !== 'pieza' || vistos.has(p.pieza.id)) continue;
@@ -89,15 +86,14 @@ if (compuesto) {
   description = post.data.description;
   colorScheme = post.data.colorScheme;
   prueba = post.data.prueba;
-  slug = fanzineSlug(post);
   Content = (await post.render()).Content;
 }
 const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' });
 ---
 
 <FanzineLayout title={title} description={description} colorScheme={colorScheme} prueba={prueba}>
-  {/* PDFs de Typst (issue #9/#10): generados en CI. */}
-  <DescargaPdf slot="download" slug={slug} />
+  {/* La tarjeta de descarga de PDF (issues #9/#10) la pinta Pliego.astro
+      debajo de la portada (tipo="portada"); el header queda limpio. */}
   <a slot="jump" href="#pagina-2">≡ Índice</a>
   <article class="fz-volume-page post-body">
     <Volumen>

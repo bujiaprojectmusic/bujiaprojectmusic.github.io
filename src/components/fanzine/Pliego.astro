@@ -17,10 +17,13 @@
 //   sin caja. El control "↑ Inicio / ≡ Índice" vive una sola vez en el
 //   layout, no en cada pliego.
 // - Print: cada pliego es una página (break-before), con número.
+// - tipo="portada": después de la sección va la tarjeta de descarga de
+//   PDF (DescargaPdf.astro), sólo en pantalla.
 // ─────────────────────────────────────────────────────────────────────────
 import type { ColorSchemeName } from '../../config/site';
 import OptimizedImage from '../OptimizedImage.astro';
 import type { ImageSource } from '../../utils/resolveImage';
+import DescargaPdf from './DescargaPdf.astro';
 
 export type PliegoTipo = 'portada' | 'indice' | 'normal' | 'relleno' | 'fin' | 'contraportada';
 
@@ -43,6 +46,9 @@ if (!Number.isInteger(n) || n < 1 || n > 64) {
 }
 
 const hasContent = Astro.slots.has('default');
+// Debajo de la portada va la tarjeta de descarga de PDF (issues #9/#10).
+// El slug es el último tramo de la URL del volumen (/fanzine/vol-NN).
+const slugVolumen = tipo === 'portada' ? (Astro.url.pathname.replace(/\/$/, '').split('/').pop() ?? '') : '';
 const bleedImage = typeof bleed === 'boolean' ? undefined : bleed;
 const showNum = tipo !== 'portada' && tipo !== 'contraportada';
 const LABELS: Record<PliegoTipo, string> = {
@@ -102,6 +108,7 @@ const LABELS: Record<PliegoTipo, string> = {
 
   {showNum && <span class="pliego__num" aria-hidden="true">{n}</span>}
 </section>
+{tipo === 'portada' && <DescargaPdf slug={slugVolumen} />}
 
 <style>
   /* ── Pantalla: un tramo más del scroll, no una página ─────────────── */

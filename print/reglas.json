@@ -1,5 +1,5 @@
 {
-  "$comentario": "Reglas del impreso de La Jirafa Eléctrica (issue #16). ÚNICO lugar donde se escriben medidas y tamaños: lo leen print/lib/base.typ (json), scripts/print/*.mjs y docs/IMPRESO.md (tablas generadas con `npm run print:check -- --write`). Unidad: pt (1 in = 72 pt) salvo que el nombre diga otra cosa.",
+  "$comentario": "Reglas del impreso de La Jirafa Elektrika (issue #16). ÚNICO lugar donde se escriben medidas y tamaños: lo leen print/lib/base.typ (json), scripts/print/*.mjs y docs/IMPRESO.md (tablas generadas con `npm run print:check -- --write`). Unidad: pt (1 in = 72 pt) salvo que el nombre diga otra cosa.",
   "version": 2,
   "formato": {
     "corte": { "ancho_pt": 396, "alto_pt": 612, "ancho_in": 5.5, "alto_in": 8.5, "orientacion": "vertical (media carta)" },

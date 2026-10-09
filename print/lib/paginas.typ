@@ -150,7 +150,7 @@
   let cuerpo = if tipo == "colabora" {
     titulo("Colabora")
     texto("cuerpo_1col", quien: "relleno colabora")[
-      La Jirafa Eléctrica se arma con lo que la gente manda: fotos de su instrumento, crónicas de tocadas, tutoriales, dibujos, quejas. No hace falta escribir bonito; hace falta tener algo que contar.
+      La Jirafa Elektrika se arma con lo que la gente manda: fotos de su instrumento, crónicas de tocadas, tutoriales, dibujos, quejas. No hace falta escribir bonito; hace falta tener algo que contar.
 
       Mandalo al taller (WhatsApp #ctx.vol.taller.whatsapp) o dejalo en persona en #ctx.vol.taller.direccion. Todo se publica con crédito y con permiso.
     ]

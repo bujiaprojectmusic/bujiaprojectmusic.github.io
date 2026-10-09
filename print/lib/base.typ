@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────
-// Base del impreso de La Jirafa Eléctrica (issue #16). Lee TODAS las
+// Base del impreso de La Jirafa Elektrika (issue #16). Lee TODAS las
 // medidas de /print/reglas.json: tamaño de hoja, sangrado, márgenes
 // (inside/outside con binding: left), folio y estilos de texto. Ningún
 // número de página, margen ni tamaño de letra se escribe acá a mano.

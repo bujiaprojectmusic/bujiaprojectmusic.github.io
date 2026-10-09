@@ -54,7 +54,7 @@
   if "styles" in fields {
     positional.push(fields.remove("styles"))
   }
-  // PARCHE LOCAL (La Jirafa Eléctrica, #9): enum/list/grid/stack/terms
+  // PARCHE LOCAL (La Jirafa Elektrika, #9): enum/list/grid/stack/terms
   // reciben sus hijos como argumentos posicionales sueltos, no como un
   // arreglo (con el arreglo Typst 0.15 falla: "array must contain exactly
   // two entries"). `sequence` sí acepta el arreglo.
@@ -104,7 +104,7 @@
     if height <= goal-height {
       continue
     }
-    // PARCHE LOCAL (La Jirafa Eléctrica, #9): en enum/list los ítems no se
+    // PARCHE LOCAL (La Jirafa Elektrika, #9): en enum/list los ítems no se
     // parten: el que no cabe pasa entero al resto, y el enum del resto
     // sigue la numeración (start) en vez de volver a 1.
     if repr(body.func()) in ("enum", "list") and not reverse {
