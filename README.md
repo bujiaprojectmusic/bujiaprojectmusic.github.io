@@ -130,6 +130,10 @@ de la portada, va la tarjeta "Llévatelo: este volumen en PDF"
 chicas, el cuadernillo xerox, la versión xerox página por página, el PDF
 de imprenta y "Cómo imprimir", más los pasos para engrapar. Si una pieza
 no cabe en su página, el build falla y dice cuál: el texto nunca se achica.
+En `/fanzine/colabora` están el **manifiesto** y los **principios y
+acuerdo de colaboración editorial** (textos en
+`src/content/pages/fanzine-manifiesto.mdx` y `fanzine-acuerdo.mdx`,
+ligados desde el header y el footer del fanzine).
 
 ## Personalización (colores, tipografía, redes)
 

@@ -1,0 +1,271 @@
+---
+// /fanzine/colabora: el manifiesto de La Jirafa Eléctrica y los principios
+// y acuerdo de colaboración editorial, en una sola página con dos anclas
+// (#manifiesto, #acuerdo). Los textos viven en la colección `pages`
+// (src/content/pages/fanzine-manifiesto.mdx y fanzine-acuerdo.mdx) para
+// editarlos sin tocar código. Sin JavaScript. Se liga desde el header del
+// fanzine ("Colabora"). Issue #12 (plantilla de envío por correo) queda
+// aparte: acá sólo van los dos textos.
+import { getEntry } from 'astro:content';
+import FanzineLayout from '../../layouts/FanzineLayout.astro';
+
+const manifiesto = await getEntry('pages', 'fanzine-manifiesto');
+const acuerdo = await getEntry('pages', 'fanzine-acuerdo');
+if (!manifiesto || !acuerdo) {
+  throw new Error('/fanzine/colabora: faltan src/content/pages/fanzine-manifiesto.mdx o fanzine-acuerdo.mdx.');
+}
+const { Content: Manifiesto } = await manifiesto.render();
+const { Content: Acuerdo } = await acuerdo.render();
+---
+
+<FanzineLayout
+  title="Colabora"
+  description="Manifiesto y acuerdo de colaboración de La Jirafa Eléctrica: qué documentamos, cómo trabajamos y bajo qué condiciones publicamos."
+  colorScheme="acido"
+>
+  <a slot="jump" href="#manifiesto">01 Manifiesto</a>
+  <a slot="jump" href="#acuerdo">02 Acuerdo</a>
+
+  <div class="fz-colabora">
+    <header class="fz-colabora__head">
+      <p class="fz-colabora__eyebrow">Colabora</p>
+      <h1 class="fz-colabora__title">Hecho entre<br />varias manos</h1>
+      <p class="fz-colabora__sub">
+        Si quieres colaborar en el fanzine, lee primero estos dos textos: el <a href="#manifiesto">manifiesto</a>
+        (qué nos interesa y cómo lo hacemos) y el <a href="#acuerdo">acuerdo de colaboración</a> (las condiciones
+        bajo las que recibimos, trabajamos y publicamos contenido).
+      </p>
+      <nav class="fz-colabora__tabs fz-no-print" aria-label="Secciones">
+        <a href="#manifiesto"><span>01</span> Manifiesto</a>
+        <a href="#acuerdo"><span>02</span> Acuerdo de colaboración</a>
+      </nav>
+    </header>
+
+    <section id="manifiesto" class="fz-colabora__sec fz-colabora__sec--manifiesto" aria-labelledby="manifiesto-titulo">
+      <header class="fz-colabora__sechead">
+        <p class="fz-colabora__num" aria-hidden="true">01</p>
+        <h2 id="manifiesto-titulo" class="fz-colabora__h2">{manifiesto.data.title}</h2>
+        {manifiesto.data.subtitle && <p class="fz-colabora__lema">{manifiesto.data.subtitle}</p>}
+      </header>
+      <div class="post-body fz-colabora__body">
+        <Manifiesto />
+      </div>
+    </section>
+
+    <section id="acuerdo" class="fz-colabora__sec fz-colabora__sec--acuerdo" aria-labelledby="acuerdo-titulo">
+      <header class="fz-colabora__sechead">
+        <p class="fz-colabora__num" aria-hidden="true">02</p>
+        <h2 id="acuerdo-titulo" class="fz-colabora__h2">{acuerdo.data.title}</h2>
+        {acuerdo.data.subtitle && <p class="fz-colabora__version">{acuerdo.data.subtitle}</p>}
+      </header>
+      <div class="post-body fz-colabora__body fz-colabora__body--acuerdo">
+        <Acuerdo />
+      </div>
+    </section>
+  </div>
+</FanzineLayout>
+
+<style>
+  .fz-colabora {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+  .fz-colabora__head {
+    margin-bottom: 2.5rem;
+  }
+  .fz-colabora__eyebrow {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.75rem;
+    background: var(--accent);
+    display: inline-block;
+    padding: 0.25em 0.7em;
+    margin: 0 0 0.8rem;
+  }
+  .fz-colabora__title {
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(2.6rem, 9vw, 5rem);
+    line-height: 0.92;
+    margin: 0 0 1rem;
+  }
+  .fz-colabora__sub {
+    margin: 0 0 1.4rem;
+    max-width: 40rem;
+    line-height: 1.55;
+  }
+  .fz-colabora__sub a {
+    color: inherit;
+    font-weight: 700;
+    text-decoration-thickness: 3px;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 3px;
+  }
+  .fz-colabora__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .fz-colabora__tabs a {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.5em 1em;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .fz-colabora__tabs a span {
+    color: var(--accent);
+    -webkit-text-stroke: 1px var(--ink);
+    margin-right: 0.3em;
+  }
+  .fz-colabora__tabs a:hover,
+  .fz-colabora__tabs a:focus-visible {
+    background: var(--accent);
+  }
+
+  /* ── Secciones: cada una, una "caja" con borde grueso ─────────────── */
+  .fz-colabora__sec {
+    position: relative;
+    border: var(--border-w) solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--paper);
+    padding: 1.6rem 1.6rem 1.8rem;
+    margin: 0 0 2.5rem;
+    scroll-margin-top: 1rem;
+  }
+  .fz-colabora__sec--manifiesto {
+    box-shadow: 8px 8px 0 var(--accent);
+  }
+  .fz-colabora__sec--acuerdo {
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  .fz-colabora__sechead {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.2rem 1rem;
+    align-items: baseline;
+    border-bottom: var(--border-w) solid var(--ink);
+    padding-bottom: 0.8rem;
+    margin-bottom: 1.4rem;
+  }
+  .fz-colabora__num {
+    grid-row: 1 / span 2;
+    margin: 0;
+    font-family: 'Anton', var(--font-head);
+    font-size: clamp(2.6rem, 8vw, 4rem);
+    line-height: 0.9;
+    color: var(--accent);
+    -webkit-text-stroke: 2px var(--ink);
+  }
+  .fz-colabora__h2 {
+    margin: 0;
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    line-height: 1;
+  }
+  .fz-colabora__lema {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .fz-colabora__version {
+    margin: 0;
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+  }
+
+  /* El cuerpo reutiliza .post-body (h3 amarillos rotados, negritas, listas).
+     Sin dropcap: son textos de principios, no crónicas. */
+  .fz-colabora__body :global(> p:first-of-type::first-letter) {
+    float: none;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    margin: 0;
+    padding: 0;
+  }
+  .fz-colabora__body :global(p) {
+    line-height: 1.6;
+  }
+  .fz-colabora__body :global(ul) {
+    padding-left: 1.3rem;
+    margin: 0 0 1em;
+    text-align: left;
+  }
+  .fz-colabora__body :global(li) {
+    margin-bottom: 0.3em;
+  }
+  .fz-colabora__body :global(li::marker) {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  /* Firma del manifiesto (ver fanzine-manifiesto.mdx). */
+  .fz-colabora__body :global(.fz-firma) {
+    margin: 2rem 0 0;
+    padding: 1rem 1.2rem;
+    border-left: 6px solid var(--accent);
+    text-align: left;
+    line-height: 1.6;
+  }
+  .fz-colabora__body :global(.fz-firma strong) {
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    font-size: 1.4rem;
+    letter-spacing: 0.04em;
+  }
+  /* En el acuerdo, los 14 puntos van como títulos sin rotar: es un texto
+     para leerse en orden, no una pieza del fanzine. */
+  .fz-colabora__body--acuerdo :global(h3) {
+    display: block;
+    transform: none;
+    background: transparent;
+    padding: 0.4em 0 0.2em;
+    border-top: 3px solid var(--ink);
+    font-size: 1.05rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 640px) {
+    .fz-colabora {
+      padding: 1.5rem 1rem 3rem;
+    }
+    .fz-colabora__sec {
+      padding: 1.2rem 1rem 1.4rem;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+    .fz-colabora__sec--manifiesto {
+      box-shadow: 5px 5px 0 var(--accent);
+    }
+    .fz-colabora__body {
+      text-align: left;
+      hyphens: manual;
+    }
+  }
+  @media print {
+    .fz-colabora__sec {
+      box-shadow: none;
+      border-width: 2px;
+      break-inside: auto;
+    }
+    .fz-colabora__sec--acuerdo {
+      break-before: page;
+    }
+  }
+</style>
