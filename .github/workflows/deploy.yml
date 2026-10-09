@@ -96,6 +96,41 @@ jobs:
       - name: PDF en dist
         run: ls -la dist/fanzine/*/ && test -z "$(git ls-files '*.pdf')"
 
+      # Presupuesto de datos (issue #8): límites y páginas en budget.json;
+      # scripts/check-budget.mjs sirve dist/ con gzip y mide con Chromium
+      # (Playwright) en 390×844 y caché vacía. Falla el job si /fanzine o un
+      # volumen rebasa; las páginas informativas sólo avisan. Corre en PRs y
+      # en main. Chromium se cachea por versión de Playwright (lockfile);
+      # con cache hit sólo se instalan las librerías del sistema (~20 s).
+      # Costo en el job build: ~1 min con caché (instalación + ~40 s de
+      # medición); el deploy sigue dependiendo sólo de este job.
+      - name: Caché de Chromium (Playwright)
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Instalar Chromium de Playwright
+        run: |
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+            echo "Chromium desde la caché (cache hit)"; npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+
+      - name: Presupuesto de datos (budget.json)
+        run: npm run check:budget -- --json budget-reporte.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: presupuesto
+          path: budget-reporte.json
+          if-no-files-found: ignore
+
       - uses: actions/upload-artifact@v4
         with:
           name: fanzine-pdfs

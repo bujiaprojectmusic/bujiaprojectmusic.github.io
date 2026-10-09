@@ -1,0 +1,18 @@
+{
+  "$comentario": "Presupuesto de datos del fanzine (issue #8). ÚNICO lugar con los límites: lo lee scripts/check-budget.mjs (npm run check:budget), que corre en CI en cada PR y en main. Medición: móvil (viewport abajo), caché vacía, bytes transferidos comprimidos (gzip para texto, como GitHub Pages). Los PDF descargables no cuentan: sólo se bajan si la persona los pide.",
+  "viewport": { "ancho": 390, "alto": 844 },
+  "limites_kb": {
+    "primera_vista": 300,
+    "html": 30,
+    "css": 25,
+    "fuentes": 60,
+    "js": 5,
+    "pagina_completa": 3072
+  },
+  "paginas": {
+    "$comentario": "fallan: tumban el CI si rebasan. informativas: sólo advertencia. /fanzine/vol-* se expande a cada volumen generado en dist/ (sin las redirecciones).",
+    "fallan": ["/fanzine", "/fanzine/vol-*"],
+    "informativas": ["/", "/nosotros", "/archive/primera-skatelecaster"]
+  },
+  "recursos_mas_pesados": 5
+}
