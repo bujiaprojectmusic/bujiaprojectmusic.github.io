@@ -195,7 +195,8 @@
     "inset_x_pt": 3,
     "inset_y_pt": 1.5,
     "estilos": 4,
-    "espacio_pt": 7
+    "espacio_pt": 7,
+    "interlinea_pt": 6
   },
   "collage_xerox": {
     "alto_pct": 42,

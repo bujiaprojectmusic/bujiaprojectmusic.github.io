@@ -3,7 +3,7 @@ $ node scripts/print/build.mjs --fixture tests/print/fixtures/sin-gemelo.mdx
 exit: 1
 
 $ node scripts/print/build.mjs --fixture tests/print/fixtures/catalogo-propuesto.mdx
-✖ tests/print/fixtures/catalogo-propuesto.mdx:33: el componente <CintaCanela> (CintaCanela.astro) está "propuesto" en el catálogo, no aprobado. Ricardo lo aprueba en la puerta 2; hasta entonces no va en un volumen.
+✖ tests/print/fixtures/catalogo-propuesto.mdx:33: el componente <PapelRoto> (PapelRoto.astro) está "propuesto" en el catálogo, no aprobado. Ricardo lo aprueba en la puerta 2; hasta entonces no va en un volumen.
 exit: 1
 
 $ node scripts/print/build.mjs --fixture tests/print/fixtures/catalogo-sin-gemelo.mdx

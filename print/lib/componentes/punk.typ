@@ -71,7 +71,7 @@
   let letras = p.at("letras", default: ())
   block(width: 100%, above: 10pt, below: 8pt, breakable: false,
     heading(level: 1, outlined: false, bookmarked: ctx.pantalla, {
-      set par(leading: 6pt)
+      set par(leading: pt(G.interlinea_pt))
       for l in letras {
         if l.at("espacio", default: false) { h(pt(G.espacio_pt)) } else { recorte(l); h(1.5pt) }
       }
