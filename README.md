@@ -192,6 +192,31 @@ mientras falten, salen placeholders marcados TODO y el build no se rompe. Se
 ven todos en `/fanzine/muestra` (noindex, fuera del sitemap). Detalle en
 [`COMPONENTES_MDX.md`](COMPONENTES_MDX.md).
 
+## Mandar colaboraciones: `/fanzine/colabora/enviar` (issue #12)
+
+La puerta de entrada para colaboradores: intro, "Cómo enviar", tabla de
+campos, plantilla para copiar, permisos de publicación y el botón **"Mandar
+mi colaboración"** (un `mailto:` a `bujiaprojectmusic+fanzine@gmail.com` con
+asunto y cuerpo ya puestos). El asunto, la plantilla, los campos y el texto
+de permisos viven en **un solo lugar**, `src/config/colabora.ts` (copia fiel
+del issue #12 / doc "Plantilla para colaboradores"): de ahí salen el `<pre>`
+y el `mailto:` (`mailtoColabora()`, `encodeURIComponent` y `%0D%0A`). El
+correo y el **interruptor de publicación** están en `src/config/site.ts`
+(`fanzine.colabora`):
+
+- `publicada: false` (default, mientras el texto de permisos está en
+  revisión legal): la página se genera pero con `noindex`, fuera del
+  sitemap, sin enlaces desde el sitio y con el aviso "Borrador – pendiente
+  de revisión legal".
+- `publicada: true`: se indexa, entra al sitemap, se enlaza desde `/fanzine`
+  y `/fanzine/colabora` y desaparece el aviso.
+
+El único dato de contacto que se publica ahí es ese correo. El botón
+"Copiar plantilla" usa < 1 KB de JS inline y sin JS no aparece (la plantilla
+se copia del `<pre>`). Tests: `npm run test:content`
+(`tests/content/colabora.test.mjs`). El manifiesto y el acuerdo de
+colaboración siguen en `/fanzine/colabora`.
+
 ## Presupuesto de datos (issue #8)
 
 El fanzine tiene que ser vistoso pero ligero. Los límites viven **sólo en

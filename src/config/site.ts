@@ -349,3 +349,21 @@ export const printPage = {
   width: '5.5in',
   height: '8.5in',
 };
+
+// ─────────────────────────────────────────────────────────────────────────
+// Fanzine: página de envío de colaboraciones (issue #12),
+// /fanzine/colabora/enviar. `publicada: false` (default) = la página se
+// genera pero con noindex, fuera del sitemap, sin enlaces desde el sitio y
+// con el aviso "Borrador – pendiente de revisión legal". Ricardo la pone en
+// `true` cuando termine la revisión legal: se indexa, entra al sitemap, se
+// enlaza desde /fanzine y /fanzine/colabora y desaparece el aviso. El único
+// dato de contacto que se publica en esa página es `correo`.
+// La plantilla y el texto de permisos viven en src/config/colabora.ts.
+// ─────────────────────────────────────────────────────────────────────────
+export const fanzine = {
+  colabora: {
+    publicada: false,
+    correo: 'bujiaprojectmusic+fanzine@gmail.com',
+    ruta: '/fanzine/colabora/enviar',
+  },
+} as const;

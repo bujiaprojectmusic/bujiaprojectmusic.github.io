@@ -8,6 +8,7 @@
 // aparte: acá sólo van los dos textos.
 import { getEntry } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
+import { fanzine } from '../../config/site';
 
 const manifiesto = await getEntry('pages', 'fanzine-manifiesto');
 const acuerdo = await getEntry('pages', 'fanzine-acuerdo');
@@ -16,6 +17,9 @@ if (!manifiesto || !acuerdo) {
 }
 const { Content: Manifiesto } = await manifiesto.render();
 const { Content: Acuerdo } = await acuerdo.render();
+// Enlace a /fanzine/colabora/enviar (issue #12) sólo cuando esté publicada.
+const enviar = fanzine.colabora.publicada ? fanzine.colabora.ruta : null;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <FanzineLayout
@@ -38,6 +42,7 @@ const { Content: Acuerdo } = await acuerdo.render();
       <nav class="fz-colabora__tabs fz-no-print" aria-label="Secciones">
         <a href="#manifiesto"><span>01</span> Manifiesto</a>
         <a href="#acuerdo"><span>02</span> Acuerdo de colaboración</a>
+        {enviar && <a href={`${base}${enviar}`} class="fz-colabora__tabs-cta"><span>03</span> Manda tu colaboración</a>}
       </nav>
     </header>
 
@@ -132,6 +137,10 @@ const { Content: Acuerdo } = await acuerdo.render();
   .fz-colabora__tabs a:hover,
   .fz-colabora__tabs a:focus-visible {
     background: var(--accent);
+  }
+  .fz-colabora__tabs-cta {
+    background: var(--ink) !important;
+    color: var(--paper) !important;
   }
 
   /* ── Secciones: cada una, una "caja" con borde grueso ─────────────── */
