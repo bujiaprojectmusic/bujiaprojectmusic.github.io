@@ -1,0 +1,19 @@
+$ node scripts/print/build.mjs --fixture tests/print/fixtures/sin-gemelo.mdx
+✖ tests/print/fixtures/sin-gemelo.mdx:33: el componente <TallerCover> (TallerCover.astro) no está en el catálogo (src/components/fanzine/registro.json). Nada entra a un volumen sin estar registrado y aprobado con sus dos versiones (web + Typst); ver COMPONENTES_MDX.md § Catálogo.
+exit: 1
+
+$ node scripts/print/build.mjs --fixture tests/print/fixtures/catalogo-propuesto.mdx
+✖ tests/print/fixtures/catalogo-propuesto.mdx:33: el componente <CintaCanela> (CintaCanela.astro) está "propuesto" en el catálogo, no aprobado. Ricardo lo aprueba en la puerta 2; hasta entonces no va en un volumen.
+exit: 1
+
+$ node scripts/print/build.mjs --fixture tests/print/fixtures/catalogo-sin-gemelo.mdx
+✖ tests/print/fixtures/catalogo-sin-gemelo.mdx:33: el componente <MissingImage> (MissingImage.astro) no tiene gemelo Typst en print/lib/ (registro: typst = null). Agregá el gemelo y su ruta en registro.json, o sacalo del volumen.
+exit: 1
+
+$ node scripts/print/build.mjs --fixture tests/print/fixtures/catalogo-solo-web.mdx
+exit: 0
+
+(sin --quiet, para ver el aviso)
+  ⚠ tests/print/fixtures/catalogo-solo-web.mdx:33: <PunkButton> es sólo web (es navegación; en papel no hay a dónde ir (se omite con aviso)); en el impreso se omite.
+✔ vol-90: jirafa-vol-90-pantalla.pdf (16 págs, 0.64 MB) · jirafa-vol-90-imprenta.pdf (0.64 MB) · ppi mín 1309 · ligas pantalla 1, imprenta 0 · marcadores 12
+  ⚠ tests/print/fixtures/catalogo-solo-web.mdx:33: <PunkButton> es sólo web (es navegación; en papel no hay a dónde ir (se omite con aviso)); en el impreso se omite.

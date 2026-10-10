@@ -1,7 +1,8 @@
 // Tests del motor de impresión (issue #9) con los fixtures de
 // tests/print/fixtures/: desborde, tamaño mínimo, relleno a múltiplo de 4,
 // volumen que no cierra, multimedia qr/omitir, foto con ppi bajo y
-// componente sin gemelo. Corre: npm run print:test (node --test).
+// componente fuera del catálogo / propuesto / sin gemelo / sólo web (#17).
+// Corre: npm run print:test (node --test).
 // Necesita Typst (npm run print:install) y poppler.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -79,8 +80,28 @@ test('ppi bajo: una foto de 200 px a todo el ancho falla nombrando pieza y foto'
   assert.match(r.stderr, /La foto tests\/print\/fixtures\/foto-chica\.png en la pieza "Pieza 3" \(pág\. 3, <ImageFull>\) queda a \d+ ppi/);
 });
 
-test('componente sin gemelo: el export falla con archivo, línea y nombre', () => {
+test('catálogo (#17): un componente que no está en el registro falla con archivo, línea y nombre', () => {
   const r = build('sin-gemelo');
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /sin-gemelo\.mdx:\d+: el componente <TallerCover> \(TallerCover\.astro\) no tiene gemelo Typst/);
+  assert.match(r.stderr, /sin-gemelo\.mdx:33: el componente <TallerCover> \(TallerCover\.astro\) no está en el catálogo/);
+});
+
+test('catálogo (#17): un componente propuesto (no aprobado) falla con archivo, línea y nombre', () => {
+  const r = build('catalogo-propuesto');
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /catalogo-propuesto\.mdx:33: el componente <CintaCanela> \(CintaCanela\.astro\) está "propuesto" en el catálogo, no aprobado/);
+});
+
+test('catálogo (#17): un componente aprobado sin gemelo Typst falla con archivo, línea y nombre', () => {
+  const r = build('catalogo-sin-gemelo');
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /catalogo-sin-gemelo\.mdx:33: el componente <MissingImage> \(MissingImage\.astro\) no tiene gemelo Typst/);
+});
+
+test('catálogo (#17): un componente sólo web se omite del impreso con aviso y el build pasa', () => {
+  const r = build('catalogo-solo-web');
+  assert.equal(r.status, 0, r.stderr);
+  const res = resultado('catalogo-solo-web');
+  assert.ok(res.avisos.some((a) => /catalogo-solo-web\.mdx:33: <PunkButton> es sólo web/.test(a)), res.avisos.join('\n'));
+  assert.doesNotMatch(texto('catalogo-solo-web'), /Ver el fanzine/);
 });

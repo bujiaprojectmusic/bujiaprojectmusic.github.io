@@ -1,0 +1,44 @@
+---
+// /fanzine/kit/fachadas (issue #17): página fixture de las fachadas de
+// video y playlist, con 2 videos y 1 playlist. La usa el test de
+// Playwright (tests/web/fachadas.test.mjs): 0 peticiones a YouTube /
+// Spotify / Bandcamp antes del clic, iframe después del clic, y sin JS
+// cada fachada es un enlace. noindex y fuera del sitemap (astro.config.mjs).
+import FanzineLayout from '../../../layouts/FanzineLayout.astro';
+import VideoOldTV from '../../../components/content/VideoOldTV.astro';
+import VideoCinema from '../../../components/content/VideoCinema.astro';
+import Playlist from '../../../components/content/Playlist.astro';
+---
+
+<FanzineLayout title="Fachadas de video (fixture)" description="Página de prueba de las fachadas de video y playlist del fanzine." colorScheme="rosa" noindex>
+  <main class="fx">
+    <h1 class="fx__title">Fachadas de video y playlist</h1>
+    <p class="fx__sub">
+      Dos videos y una playlist. Nada se pide a YouTube, Spotify ni Bandcamp hasta que das clic; sin JavaScript cada fachada
+      es un enlace al servicio. Al imprimir, no aparecen. Ver <a href="/fanzine/kit">el kit</a>.
+    </p>
+    <VideoOldTV id="C1vfbwwdtOQ" title="Guitar Set Up 101" />
+    <VideoCinema id="C1vfbwwdtOQ" title="Sesión en vivo" clap="Toma 1" />
+    <Playlist servicio="youtube" id="PLzMaYoBMVrDm6n8BMuAVIctRy7GFBR5Ef" titulo="Playlist de ajuste" />
+  </main>
+</FanzineLayout>
+
+<style>
+  .fx {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+  .fx__title {
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    line-height: 0.95;
+    margin: 0 0 0.8rem;
+  }
+  .fx__sub {
+    max-width: 44rem;
+    line-height: 1.55;
+  }
+</style>

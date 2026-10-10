@@ -1,16 +1,23 @@
 ---
-// Video de YouTube con marco de cine viejo: perforaciones de rollo de
-// película a los costados y una claqueta arriba con el título.
+// Video de YouTube con marco de cine viejo: perforaciones de rollo a los
+// costados y claqueta arriba con el título. Fachada (#17): póster + enlace;
+// el iframe se mete al dar clic (ver Fachada.astro).
 // Uso: <VideoCinema id="dQw4w9WgXcQ" title="Sesión en vivo" clap="Toma 1" />
+// En papel sale como QR + leyenda u omitido (impreso.multimedia, #9).
+import Fachada from './Fachada.astro';
+import type { ImageSource } from '../../utils/resolveImage';
+
 interface Props {
   id: string;
   title: string;
   clap?: string;
+  /** Imagen local del póster (astro:assets); sin ella, pantalla CSS. */
+  poster?: ImageSource;
 }
-const { id, title, clap } = Astro.props;
+const { id, title, clap, poster } = Astro.props;
 ---
 
-<div class="cinema">
+<div class="cinema fz-no-print">
   {clap && (
     <div class="cinema__clap">
       <span class="cinema__clap-stripes" aria-hidden="true" />
@@ -20,13 +27,7 @@ const { id, title, clap } = Astro.props;
   <div class="cinema__reel">
     <span class="cinema__perf" aria-hidden="true" />
     <div class="cinema__screen">
-      <iframe
-        src={`https://www.youtube-nocookie.com/embed/${id}`}
-        title={title}
-        loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-      />
+      <Fachada href={`https://www.youtube.com/watch?v=${id}`} embed={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1`} title={title} etiqueta="Video · YouTube" poster={poster} />
     </div>
     <span class="cinema__perf" aria-hidden="true" />
   </div>
@@ -48,11 +49,7 @@ const { id, title, clap } = Astro.props;
   .cinema__clap-stripes {
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(
-      -35deg,
-      #fff 0 14px,
-      var(--ink) 14px 28px
-    );
+    background: repeating-linear-gradient(-35deg, #fff 0 14px, var(--ink) 14px 28px);
     opacity: 0.9;
     height: 10px;
     top: 0;
@@ -75,23 +72,15 @@ const { id, title, clap } = Astro.props;
   .cinema__perf {
     flex: none;
     width: 18px;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0 6px,
-      #d8cdb8 6px 16px,
-      transparent 16px 22px
-    );
+    background-image: repeating-linear-gradient(to bottom, transparent 0 6px, #d8cdb8 6px 16px, transparent 16px 22px);
   }
   .cinema__screen {
     position: relative;
     flex: 1;
-    aspect-ratio: 16 / 9;
   }
-  .cinema__screen iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
+  @media print {
+    .cinema {
+      display: none;
+    }
   }
 </style>

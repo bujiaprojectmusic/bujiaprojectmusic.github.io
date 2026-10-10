@@ -192,6 +192,31 @@ mientras falten, salen placeholders marcados TODO y el build no se rompe. Se
 ven todos en `/fanzine/muestra` (noindex, fuera del sitemap). Detalle en
 [`COMPONENTES_MDX.md`](COMPONENTES_MDX.md).
 
+## Catálogo de componentes: registro, `/fanzine/kit` y `jirafa-kit.pdf` (issue #17)
+
+- **Registro único:** `src/components/fanzine/registro.json` (49 + entradas:
+  inventario completo + propuestos). Regla: nada entra a un volumen sin
+  estar `aprobado` con sus dos versiones (web + Typst); `soloWeb` se omite
+  del impreso con aviso. El export (`npm run print`) falla nombrando
+  pieza, línea y componente si una pieza usa uno que no está, está
+  `propuesto` o no tiene gemelo.
+- **`/fanzine/kit`** (noindex, fuera del sitemap): cada componente
+  aprobado en rosa / xerox / overol, props, MDX copiable y miniatura Typst.
+  `/fanzine/kit/fachadas` es el fixture de las fachadas de video.
+- **`npm run print:kit`:** `print/build/kit/jirafa-kit.pdf` y
+  `jirafa-kit-bn.pdf` (una página por componente) + miniaturas PNG;
+  `copy-dist.mjs` los publica en `dist/fanzine/kit/`. Artifact `fanzine-kit`.
+- **`npm run check:componentes`:** CSS ≤ 1.5 KB gzip y SVG ≤ 2 KB gzip por
+  componente, sin raster. **`npm run test:web`:** fachadas con Playwright
+  (0 peticiones a YouTube/Spotify/Bandcamp antes del clic).
+- **Fachadas:** `VideoOldTV`, `VideoCinema` y `Playlist` (youtube | spotify
+  | bandcamp) no meten iframe hasta el clic; sin JS son enlaces. Script
+  compartido ≤ 1 KB gzip, sólo en páginas con video.
+- **Componente nuevo:** Redacción propone 2–3 por volumen en el PR del
+  volumen, Ricardo aprueba en la puerta 2, se abre un issue con la
+  plantilla `componente-punk` y entra al registro. Detalle en
+  `COMPONENTES_MDX.md` § 9.
+
 ## Mandar colaboraciones: `/fanzine/colabora/enviar` (issue #12)
 
 La puerta de entrada para colaboradores: intro, "Cómo enviar", tabla de

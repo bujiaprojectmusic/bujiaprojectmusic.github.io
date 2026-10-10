@@ -1,0 +1,26 @@
+$ pdffonts print/build/kit/jirafa-kit.pdf
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+QLTLNK+SpaceMono-Regular             CID TrueType      Identity-H       yes yes yes    288  0
+QHCPLK+SpaceMono-Bold                CID TrueType      Identity-H       yes yes yes    291  0
+QHRNKX+Anton-Regular                 CID TrueType      Identity-H       yes yes yes    294  0
+
+$ pdffonts print/build/kit/jirafa-kit-bn.pdf
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+QLTLNK+SpaceMono-Regular             CID TrueType      Identity-H       yes yes yes    266  0
+QHCPLK+SpaceMono-Bold                CID TrueType      Identity-H       yes yes yes    269  0
+QHRNKX+Anton-Regular                 CID TrueType      Identity-H       yes yes yes    272  0
+
+$ pdfinfo jirafa-kit.pdf
+Pages:           36
+Page size:       396 x 612 pts
+
+manifest-kit.json: gris (pdftoppm 50 dpi, 36 págs):
+{"maxRG":0,"maxGB":0}
+QR (jsQR sobre la página a 300 dpi):
+  https://www.youtube.com/watch?v=C1vfbwwdtOQ → leído: true
+  https://www.youtube.com/watch?v=C1vfbwwdtOQ → leído: true
+  https://www.youtube.com/watch?v=C1vfbwwdtOQ → leído: true
+  https://www.youtube.com/playlist?list=PLzMaYoBMVrDm6n8BMuAVIctRy7GFBR5Ef → leído: true
+componentes: 33 páginas: 36

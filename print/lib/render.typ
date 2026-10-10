@@ -7,9 +7,10 @@
 #import "/print/lib/componentes/titulos.typ": section-title, post-cover
 #import "/print/lib/componentes/bloques.typ": columnas, quote, note, divider
 #import "/print/lib/componentes/video.typ": video-poster
-#import "/print/lib/componentes/taller.typ": datos-taller
+#import "/print/lib/componentes/taller.typ": datos-taller, sticker-title, section-label
+#import "/print/lib/componentes/marca.typ": sticker, cinta, parche
 
-// Un gemelo por componente web (misma lista que GEMELOS en scripts/print/lib/mdx.ts).
+// Un gemelo por componente web (la lista viene del registro: src/components/fanzine/registro.json).
 // Portada, Indice y Contraportada viven en paginas.typ (definen la página).
 #let gemelos = (
   SectionTitle: section-title,
@@ -28,6 +29,12 @@
   OptimizedImage: optimized-image,
   VideoPoster: video-poster,
   DatosTaller: datos-taller,
+  // #17: marca y piezas del taller. Playlist llega como VideoPoster desde el export.
+  Sticker: sticker,
+  Cinta: cinta,
+  Parche: parche,
+  StickerTitle: sticker-title,
+  SectionLabel: section-label,
 )
 
 #let render-nodo(ctx, n) = {

@@ -85,6 +85,17 @@ jobs:
       - name: Resumen del impreso
         run: cat print/build/resumen.md >> "$GITHUB_STEP_SUMMARY"
 
+      # Catálogo de componentes (issue #17): jirafa-kit.pdf y jirafa-kit-bn.pdf
+      # desde src/components/fanzine/registro.json, con miniaturas PNG por
+      # componente para /fanzine/kit. copy-dist.mjs los lleva a dist/fanzine/kit/.
+      # El presupuesto por componente (CSS/SVG gzip, sin raster) se revisa con
+      # check:componentes.
+      - name: Catálogo de componentes (npm run print:kit)
+        run: npm run print:kit
+
+      - name: Presupuesto por componente (npm run check:componentes)
+        run: npm run check:componentes
+
       - name: Tests del motor de impresión (fixtures)
         run: npm run print:test
 
@@ -94,7 +105,7 @@ jobs:
       - run: npm run build
 
       - name: PDF en dist
-        run: ls -la dist/fanzine/*/ && test -z "$(git ls-files '*.pdf')"
+        run: ls -la dist/fanzine/*/ dist/fanzine/kit/typst/ && test -f dist/fanzine/kit/jirafa-kit.pdf && test -f dist/fanzine/kit/jirafa-kit-bn.pdf && test -z "$(git ls-files '*.pdf')"
 
       # Presupuesto de datos (issue #8): límites y páginas en budget.json;
       # scripts/check-budget.mjs sirve dist/ con gzip y mide con Chromium
@@ -124,6 +135,12 @@ jobs:
       - name: Presupuesto de datos (budget.json)
         run: npm run check:budget -- --json budget-reporte.json
 
+      # Fachadas de video y playlist (issue #17): 0 peticiones a YouTube /
+      # Spotify / Bandcamp antes del clic, iframe después, enlace sin JS,
+      # script ≤ 1 KB gzip y ausente en páginas sin video.
+      - name: Tests de las fachadas (npm run test:web)
+        run: npm run test:web
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -150,6 +167,16 @@ jobs:
       # tests/qa/fixtures/, fuera de src/).
       - name: Tests del QA (fixtures negativos)
         run: npm run qa:test
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fanzine-kit
+          path: |
+            print/build/kit/jirafa-kit.pdf
+            print/build/kit/jirafa-kit-bn.pdf
+            print/build/kit/manifest-kit.json
+            print/build/kit/typst/*.png
+          if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         with:

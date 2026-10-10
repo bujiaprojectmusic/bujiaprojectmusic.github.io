@@ -7,19 +7,32 @@
 //   export con archivo, línea y nombre. Única excepción: expresiones que
 //   leen datos del taller importados de src/data/taller.ts (`{whatsapp.url}`).
 // - Ligas internas al volumen → { tipo: "ref", pagina }; externas → sólo texto.
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import type { Nodo } from './tipos.ts';
 
-/** Componentes web con gemelo en print/lib/componentes/. */
-export const GEMELOS = new Set([
-  'Pliego', 'Portada', 'Indice', 'SectionTitle', 'Columnas', 'Polaroid', 'Contraportada',
-  'PostCover', 'ImageFull', 'ImageSide', 'Gallery', 'Xerox', 'PhotoOld', 'Quote', 'Note', 'Divider',
-  'VideoPoster', 'VideoOldTV', 'VideoCinema', 'BeforeAfter', 'OptimizedImage', 'DatosTaller',
-  // Piezas (#13): <Pagina> es la página relativa y <Foto n> la foto n del frontmatter (las resuelve sources/piezas.ts).
-  'Pagina', 'Foto',
-]);
+// ── Catálogo (issue #17): src/components/fanzine/registro.json ────────────
+// Un componente entra al impreso sólo si está en el registro, `aprobado` y
+// con gemelo Typst. `soloWeb` se omite con aviso. Todo lo demás es error
+// con archivo, línea y nombre.
+export interface EntradaRegistro {
+  nombre: string;
+  web: string | null;
+  typst: string | null;
+  estado: 'aprobado' | 'propuesto';
+  soloWeb: false | string;
+  soloImpreso: false | string;
+}
+export const RUTA_REGISTRO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'src', 'components', 'fanzine', 'registro.json');
+export const REGISTRO: Map<string, EntradaRegistro> = new Map(
+  (JSON.parse(fs.readFileSync(RUTA_REGISTRO, 'utf8')).componentes as EntradaRegistro[]).map((c) => [c.nombre, c]),
+);
+/** Componentes web con gemelo en print/lib/ (aprobados y con `typst` en el registro). */
+export const GEMELOS = new Set([...REGISTRO.values()].filter((c) => c.estado === 'aprobado' && c.typst).map((c) => c.nombre));
 /** Etiquetas HTML con gemelo (contenedores genéricos). */
 export const HTML_OK = new Set(['p', 'div', 'span', 'ul', 'ol', 'li', 'strong', 'b', 'em', 'i', 'a', 'br', 'hr', 'small', 'figure', 'figcaption', 'blockquote']);
 
@@ -141,6 +154,17 @@ export function convertirHijos(ctx: Contexto, hijos: any[]): Nodo[] {
   return out;
 }
 
+/** Chequeo de catálogo (#17). Devuelve true si el componente es sólo web y se omite. */
+export function revisarCatalogo(ctx: Contexto, nodo: any, nombre: string): boolean {
+  const r = REGISTRO.get(nombre);
+  const quien = `el componente <${nodo.name}> (${nombre}.astro)`;
+  if (!r) throw new ErrorExport(`${donde(ctx, nodo)}: ${quien} no está en el catálogo (src/components/fanzine/registro.json). Nada entra a un volumen sin estar registrado y aprobado con sus dos versiones (web + Typst); ver COMPONENTES_MDX.md § Catálogo.`);
+  if (r.estado !== 'aprobado') throw new ErrorExport(`${donde(ctx, nodo)}: ${quien} está "${r.estado}" en el catálogo, no aprobado. Ricardo lo aprueba en la puerta 2; hasta entonces no va en un volumen.`);
+  if (r.soloWeb) { ctx.avisos.push(`${donde(ctx, nodo)}: <${nodo.name}> es sólo web (${r.soloWeb}); en el impreso se omite.`); return true; }
+  if (!r.typst) throw new ErrorExport(`${donde(ctx, nodo)}: ${quien} no tiene gemelo Typst en print/lib/ (registro: typst = null). Agregá el gemelo y su ruta en registro.json, o sacalo del volumen.`);
+  return false;
+}
+
 export function convertir(ctx: Contexto, n: any): Nodo[] | null {
   switch (n.type) {
     case 'text': return [texto(n.value)];
@@ -195,7 +219,8 @@ export function convertir(ctx: Contexto, n: any): Nodo[] | null {
       }
       const nombre = ctx.componentes.get(n.name);
       if (!nombre) throw new ErrorExport(`${donde(ctx, n)}: <${n.name}> no está importado en el MDX.`);
-      if (!GEMELOS.has(nombre)) throw new ErrorExport(`${donde(ctx, n)}: el componente <${n.name}> (${nombre}.astro) no tiene gemelo Typst en print/lib/componentes/. Agregalo ahí o sacalo del volumen.`);
+      const omitir = revisarCatalogo(ctx, n, nombre);
+      if (omitir) return [];
       return [{ t: 'componente', nombre, props: props(ctx, n), hijos: convertirHijos(ctx, n.children) }];
     }
     case 'mdxjsEsm': return [];

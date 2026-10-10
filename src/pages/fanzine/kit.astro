@@ -1,0 +1,531 @@
+---
+// /fanzine/kit (issue #17): catálogo de componentes del fanzine, generado
+// desde src/components/fanzine/registro.json. Por componente: nombre,
+// descripción, render web en 3 esquemas (rosa, xerox, overol), tabla de
+// props, ejemplo MDX copiable (un clic selecciona todo; sin JS), estado y
+// la miniatura de su versión Typst (PNG a 150 dpi que genera
+// scripts/print/build-kit.mjs; sin ella en builds locales sin Typst).
+// noindex y fuera del sitemap (astro.config.mjs). Los PDF del catálogo
+// (jirafa-kit.pdf / jirafa-kit-bn.pdf) los copia copy-dist.mjs a /fanzine/kit/.
+import fs from 'node:fs';
+import path from 'node:path';
+import FanzineLayout from '../../layouts/FanzineLayout.astro';
+import { REGISTRO, GRUPOS, ejemploMdx, importMdx, hijosHtml, type Componente, type Grupo } from '../../components/fanzine/registro';
+import { colorSchemes } from '../../config/site';
+import { setPiezaActual } from '../../utils/piezaActual';
+import Pliego from '../../components/fanzine/Pliego.astro';
+import Pagina from '../../components/fanzine/Pagina.astro';
+import Foto from '../../components/fanzine/Foto.astro';
+import Relleno from '../../components/fanzine/Relleno.astro';
+import Portada from '../../components/Portada.astro';
+import Indice from '../../components/Indice.astro';
+import Contraportada from '../../components/Contraportada.astro';
+import DatosTaller from '../../components/fanzine/DatosTaller.astro';
+import DescargaPdf from '../../components/fanzine/DescargaPdf.astro';
+import SectionTitle from '../../components/SectionTitle.astro';
+import PostCover from '../../components/content/PostCover.astro';
+import StickerTitle from '../../components/taller/StickerTitle.astro';
+import SectionLabel from '../../components/taller/SectionLabel.astro';
+import Columnas from '../../components/Columnas.astro';
+import Quote from '../../components/content/Quote.astro';
+import Note from '../../components/content/Note.astro';
+import Divider from '../../components/content/Divider.astro';
+import ImageFull from '../../components/content/ImageFull.astro';
+import ImageSide from '../../components/content/ImageSide.astro';
+import Polaroid from '../../components/Polaroid.astro';
+import PhotoOld from '../../components/content/PhotoOld.astro';
+import Xerox from '../../components/content/Xerox.astro';
+import Gallery from '../../components/content/Gallery.astro';
+import BeforeAfter from '../../components/content/BeforeAfter.astro';
+import OptimizedImage from '../../components/OptimizedImage.astro';
+import MissingImage from '../../components/MissingImage.astro';
+import VideoOldTV from '../../components/content/VideoOldTV.astro';
+import VideoCinema from '../../components/content/VideoCinema.astro';
+import VideoPoster from '../../components/content/VideoPoster.astro';
+import Playlist from '../../components/content/Playlist.astro';
+import Sticker from '../../components/fanzine/Sticker.astro';
+import Cinta from '../../components/fanzine/Cinta.astro';
+import Parche from '../../components/fanzine/Parche.astro';
+import PunkButton from '../../components/taller/PunkButton.astro';
+
+const MAPA: Record<string, any> = {
+  Pliego, Pagina, Foto, Relleno, Portada, Indice, Contraportada, DatosTaller, DescargaPdf, SectionTitle, PostCover, StickerTitle, SectionLabel,
+  Columnas, Quote, Note, Divider, ImageFull, ImageSide, Polaroid, PhotoOld, Xerox, Gallery, BeforeAfter, OptimizedImage, MissingImage,
+  VideoOldTV, VideoCinema, VideoPoster, Playlist, Sticker, Cinta, Parche, PunkButton,
+};
+
+// Manifest del kit impreso (npm run print:kit); sin él, las miniaturas dicen "no disponible".
+const rutaManifest = path.resolve(process.cwd(), 'print', 'build', 'kit', 'manifest-kit.json');
+const manifest = fs.existsSync(rutaManifest) ? JSON.parse(fs.readFileSync(rutaManifest, 'utf8')) : null;
+const typstDe = (nombre: string) => manifest?.componentes.find((c: any) => c.nombre === nombre) ?? null;
+const mb = (b: number) => (b < 1024 * 1024 ? `${Math.round(b / 1024)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`);
+
+const esquemas = REGISTRO.esquemas_kit;
+// Pieza demo para <Pagina> y <Foto> (pieza_demo del registro): una "página" por esquema,
+// así cada columna tiene su propia ancla #pagina-N y la última lleva el crédito.
+const P = REGISTRO.pieza_demo;
+setPiezaActual({ pieza: { id: P.id, data: { paginas: esquemas.length, fotos: P.fotos, credito: P.credito, scheme: P.scheme } } as any, desde: 6, scheme: P.scheme, prueba: false });
+const todos = REGISTRO.componentes;
+const aprobados = todos.filter((c) => c.estado === 'aprobado');
+const propuestos = todos.filter((c) => c.estado === 'propuesto');
+const grupos = (Object.keys(GRUPOS) as Grupo[]).filter((g) => g !== 'propuestos');
+const porGrupo = (g: Grupo) => aprobados.filter((c) => c.grupo === g);
+// Páginas de ejemplo con ancla #pagina-N: un n distinto por esquema para no repetir ids.
+const nPagina = (c: Componente, i: number) => (c.nombre === 'Pliego' ? 3 + i : c.nombre === 'Relleno' ? 9 + i : 0);
+const propsDemo = (c: Componente, esquema: string, i: number) => {
+  const p = { ...(c.demo?.props ?? {}) } as Record<string, unknown>;
+  if (c.nombre === 'SectionTitle') p.scheme = esquema;
+  if (c.nombre === 'Pliego' || c.nombre === 'Relleno') p.n = nPagina(c, i);
+  if (c.nombre === 'Pliego') p.scheme = esquema;
+  if (c.nombre === 'Pagina') { p.scheme = esquema; p.n = i + 1; }
+  if (c.nombre === 'Portada' || c.nombre === 'Contraportada') p.placeholders = true;
+  return p;
+};
+const ejemploDe = (c: Componente) => [importMdx(c), ejemploMdx(c)].filter(Boolean).join('\n\n');
+const conteo = { total: todos.length, aprobados: aprobados.length, propuestos: propuestos.length, conGemelo: aprobados.filter((c) => c.typst).length, soloWeb: aprobados.filter((c) => c.soloWeb).length };
+---
+
+<FanzineLayout title="Kit de componentes" description="Catálogo de los componentes punk del fanzine: versión web en tres esquemas y versión impresa (Typst)." colorScheme="xerox" noindex>
+  <a slot="jump" href="#kit">≡ Kit</a>
+
+  <main class="kit">
+    <header class="kit__head" id="kit">
+      <p class="kit__eyebrow">Kit · catálogo · no indexado</p>
+      <h1 class="kit__title">Kit de<br />componentes</h1>
+      <p class="kit__sub">
+        Todo lo que puede ir en una nota del fanzine, generado desde <code>src/components/fanzine/registro.json</code>:
+        <strong>{conteo.total}</strong> entradas, <strong>{conteo.aprobados}</strong> aprobadas ({conteo.conGemelo} con gemelo Typst,
+        {conteo.soloWeb} sólo web) y <strong>{conteo.propuestos}</strong> propuestas. Cada componente aprobado se ve en tres
+        esquemas (rosa, xerox, overol) con su tabla de props, el MDX para copiar y la miniatura de su versión impresa.
+      </p>
+      <p class="kit__regla">
+        <strong>Regla:</strong> nada entra a un volumen sin estar en el registro, <em>aprobado</em> y con sus dos versiones (web +
+        Typst), documentado y dentro del presupuesto. El export del impreso falla si una pieza usa un componente que no está, que está
+        <em>propuesto</em> o que no tiene gemelo (salvo <em>sólo web</em>, que se omite con aviso).
+      </p>
+      {manifest ? (
+        <p class="kit__pdfs">
+          <strong>Catálogo impreso (Typst):</strong>
+          <a href="/fanzine/kit/jirafa-kit.pdf">jirafa-kit.pdf</a> ({manifest.pdfs.pantalla.paginas} págs, {mb(manifest.pdfs.pantalla.bytes)}) ·
+          <a href="/fanzine/kit/jirafa-kit-bn.pdf">jirafa-kit-bn.pdf</a> (B/N, {mb(manifest.pdfs.bn.bytes)}) ·
+          <a href="/fanzine/kit/fachadas">fixture de fachadas</a>
+        </p>
+      ) : (
+        <p class="kit__pdfs">Catálogo impreso no disponible en este build (corré <code>npm run print:kit</code> antes de <code>npm run build</code>). · <a href="/fanzine/kit/fachadas">fixture de fachadas</a></p>
+      )}
+      <nav class="kit__toc" aria-label="Grupos">
+        {grupos.map((g) => (
+          <a href={`#g-${g}`}>{GRUPOS[g]} <span>{porGrupo(g).length}</span></a>
+        ))}
+        <a href="#g-propuestos">{GRUPOS.propuestos} <span>{propuestos.length}</span></a>
+      </nav>
+    </header>
+
+    {grupos.map((g) => (
+      <section class="kit__grupo" id={`g-${g}`}>
+        <h2 class="kit__grupo-titulo">{GRUPOS[g]}</h2>
+        {porGrupo(g).map((c) => {
+          const Comp = MAPA[c.nombre];
+          const t = typstDe(c.nombre);
+          return (
+            <article class="kit__comp" id={`c-${c.nombre}`}>
+              <header class="kit__comp-head">
+                <h3 class="kit__nombre"><code>{c.tipo === 'estilo' ? c.nombre : `<${c.nombre}>`}</code></h3>
+                <span class:list={['kit__estado', `kit__estado--${c.estado}`]}>{c.estado}</span>
+                {c.soloWeb && <span class="kit__estado kit__estado--web">sólo web</span>}
+                {!c.soloWeb && !c.typst && <span class="kit__estado kit__estado--sin">sin gemelo</span>}
+                {c.volumen != null && <span class="kit__meta">desde vol. {String(c.volumen).padStart(2, '0')}</span>}
+              </header>
+              <p class="kit__desc">{c.descripcion}</p>
+              <dl class="kit__rutas">
+                <dt>Web</dt><dd><code>{c.web ?? '—'}</code></dd>
+                <dt>Typst</dt><dd><code>{c.typst ?? '—'}</code>{c.soloWeb && <span> · {c.soloWeb}</span>}</dd>
+              </dl>
+
+              {c.demo || c.nombre === 'ColorSchemeStyles' ? (
+                <div class="kit__esquemas">
+                  {esquemas.map((e, i) => (
+                    <div class:list={['kit__esquema', `scheme-${e}`]}>
+                      <p class="kit__etq">scheme-{e}</p>
+                      <div class="kit__render fz-volume-page post-body">
+                        {c.nombre === 'ColorSchemeStyles' ? (
+                          <ul class="kit__paleta">
+                            {(['ink', 'accent', 'paper'] as const).map((k) => (
+                              <li><span style={`background:${(colorSchemes as any)[e][k]}`} /> <code>--{k}</code> {(colorSchemes as any)[e][k]}</li>
+                            ))}
+                          </ul>
+                        ) : c.tipo === 'estilo' ? (
+                          <Fragment set:html={hijosHtml(c.demo!.hijos)} />
+                        ) : c.nombre === 'Pagina' ? (
+                          <Pagina {...(propsDemo(c, e, i) as any)}><Fragment set:html={hijosHtml(c.demo!.hijos)} /></Pagina>
+                        ) : c.demo!.hijos != null ? (
+                          <Comp {...propsDemo(c, e, i)}><Fragment set:html={hijosHtml(c.demo!.hijos)} /></Comp>
+                        ) : (
+                          <Comp {...propsDemo(c, e, i)} />
+                        )}
+                        {c.demo?.despues && <Fragment set:html={hijosHtml(c.demo.despues)} />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p class="kit__sin-demo">Sin render en el kit: {c.notas || c.soloWeb || 'infraestructura'}</p>
+              )}
+
+              <div class="kit__datos">
+                <div>
+                  <h4>Props</h4>
+                  {c.props.length ? (
+                    <div class="kit__tabla-wrap" tabindex="0" role="region" aria-label={`Props de ${c.nombre}`}>
+                      <table class="kit__tabla">
+                        <thead><tr><th>Prop</th><th>Tipo</th><th>Default</th><th>Ejemplo</th><th>Qué es</th></tr></thead>
+                        <tbody>
+                          {c.props.map((p) => (
+                            <tr>
+                              <td><code>{p.nombre}</code>{p.obligatoria && <span title="obligatoria"> *</span>}</td>
+                              <td><code>{p.tipo}</code></td>
+                              <td>{p.default ?? '—'}</td>
+                              <td>{c.demo && p.nombre in c.demo.props ? <code>{JSON.stringify(c.demo.props[p.nombre])}</code> : '—'}</td>
+                              <td>{p.que}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p class="kit__nota">Sin props.</p>
+                  )}
+                  <h4>MDX (un clic selecciona todo)</h4>
+                  <pre class="kit__mdx" tabindex="0"><code>{ejemploDe(c)}</code></pre>
+                  {c.notas && <p class="kit__nota">{c.notas}</p>}
+                </div>
+                <figure class="kit__typst">
+                  {t ? (
+                    <>
+                      <img src={`/fanzine/kit/${t.png}`} alt={`Versión impresa (Typst) de ${c.nombre}: página ${t.pagina} de jirafa-kit.pdf`} width="825" height="1275" loading="lazy" decoding="async" />
+                      <figcaption>Typst · pág. {t.pagina} de <a href="/fanzine/kit/jirafa-kit.pdf">jirafa-kit.pdf</a> · esquema {t.esquema}</figcaption>
+                    </>
+                  ) : (
+                    <figcaption class="kit__typst-no">{c.typst ? (manifest ? 'Sin página en el kit impreso.' : 'Miniatura Typst no disponible en este build (npm run print:kit).') : c.soloWeb ? 'Sólo web: no tiene versión impresa.' : 'Sin gemelo Typst: en el impreso es error.'}</figcaption>
+                  )}
+                </figure>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+    ))}
+
+    <section class="kit__grupo" id="g-propuestos">
+      <h2 class="kit__grupo-titulo">{GRUPOS.propuestos}</h2>
+      <p class="kit__sub">
+        Propuesta inicial del issue #17. Cada volumen, Redacción propone 2–3 componentes nuevos en el PR del volumen; Ricardo los
+        aprueba en la puerta 2 junto con la portada; cada aprobado abre un issue con la plantilla <code>componente-punk</code> y entra
+        acá en sus dos versiones.
+      </p>
+      {propuestos.map((c) => (
+        <article class="kit__comp kit__comp--propuesto" id={`c-${c.nombre}`}>
+          <header class="kit__comp-head">
+            <h3 class="kit__nombre"><code>{`<${c.nombre}>`}</code></h3>
+            <span class="kit__estado kit__estado--propuesto">{c.estado}</span>
+          </header>
+          <p class="kit__desc">{c.descripcion}</p>
+          <p class="kit__nota">Props previstas: {c.props.map((p) => p.nombre).join(', ') || '—'}. {c.notas}</p>
+        </article>
+      ))}
+    </section>
+  </main>
+</FanzineLayout>
+
+<style>
+  .kit {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+  .kit__eyebrow,
+  .kit__etq {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.72rem;
+  }
+  .kit__eyebrow {
+    background: var(--accent);
+    display: inline-block;
+    padding: 0.25em 0.7em;
+    margin: 0 0 0.8rem;
+  }
+  .kit__title,
+  .kit__grupo-titulo {
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.92;
+    margin: 0 0 1rem;
+  }
+  .kit__title {
+    font-size: clamp(2.4rem, 8vw, 4.5rem);
+  }
+  .kit__grupo-titulo {
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    border-bottom: var(--border-w) solid var(--ink);
+    padding-bottom: 0.3rem;
+    margin-top: 3rem;
+  }
+  .kit__sub,
+  .kit__regla,
+  .kit__pdfs {
+    max-width: 52rem;
+    line-height: 1.55;
+  }
+  .kit__regla {
+    border-left: 6px solid var(--accent);
+    padding: 0.4rem 0.8rem;
+    background: rgba(0, 0, 0, 0.04);
+    font-size: 0.9rem;
+  }
+  .kit__toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+  }
+  .kit__toc a {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.3em 0.9em;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+  }
+  .kit__toc a span {
+    background: var(--accent);
+    padding: 0 0.45em;
+    border-radius: 999px;
+    margin-left: 0.3em;
+  }
+  .kit__comp {
+    margin: 2rem 0 3rem;
+    scroll-margin-top: 1rem;
+  }
+  .kit__comp-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+  .kit__nombre {
+    margin: 0;
+    font-size: 1.4rem;
+    font-family: var(--font-head);
+  }
+  .kit__nombre code {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.1em 0.45em;
+  }
+  .kit__estado,
+  .kit__meta {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2em 0.6em;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+  }
+  .kit__estado--aprobado {
+    background: var(--accent);
+  }
+  .kit__estado--propuesto {
+    border-style: dashed;
+  }
+  .kit__estado--web,
+  .kit__estado--sin {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .kit__meta {
+    border-color: transparent;
+    opacity: 0.75;
+  }
+  .kit__desc {
+    max-width: 52rem;
+    line-height: 1.5;
+    margin: 0.6rem 0;
+  }
+  .kit__rutas {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.2rem 0.8rem;
+    font-size: 0.8rem;
+    margin: 0 0 1rem;
+  }
+  .kit__rutas dt {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .kit__rutas dd {
+    margin: 0;
+    word-break: break-all;
+  }
+  .kit__esquemas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .kit__esquema {
+    background: var(--paper);
+    color: var(--ink);
+    border: var(--border-w) solid var(--ink);
+    border-radius: var(--radius);
+    overflow: hidden;
+    min-width: 0;
+  }
+  .kit__etq {
+    margin: 0;
+    padding: 0.4rem 0.8rem;
+    border-bottom: 2px dashed var(--ink);
+    opacity: 0.8;
+  }
+  .kit__render {
+    padding: 1rem 0.9rem 1.2rem;
+    overflow-wrap: anywhere;
+  }
+  /* Sin la capitular del primer párrafo de .post-body: acá cada columna es una muestra, no una nota. */
+  .kit__render > :global(p:first-of-type::first-letter) {
+    float: none;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    padding: 0;
+  }
+  .kit__paleta {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+  }
+  .kit__paleta li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.3rem 0;
+  }
+  .kit__paleta span {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .kit__sin-demo,
+  .kit__nota {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    opacity: 0.85;
+  }
+  .kit__datos {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 1.2rem;
+    margin-top: 1.2rem;
+    align-items: start;
+  }
+  .kit__datos h4 {
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    margin: 1rem 0 0.4rem;
+  }
+  .kit__tabla-wrap {
+    overflow-x: auto;
+    border: 2px solid var(--ink);
+  }
+  .kit__tabla {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.78rem;
+  }
+  .kit__tabla th,
+  .kit__tabla td {
+    text-align: left;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    vertical-align: top;
+  }
+  .kit__tabla th {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+  }
+  .kit__mdx {
+    margin: 0;
+    padding: 0.8rem 1rem;
+    background: #111;
+    color: #f4f0e6;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre;
+    user-select: all;
+    border-left: 6px solid var(--accent);
+  }
+  .kit__typst {
+    margin: 1rem 0 0;
+    text-align: center;
+  }
+  .kit__typst img {
+    width: 100%;
+    height: auto;
+    border: 2px solid var(--ink);
+    background: #fff;
+  }
+  .kit__typst figcaption {
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    margin-top: 0.4rem;
+  }
+  .kit__typst-no {
+    border: 2px dashed var(--ink);
+    padding: 1rem;
+  }
+  .kit__comp--propuesto {
+    margin: 1.2rem 0;
+    padding-left: 1rem;
+    border-left: 4px dashed var(--ink);
+  }
+  @media (max-width: 900px) {
+    .kit__esquemas {
+      grid-template-columns: 1fr;
+    }
+    .kit__datos {
+      grid-template-columns: 1fr;
+    }
+    .kit__typst {
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  @media (max-width: 480px) {
+    .kit {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+</style>

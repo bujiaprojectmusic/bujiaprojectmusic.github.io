@@ -1,0 +1,142 @@
+---
+// Fachada de video / playlist (issue #17, pedido de Ricardo): en la página
+// NO hay iframe. Hay un enlace <a> al video con un póster (imagen local
+// vía astro:assets si se pasa `poster`, o una pantalla CSS con el título y
+// ▶, 0 bytes de imagen). Sin JS, el enlace abre el video en el servicio.
+// Con JS, el script compartido de abajo (≤ 1 KB gzip, Astro lo incluye
+// UNA vez y sólo en páginas que usan este componente) cambia el enlace por
+// el iframe (youtube-nocookie / Spotify / Bandcamp) al dar clic, con
+// autoplay. Antes del clic no sale ninguna petición a esos dominios.
+// Lo usan VideoOldTV, VideoCinema y Playlist; en @media print se oculta.
+import OptimizedImage from '../OptimizedImage.astro';
+import type { ImageSource } from '../../utils/resolveImage';
+
+interface Props {
+  /** Enlace público (sin JS). */
+  href: string;
+  /** URL del iframe que se mete al dar clic. */
+  embed: string;
+  title: string;
+  /** «Video · YouTube», «Playlist · Spotify»… */
+  etiqueta: string;
+  poster?: ImageSource;
+  /** Relación de aspecto de la pantalla (CSS). */
+  aspecto?: string;
+}
+const { href, embed, title, etiqueta, poster, aspecto = '16 / 9' } = Astro.props;
+---
+
+<span class="fz-fachada-marco" style={`--fz-aspecto:${aspecto}`}>
+  <a class="fz-fachada" href={href} data-embed={embed} data-title={title} target="_blank" rel="noreferrer noopener">
+    {poster && <OptimizedImage src={poster} alt="" widths={[480, 768]} sizes="(max-width: 720px) 100vw, 720px" print={false} context={`póster de ${title}`} class="fz-fachada__poster" />}
+    <span class="fz-fachada__play" aria-hidden="true">▶</span>
+    <span class="fz-fachada__texto">
+      <span class="fz-fachada__kind">{etiqueta}</span>
+      <span class="fz-fachada__title">{title}</span>
+      <span class="fz-fachada__cta">Ver (carga al dar clic)</span>
+    </span>
+  </a>
+</span>
+
+<script>
+  // Fachada (#17): al clic, el enlace se vuelve el iframe. Un solo listener
+  // por página; sin dependencias. Clic con modificadores → enlace normal.
+  document.addEventListener('click', (e) => {
+    const t = e.target as Element | null;
+    const a = t?.closest<HTMLAnchorElement>('a.fz-fachada[data-embed]');
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+    e.preventDefault();
+    const f = document.createElement('iframe');
+    f.src = a.dataset.embed!;
+    f.title = a.dataset.title || '';
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    f.setAttribute('allowfullscreen', '');
+    a.parentElement?.classList.add('fz-fachada-marco--abierta');
+    a.replaceWith(f);
+  });
+</script>
+
+<style>
+  .fz-fachada-marco {
+    position: relative;
+    display: block;
+    aspect-ratio: var(--fz-aspecto);
+    background: #000;
+    overflow: hidden;
+  }
+  .fz-fachada {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0.8rem 1rem;
+    color: #fff;
+    text-decoration: none;
+    background:
+      repeating-linear-gradient(-45deg, transparent 0 10px, rgba(255, 255, 255, 0.05) 10px 20px),
+      radial-gradient(circle at 70% 30%, var(--accent) 0, transparent 45%),
+      #111;
+  }
+  .fz-fachada :global(.fz-fachada__poster),
+  .fz-fachada :global(picture) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.75;
+  }
+  .fz-fachada__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--ink);
+    border: 3px solid #fff;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    padding-left: 0.2rem;
+  }
+  .fz-fachada__texto {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    text-shadow: 0 1px 2px #000;
+  }
+  .fz-fachada__kind,
+  .fz-fachada__cta {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.65rem;
+  }
+  .fz-fachada__cta {
+    color: var(--accent);
+  }
+  .fz-fachada__title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+  .fz-fachada-marco :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  @media print {
+    .fz-fachada-marco {
+      display: none;
+    }
+  }
+</style>
