@@ -1,0 +1,259 @@
+---
+// /fanzine/muestra (issue #7): página de muestra de los componentes punk,
+// texturas, stickers y animaciones del fanzine, en tres esquemas de color
+// (rosa, xerox, overol). noindex y fuera del sitemap (astro.config.mjs).
+// No es un volumen: no pasa por Typst. Sirve para ver cada pieza y para
+// las capturas de evidencia; cuando lleguen los SVG del bot de Diseño
+// (src/assets/fanzine/), acá se ven en vez de los placeholders TODO.
+import FanzineLayout from '../../layouts/FanzineLayout.astro';
+import Portada from '../../components/Portada.astro';
+import Indice from '../../components/Indice.astro';
+import Contraportada from '../../components/Contraportada.astro';
+import SectionTitle from '../../components/SectionTitle.astro';
+import Columnas from '../../components/Columnas.astro';
+import Polaroid from '../../components/Polaroid.astro';
+import PhotoOld from '../../components/content/PhotoOld.astro';
+import Xerox from '../../components/content/Xerox.astro';
+import OptimizedImage from '../../components/OptimizedImage.astro';
+import Sticker from '../../components/fanzine/Sticker.astro';
+import Cinta from '../../components/fanzine/Cinta.astro';
+import Parche from '../../components/fanzine/Parche.astro';
+import { ASSETS, assetsFaltantes } from '../../utils/fanzineAssets';
+import type { ColorSchemeName } from '../../config/site';
+
+const esquemas: { nombre: ColorSchemeName; titulo: string; foto: string; foto2: string }[] = [
+  { nombre: 'rosa', titulo: 'Fierros y Fuzz', foto: '/fanzine/vol-00/portada-taller.jpeg', foto2: '/fanzine/vol-00/skatecaster-terminada.jpeg' },
+  { nombre: 'xerox', titulo: 'Ruido de prueba', foto: '/fanzine/vol-00/taller-completo.jpeg', foto2: '/fanzine/vol-00/mesa-trabajo.jpeg' },
+  { nombre: 'overol', titulo: 'Madera y otras malas ideas', foto: '/fanzine/vol-00/mural.jpeg', foto2: '/fanzine/vol-00/pintura.jpeg' },
+];
+const faltan = assetsFaltantes();
+const stickers = ['bujia-chispa', 'rayo', 'pua', 'llave-inglesa', 'estrella-medio-tono', 'sello-copia'] as const;
+---
+
+<FanzineLayout title="Muestra de componentes" description="Página de muestra de los componentes del fanzine." colorScheme="xerox" noindex>
+  <a slot="jump" href="#rosa">rosa</a>
+  <a slot="jump" href="#xerox">xerox</a>
+  <a slot="jump" href="#overol">overol</a>
+
+  <div class="mu">
+    <header class="mu__head">
+      <p class="mu__eyebrow">Muestra · no indexada</p>
+      <h1 class="mu__title">Componentes<br />del fanzine</h1>
+      <p class="mu__sub">
+        Portada, índice, Polaroid y foto vieja con cinta, contraportada, columnas, texturas (<code>.tx-grain</code>,
+        <code>.tx-halftone</code>, <code>.tx-duotone</code>), stickers y cintas, en tres esquemas: rosa, xerox y overol. Todo
+        sin JavaScript; las animaciones de aparición se apagan con <em>prefers-reduced-motion</em> y al imprimir.
+      </p>
+      {faltan.length > 0 ? (
+        <p class="mu__aviso">
+          <strong>Placeholders (TODO):</strong> faltan {faltan.length} de {Object.keys(ASSETS).length} SVG del bot de Diseño en{' '}
+          <code>src/assets/fanzine/</code>: {faltan.join(', ')}. Con sólo copiarlos ahí, aparecen.
+        </p>
+      ) : (
+        <p class="mu__aviso">Todos los SVG de marca están en <code>src/assets/fanzine/</code>.</p>
+      )}
+    </header>
+
+    {esquemas.map((e, i) => (
+      <section id={e.nombre} class:list={['mu__esquema', `scheme-${e.nombre}`]}>
+        <p class="mu__etiqueta">scheme-{e.nombre}</p>
+
+        <article class="fz-volume-page post-body mu__col">
+          <Portada volume={i + 1} title={e.titulo} subtitle={`Muestra · esquema ${e.nombre} · Texcoco`} image={e.foto} placeholders />
+
+          <Indice
+            items={[
+              { page: '03', title: 'Editorial' },
+              { page: '04', title: 'Taller: rebobinado de pastillas' },
+              { page: '09', title: 'Playlist del mes' },
+            ]}
+            linkPages={false}
+          />
+
+          <SectionTitle scheme={e.nombre}>Título sticker</SectionTitle>
+
+          <p>
+            Texto de muestra con <strong>negritas</strong> y <em>cursivas</em>. Las fotos de abajo llevan cinta adhesiva
+            (pseudoelementos semitransparentes) y aparecen al hacer scroll.
+          </p>
+
+          <Polaroid src={e.foto2} alt="Foto de muestra" caption={`Polaroid con cinta · ${e.nombre}`} tilt={i % 2 ? 3 : -3} cintaAngulo={i % 2 ? 4 : -3} />
+
+          <PhotoOld src={e.foto} alt="Foto vieja de muestra" caption="PhotoOld con cintas en las esquinas" tilt={2} />
+
+          <Xerox src={e.foto2} alt="Foto fotocopiada" caption="Xerox" />
+
+          <h3>Texturas</h3>
+          <div class="mu__grid">
+            <div class="mu__caja tx-grain">
+              <span>.tx-grain</span>
+            </div>
+            <div class="mu__caja tx-halftone" style="--tx-dot: rgba(0, 0, 0, 0.35); --tx-size: 12px">
+              <span>.tx-halftone</span>
+            </div>
+            <figure class="mu__duo">
+              <span class="tx-duotone">
+                <OptimizedImage src={e.foto} alt="Foto a dos tintas" widths={[480, 768]} sizes="(max-width: 900px) 100vw, 420px" print={false} context="Duotono" />
+              </span>
+              <figcaption>.tx-duotone: la misma foto con --ink y --accent de {e.nombre}</figcaption>
+            </figure>
+          </div>
+
+          <h3>Stickers, parche y cinta</h3>
+          <div class="mu__stickers">
+            <Parche variante="mono" tamano={150} />
+            {stickers.map((s, k) => (
+              <Sticker nombre={s} ancho={90} rotar={(k % 3) * 6 - 6} />
+            ))}
+            <Sticker nombre="mascota-jirafa-mono" ancho={110} alt="La jirafa, mascota del fanzine" />
+          </div>
+          <div class="mu__pegado">
+            <Cinta pos="arriba" angulo={-5} ancho={120} />
+            <Cinta pos="abajo" angulo={4} ancho={100} />
+            <p>Nota pegada con &lt;Cinta pos="arriba" /&gt; y &lt;Cinta pos="abajo" /&gt;.</p>
+          </div>
+
+          <h3>Columnas</h3>
+          <Columnas n={2}>
+            <p>
+              Dos columnas en desktop y al imprimir; una sola en móvil (menos de 640 px). Este párrafo sirve de relleno para
+              que la división se vea: lija, tornillos, cuerdas viejas, un pedal abierto sobre la mesa y la radio a todo volumen.
+            </p>
+            <p>
+              Segunda mitad del texto. En el impreso el máximo son dos columnas (reglas del issue #16), así que
+              <code>n=3</code> también cae a dos al imprimir.
+            </p>
+          </Columnas>
+
+          <Contraportada
+            texto={`Bujía Project Music — Texcoco, MX · esquema ${e.nombre}`}
+            creditos={['Textos: la redacción', 'Fotos: Bujía Project Music', 'Diseño: taller y bot de Diseño']}
+            placeholders
+          />
+        </article>
+      </section>
+    ))}
+  </div>
+</FanzineLayout>
+
+<style>
+  .mu__head {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 1rem;
+  }
+  .mu__eyebrow {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.75rem;
+    background: var(--accent);
+    display: inline-block;
+    padding: 0.25em 0.7em;
+    margin: 0 0 0.8rem;
+  }
+  .mu__title {
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(2.4rem, 8vw, 4.5rem);
+    line-height: 0.92;
+    margin: 0 0 1rem;
+  }
+  .mu__sub,
+  .mu__aviso {
+    max-width: 44rem;
+    line-height: 1.55;
+  }
+  .mu__aviso {
+    font-size: 0.8rem;
+    border-left: 6px solid var(--accent);
+    padding: 0.4rem 0.8rem;
+    background: rgba(0, 0, 0, 0.04);
+  }
+  .mu__esquema {
+    background: var(--paper);
+    color: var(--ink);
+    border-top: var(--border-w) solid var(--ink);
+    padding-bottom: 2rem;
+    scroll-margin-top: 1rem;
+  }
+  .mu__etiqueta {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem 1.25rem 0;
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+  .mu__col {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.25rem 1.25rem 0;
+  }
+  .mu__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0 2rem;
+  }
+  .mu__caja {
+    min-height: 160px;
+    border: 3px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-align: center;
+  }
+  .mu__duo {
+    margin: 0;
+  }
+  .mu__duo figcaption {
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    margin-top: 0.4rem;
+    text-align: left;
+  }
+  .mu__stickers {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem 1.5rem;
+    padding: 1.5rem 1rem;
+    border: 3px dashed var(--ink);
+    border-radius: var(--radius);
+    margin: 1rem 0 2rem;
+  }
+  .mu__pegado {
+    position: relative;
+    max-width: 28rem;
+    margin: 2.5rem auto 2rem;
+    padding: 1.4rem 1.2rem;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    transform: rotate(-1.5deg);
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    text-align: left;
+  }
+  .mu__pegado p {
+    margin: 0;
+  }
+  @media (max-width: 480px) {
+    .mu__head,
+    .mu__col,
+    .mu__etiqueta {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+</style>

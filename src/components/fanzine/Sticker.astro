@@ -1,0 +1,54 @@
+---
+// Sticker de marca (issue #7): incrusta un SVG de src/assets/fanzine/
+// (mascota, rayo, púa, sello "copia", etc; ver utils/fanzineAssets.ts) en
+// currentColor, o su placeholder TODO si el archivo todavía no está.
+// Uso: <Sticker nombre="rayo" ancho={90} rotar={-8} />
+//      <Sticker nombre="mascota-jirafa-mono" ancho={160} alt="La jirafa, mascota del fanzine" />
+// Sin JS. Aparece con scroll (clase fz-anim) salvo prefers-reduced-motion
+// y al imprimir. Los gemelos Typst llegan en #17: por ahora no va en MDX
+// de volúmenes.
+import { svgMarca, type NombreAsset } from '../../utils/fanzineAssets';
+
+interface Props {
+  nombre: NombreAsset | string;
+  /** Ancho en px (alto automático). */
+  ancho?: number;
+  /** Rotación en grados. */
+  rotar?: number;
+  /** Texto alternativo si el sticker significa algo; si no, es decorativo. */
+  alt?: string;
+  /** Sin animación de aparición. */
+  quieto?: boolean;
+  class?: string;
+}
+const { nombre, ancho = 96, rotar = 0, alt, quieto = false, class: clase } = Astro.props;
+const { svg, esPlaceholder } = svgMarca(nombre);
+---
+
+<span
+  class:list={['fz-sticker', !quieto && 'fz-anim', clase]}
+  style={`--fz-ancho:${ancho}px;--fz-rotar:${rotar}deg`}
+  data-sticker={nombre}
+  data-placeholder={esPlaceholder ? 'true' : undefined}
+  role={alt ? 'img' : undefined}
+  aria-label={alt}
+  aria-hidden={alt ? undefined : 'true'}
+  set:html={svg}
+/>
+
+<style>
+  .fz-sticker {
+    display: inline-block;
+    width: var(--fz-ancho);
+    max-width: 100%;
+    line-height: 0;
+    transform: rotate(var(--fz-rotar));
+    color: var(--ink);
+    vertical-align: middle;
+  }
+  .fz-sticker :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+</style>

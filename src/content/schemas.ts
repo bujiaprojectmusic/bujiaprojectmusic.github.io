@@ -110,7 +110,14 @@ export function volumenSchema(image: ImageFn, reference: (c: 'piezas') => z.ZodT
         .min(1),
       /** Mínimo de páginas (múltiplo de 4): si las piezas no llegan, se rellena hasta ahí. Opcional; el total nunca se fija. */
       paginas_minimo: z.number().int().min(8).multipleOf(4).optional(),
-      contraportada: z.object({ texto: z.string().default('Bujía Project Music — Texcoco, MX') }).strict().default({}),
+      contraportada: z
+        .object({
+          texto: z.string().default('Bujía Project Music — Texcoco, MX'),
+          // Créditos del volumen (issue #7): una línea por entrada.
+          creditos: z.array(z.string().min(1)).default([]),
+        })
+        .strict()
+        .default({}),
       impreso: z.object({ multimedia: z.enum(['qr', 'omitir']).default('qr') }).strict().default({}),
       prueba: z.boolean().default(false),
       draft: z.boolean().default(false),

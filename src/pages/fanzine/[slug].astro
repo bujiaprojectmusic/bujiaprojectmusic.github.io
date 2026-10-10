@@ -119,6 +119,7 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
             scheme={compuesto.entry.data.colorScheme}
             prueba={prueba}
             contraportada={compuesto.entry.data.contraportada.texto}
+            creditosContraportada={compuesto.entry.data.contraportada.creditos}
           >
             {(r: any) => <r.Content />}
           </ComponerPiezas>

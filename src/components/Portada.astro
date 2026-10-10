@@ -1,24 +1,37 @@
 ---
-// Portada de volumen: reemplaza el snippet "portada" de Ghost.
+// Portada de volumen (issue #7): foto de portada a sangre (pipeline de #4,
+// eager + fetchpriority="high"), parche de Bujía, número de volumen tipo
+// sello (etiqueta-vol.svg o sello CSS), título balanceado sin huecos raros
+// en móvil y la mascota (asset del bot de Diseño o placeholder TODO).
 // Uso en MDX:
 // <Portada volume={7} title="Fierros y Fuzz" subtitle="Julio 2026" image="/img/vol7-cover.jpg" />
-// La foto va en src/assets/img/ y se optimiza al compilar (AVIF/WebP +
-// variante grande para el PDF). Es la imagen LCP del volumen, así que se
-// carga eager + fetchpriority="high". Si el archivo todavía no existe se
-// muestra la portada sin foto (fondo --ink) y el build avisa.
+// Dentro de <Pliego tipo="portada"> va a sangre en la web (ver Pliego.astro).
+// Si la foto todavía no existe, se muestra la portada sin foto (fondo --ink)
+// y el build avisa. El gemelo Typst (print/lib/paginas.typ) lee las mismas
+// props: volume, title, subtitle, image.
 import OptimizedImage from './OptimizedImage.astro';
+import Parche from './fanzine/Parche.astro';
+import Sticker from './fanzine/Sticker.astro';
 import type { ImageSource } from '../utils/resolveImage';
+import { etiquetaVolumen, hayAsset } from '../utils/fanzineAssets';
 
 interface Props {
   volume: number;
   title: string;
   subtitle?: string;
   image?: ImageSource;
+  /** Sin mascota (p. ej. si la foto ya la trae). */
+  mascota?: boolean;
+  /** Mostrar placeholders TODO si faltan los SVG (sólo /fanzine/muestra). En
+      un volumen publicado la mascota aparece cuando esté el archivo. */
+  placeholders?: boolean;
 }
-const { volume, title, subtitle, image } = Astro.props;
+const { volume, title, subtitle, image, mascota = true, placeholders = false } = Astro.props;
+const sello = etiquetaVolumen(volume);
+const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
 ---
 
-<section class="fz-portada">
+<section class:list={['fz-portada', 'tx-grain', !image && 'fz-portada--sin-foto']}>
   {image && (
     <OptimizedImage
       src={image}
@@ -32,6 +45,29 @@ const { volume, title, subtitle, image } = Astro.props;
       missing="none"
       context={`Portada del volumen ${volume}`}
     />
+  )}
+  <div class="fz-portada__marca">
+    <Parche variante="mono" tamano={120} />
+  </div>
+  <div
+    class:list={['fz-portada__sello', sello.esPlaceholder && 'fz-portada__sello--css']}
+    data-placeholder={sello.esPlaceholder ? 'true' : undefined}
+    aria-label={`Volumen ${volume}`}
+    role="img"
+  >
+    {sello.esPlaceholder ? (
+      <span class="fz-portada__sello-in" aria-hidden="true">
+        <small>Vol.</small>
+        <b>{String(volume).padStart(2, '0')}</b>
+      </span>
+    ) : (
+      <Fragment set:html={sello.svg} />
+    )}
+  </div>
+  {conMascota && (
+    <div class="fz-portada__mascota">
+      <Sticker nombre="mascota-jirafa-mono" ancho={150} alt="La jirafa, mascota del fanzine" quieto />
+    </div>
   )}
   <div class="fz-portada__in">
     <p class="fz-portada__vol">Volumen {volume}</p>
@@ -52,6 +88,7 @@ const { volume, title, subtitle, image } = Astro.props;
     background: var(--ink);
     color: var(--paper);
     margin-bottom: 2rem;
+    --tx-grain: 0.22;
   }
   .fz-portada__bg {
     position: absolute;
@@ -61,12 +98,93 @@ const { volume, title, subtitle, image } = Astro.props;
     object-fit: cover;
     opacity: 0.55;
   }
+  /* Degradado abajo para que el título lea sobre cualquier foto. */
+  .fz-portada::before {
+    content: '';
+    position: absolute;
+    inset: 40% 0 0;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.55));
+    pointer-events: none;
+  }
+  .fz-portada--sin-foto {
+    background: var(--ink);
+    background-image: repeating-linear-gradient(135deg, transparent 0 18px, rgba(255, 255, 255, 0.05) 18px 20px);
+  }
+  .fz-portada__marca {
+    position: absolute;
+    top: 1rem;
+    left: 1.1rem;
+    z-index: 2;
+    color: var(--paper);
+    filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+  }
+  /* Sello del número de volumen: etiqueta-vol.svg o círculo CSS. */
+  .fz-portada__sello {
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    z-index: 2;
+    width: clamp(78px, 22vw, 118px);
+    color: var(--ink);
+    transform: rotate(8deg);
+    line-height: 0;
+  }
+  .fz-portada__sello :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .fz-portada__sello--css .fz-portada__sello-in {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    outline: 2px dashed var(--ink);
+    outline-offset: -8px;
+    line-height: 1;
+  }
+  .fz-portada__sello-in small {
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: clamp(0.55rem, 2vw, 0.75rem);
+  }
+  .fz-portada__sello-in b {
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    font-size: clamp(1.9rem, 8vw, 3rem);
+  }
+  .fz-portada__mascota {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.4rem;
+    z-index: 1;
+    width: clamp(90px, 24%, 170px);
+    color: var(--paper);
+    opacity: 0.95;
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.4));
+  }
+  .fz-portada__mascota :global(.fz-sticker) {
+    width: 100%;
+  }
   .fz-portada__in {
     position: relative;
-    padding: 2rem;
+    z-index: 2;
+    padding: 5.5rem 2rem 2rem;
     /* En la web el volumen va dentro de .post-body (texto justificado);
        el título y el subtítulo de la portada van alineados a la izquierda. */
     text-align: left;
+    /* Deja aire a la derecha para la mascota. */
+    padding-right: clamp(6rem, 26%, 11rem);
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .fz-portada__vol {
     font-family: var(--font-head);
@@ -81,16 +199,53 @@ const { volume, title, subtitle, image } = Astro.props;
     margin-bottom: 0.6em;
   }
   .fz-portada__title {
-    font-family: var(--font-head);
-    font-weight: 700;
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
     text-transform: uppercase;
-    font-size: clamp(2.2rem, 8vw, 4.5rem);
-    line-height: 0.95;
+    font-size: clamp(2.6rem, 11vw, 5.2rem);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
     margin: 0 0 0.3em;
+    /* Sin huecos raros en móvil: líneas balanceadas, sin justificar,
+       sin partir palabras. */
+    text-wrap: balance;
+    text-align: left;
+    hyphens: manual;
+    overflow-wrap: normal;
+    text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
   }
   .fz-portada__subtitle {
     font-family: var(--font-head);
     font-size: 1rem;
     margin: 0;
+    text-wrap: balance;
+  }
+  @media (max-width: 480px) {
+    .fz-portada__in {
+      padding: 5rem 1.1rem 1.4rem;
+      padding-right: 5.2rem;
+    }
+    .fz-portada__marca {
+      top: 0.7rem;
+      left: 0.8rem;
+    }
+    .fz-portada__marca :global(.fz-parche) {
+      width: 88px;
+    }
+    .fz-portada__mascota {
+      right: 0.3rem;
+      bottom: 0.3rem;
+      width: 26%;
+    }
+  }
+  @media print {
+    .fz-portada::before,
+    .fz-portada__title {
+      text-shadow: none;
+    }
+    .fz-portada__marca,
+    .fz-portada__mascota {
+      filter: none;
+    }
   }
 </style>

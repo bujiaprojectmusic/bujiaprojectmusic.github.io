@@ -1,0 +1,104 @@
+/* ─────────────────────────────────────────────────────────────────────
+   Texturas y animaciones del fanzine (issue #7). Sólo CSS + los filtros
+   SVG inline de src/components/fanzine/FzFilters.astro (ids fz-grain,
+   fz-rough). Nada de PNG/JPG. Extras de la web: el look base (formas,
+   colores planos, texto) vive en cada componente y es lo que replica el
+   impreso en Typst.
+
+   .tx-grain     grano de fotocopia encima del elemento (position relative)
+   .tx-halftone  trama de medio tono (vars --tx-dot, --tx-r, --tx-size)
+   .tx-duotone   foto a dos tintas con --ink/--accent del esquema activo
+   .fz-anim      aparece al entrar en pantalla (animation-timeline: view())
+   ───────────────────────────────────────────────────────────────────── */
+
+/* ── Grano ─────────────────────────────────────────────────────────── */
+.tx-grain {
+  position: relative;
+  isolation: isolate;
+}
+.tx-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  filter: url(#fz-grain);
+  opacity: var(--tx-grain, 0.35);
+  mix-blend-mode: multiply;
+  z-index: 1;
+}
+
+/* ── Medio tono (el mismo de PostCover sticker / TallerCover) ─────── */
+.tx-halftone {
+  background-image: radial-gradient(var(--tx-dot, rgba(0, 0, 0, 0.15)) var(--tx-r, 1.5px), transparent var(--tx-r, 1.5px));
+  background-size: var(--tx-size, 15px) var(--tx-size, 15px);
+}
+.tx-halftone--claro {
+  --tx-dot: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Duotono: la foto no se toca; grises × acento y sombras = tinta ─ */
+.tx-duotone {
+  position: relative;
+  display: block;
+  isolation: isolate;
+  background: var(--accent);
+  overflow: hidden;
+}
+.tx-duotone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.15);
+  mix-blend-mode: multiply;
+}
+.tx-duotone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  mix-blend-mode: lighten;
+  pointer-events: none;
+}
+
+/* ── Aparición al hacer scroll: sin JS, sólo donde el motor la soporta,
+      sólo si la persona no pidió menos movimiento, nunca al imprimir ─ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fz-anim {
+      animation: fz-aparecer linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+@keyframes fz-aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(14px) rotate(calc(var(--fz-rotar, 0deg) + 2deg)) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--fz-rotar, 0deg)) scale(1);
+  }
+}
+/* Las fotos ya traen su inclinación (--fz-tilt / --tilt): la animación no
+   la pisa. */
+.fz-polaroid.fz-anim,
+.photo-old.fz-anim {
+  --fz-rotar: var(--fz-tilt, var(--tilt, 0deg));
+}
+@media (prefers-reduced-motion: reduce) {
+  .fz-anim {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+@media print {
+  .fz-anim {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .tx-grain::after {
+    display: none;
+  }
+}

@@ -50,8 +50,9 @@
     columns: 2;
     column-gap: 1.6rem;
   }
+  /* Impreso: máximo 2 columnas (reglas de #16); fz-cols-3 cae a 2. */
   .fz-cols-3 .fz-cols__inner {
-    columns: 3;
+    columns: 2;
     column-gap: 1.2rem;
   }
 

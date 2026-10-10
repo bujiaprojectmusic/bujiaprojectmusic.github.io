@@ -129,6 +129,22 @@ const LABELS: Record<PliegoTipo, string> = {
   .pliego--normal {
     margin: 0 0 2rem;
   }
+  /* Portada a sangre (issue #7): en la web rompe el padding de la columna
+     (--fz-col-pad, ver Volumen.astro) y pierde el radio/borde lateral. */
+  .pliego--portada :global(.fz-portada) {
+    margin-left: calc(-1 * var(--fz-col-pad, 1.25rem));
+    margin-right: calc(-1 * var(--fz-col-pad, 1.25rem));
+    margin-top: calc(-1 * var(--fz-col-pad-top, 1.5rem));
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+  }
+  @media (min-width: 900px) {
+    .pliego--portada :global(.fz-portada) {
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+  }
   .pliego__bg {
     display: block;
     width: 100%;

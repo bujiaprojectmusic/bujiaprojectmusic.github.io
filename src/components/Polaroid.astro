@@ -1,8 +1,11 @@
 ---
-// Tratamiento Polaroid para fotos de contenido.
+// Tratamiento Polaroid para fotos de contenido (issue #7: con cinta).
 // Uso: <Polaroid src="/img/taller-1.jpg" alt="Rebobinando una pastilla" caption="Rebobinado a mano, marzo 2026" tilt={-4} />
+//      <Polaroid … cinta={false} />  ·  <Polaroid … cintaAngulo={6} />
 // La foto va en src/assets/img/ y se optimiza al compilar (ver
 // OptimizedImage). Si no existe, se muestra un placeholder y el build avisa.
+// La cinta es un pseudoelemento semitransparente (sin imágenes); aparece al
+// hacer scroll (fz-anim) salvo prefers-reduced-motion y al imprimir.
 import OptimizedImage from './OptimizedImage.astro';
 import type { ImageSource } from '../utils/resolveImage';
 
@@ -15,11 +18,15 @@ interface Props {
   // página (la "LCP"): se carga eager + fetchpriority="high" en vez de
   // lazy. Ponerlo SOLO en la primera foto de la página.
   priority?: boolean;
+  /** Cinta adhesiva arriba (default true). */
+  cinta?: boolean;
+  /** Ángulo de la cinta en grados (default -3). */
+  cintaAngulo?: number;
 }
-const { src, alt, caption, tilt = -3, priority = false } = Astro.props;
+const { src, alt, caption, tilt = -3, priority = false, cinta = true, cintaAngulo = -3 } = Astro.props;
 ---
 
-<figure class="fz-polaroid" style={`--fz-tilt:${tilt}deg`}>
+<figure class:list={['fz-polaroid', 'fz-anim', cinta && 'fz-polaroid--cinta']} style={`--fz-tilt:${tilt}deg;--fz-cinta:${cintaAngulo}deg`}>
   <OptimizedImage
     src={src}
     alt={alt}
@@ -32,3 +39,27 @@ const { src, alt, caption, tilt = -3, priority = false } = Astro.props;
   />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
+
+<style>
+  /* El marco y la sombra viven en global.css (.fz-polaroid). Acá sólo la
+     cinta: una tira semitransparente de masking tape, pegada arriba. */
+  .fz-polaroid--cinta {
+    position: relative;
+  }
+  .fz-polaroid--cinta::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 38%;
+    min-width: 70px;
+    height: 26px;
+    transform: translateX(-50%) rotate(var(--fz-cinta, -3deg));
+    background: rgba(255, 236, 160, 0.55);
+    background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(0, 0, 0, 0.04) 6px 8px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    z-index: 2;
+    pointer-events: none;
+  }
+</style>

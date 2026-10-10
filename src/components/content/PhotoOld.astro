@@ -1,8 +1,11 @@
 ---
-// Foto vieja: sepia, viñeta, esquinas de cinta y ligera inclinación —
+// Foto vieja: sepia, viñeta, cinta en las esquinas y ligera inclinación —
 // para fotos de archivo, del taller hace años, etc.
 // Uso: <PhotoOld src="/img/taller-2019.jpg" alt="El taller en 2019" caption="El local, 2019" tilt={2} />
+//      <PhotoOld … cinta={false} />  ·  <PhotoOld … cintaAngulo={25} />
 // La foto va en src/assets/img/ y se optimiza al compilar (ver OptimizedImage).
+// Las cintas son pseudoelementos semitransparentes (issue #7), visibles
+// también al imprimir.
 import OptimizedImage from '../OptimizedImage.astro';
 import type { ImageSource } from '../../utils/resolveImage';
 
@@ -15,13 +18,15 @@ interface Props {
   // página (la "LCP"): se carga eager + fetchpriority="high" en vez de
   // lazy. Ponerlo SOLO en la primera foto de la página.
   priority?: boolean;
+  /** Cintas en las esquinas (default true). */
+  cinta?: boolean;
+  /** Ángulo de las cintas en grados (default 35). */
+  cintaAngulo?: number;
 }
-const { src, alt, caption, tilt = -2, priority = false } = Astro.props;
+const { src, alt, caption, tilt = -2, priority = false, cinta = true, cintaAngulo = 35 } = Astro.props;
 ---
 
-<figure class="photo-old" style={`--tilt:${tilt}deg`}>
-  <span class="photo-old__tape photo-old__tape--l" aria-hidden="true" />
-  <span class="photo-old__tape photo-old__tape--r" aria-hidden="true" />
+<figure class:list={['photo-old', 'fz-anim', cinta && 'photo-old--cinta']} style={`--tilt:${tilt}deg;--cinta:${cintaAngulo}deg`}>
   <span class="photo-old__frame">
     <OptimizedImage
       src={src}
@@ -40,6 +45,7 @@ const { src, alt, caption, tilt = -2, priority = false } = Astro.props;
 <style>
   .photo-old {
     display: table;
+    position: relative;
     /* Las cintas sobresalen 14 px por lado; se descuentan del ancho para
        que a todo el ancho (móvil) no provoquen scroll horizontal. */
     max-width: calc(100% - 28px);
@@ -64,22 +70,28 @@ const { src, alt, caption, tilt = -2, priority = false } = Astro.props;
     box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
     pointer-events: none;
   }
-  .photo-old__tape {
+  /* Cintas: pseudoelementos semitransparentes, sin imágenes. */
+  .photo-old--cinta::before,
+  .photo-old--cinta::after {
+    content: '';
     position: absolute;
-    width: 60px;
+    width: 64px;
     height: 22px;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(0, 0, 0, 0.1);
     top: -10px;
+    background: rgba(255, 236, 160, 0.55);
+    background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(0, 0, 0, 0.04) 6px 8px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
     z-index: 2;
+    pointer-events: none;
   }
-  .photo-old__tape--l {
+  .photo-old--cinta::before {
     left: -14px;
-    transform: rotate(-35deg);
+    transform: rotate(calc(-1 * var(--cinta, 35deg)));
   }
-  .photo-old__tape--r {
+  .photo-old--cinta::after {
     right: -14px;
-    transform: rotate(35deg);
+    transform: rotate(var(--cinta, 35deg));
   }
   .photo-old figcaption {
     font-family: var(--font-head);

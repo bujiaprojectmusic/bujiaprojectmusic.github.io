@@ -24,7 +24,7 @@ const { tag, title, subtitle, credit, colorScheme = 'rosa' } = Astro.props;
 ---
 
 <section class={`taller-cover scheme-${colorScheme}`}>
-  <header class="taller-cover__header">
+  <header class="taller-cover__header tx-halftone">
     <div class="taller-cover__banner" aria-hidden="true"></div>
     {tag && <p class="taller-cover__tag">[{tag.toUpperCase()}]</p>}
 
@@ -53,8 +53,10 @@ const { tag, title, subtitle, credit, colorScheme = 'rosa' } = Astro.props;
   .taller-cover__header {
     position: relative;
     background: var(--paper);
-    background-image: radial-gradient(rgba(0, 0, 0, 0.18) 1px, transparent 1px);
-    background-size: 16px 16px;
+    /* Trama de medio tono compartida: .tx-halftone (fanzine-textures.css). */
+    --tx-dot: rgba(0, 0, 0, 0.18);
+    --tx-r: 1px;
+    --tx-size: 16px;
     padding-bottom: 2.2rem;
     overflow: hidden;
   }

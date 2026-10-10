@@ -1,0 +1,20 @@
+---
+// Filtros SVG compartidos del fanzine (issue #7). Se incluye UNA vez por
+// página (FanzineLayout); las clases .tx-* de src/styles/fanzine-textures.css
+// los referencian por id. Nada de bitmaps: el grano sale de feTurbulence.
+---
+
+<svg class="fz-filters" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    {/* Grano de fotocopia: ruido fractal → sólo canal alfa (puntitos). */}
+    <filter id="fz-grain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" seed="7" result="ruido" />
+      <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 -0.25" />
+    </filter>
+    {/* Borde rasgado / tinta corrida para stickers y títulos. */}
+    <filter id="fz-rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="3" result="r" />
+      <feDisplacementMap in="SourceGraphic" in2="r" scale="4" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+</svg>

@@ -180,6 +180,18 @@ acuerdo de colaboración editorial** (textos en
 `src/content/pages/fanzine-manifiesto.mdx` y `fanzine-acuerdo.mdx`,
 ligados desde el header y el footer del fanzine).
 
+## Componentes punk, texturas y assets de marca (issue #7)
+
+Portada (parche, sello de volumen, mascota, título balanceado), Índice,
+Polaroid y PhotoOld con cinta, Contraportada con créditos, Columnas (1 en
+móvil, 2/3 en desktop, máximo 2 al imprimir), stickers y cintas
+(`src/components/fanzine/{Sticker,Cinta,Parche}.astro`) y texturas sólo CSS/SVG
+(`src/styles/fanzine-textures.css`: `.tx-grain`, `.tx-halftone`,
+`.tx-duotone`, `.fz-anim`). Los SVG de marca van en `src/assets/fanzine/`;
+mientras falten, salen placeholders marcados TODO y el build no se rompe. Se
+ven todos en `/fanzine/muestra` (noindex, fuera del sitemap). Detalle en
+[`COMPONENTES_MDX.md`](COMPONENTES_MDX.md).
+
 ## Presupuesto de datos (issue #8)
 
 El fanzine tiene que ser vistoso pero ligero. Los límites viven **sólo en

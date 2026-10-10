@@ -1,30 +1,110 @@
 ---
-// Contraportada: sello de cierre del volumen.
-// Uso: <Contraportada texto="Bujía Project Music — Texcoco, MX" />
+// Contraportada (issue #7): parche de Bujía, mascota, créditos del volumen
+// y el sello con el lugar/fecha. Siempre lleva la línea
+// "Mascota: ilustración por encargo (crédito pendiente de confirmar)".
+// Uso: <Contraportada texto="Bujía Project Music — Texcoco, MX" creditos={["Textos: …", "Fotos: …"]} />
+// Las props llegan igual al gemelo Typst (print/lib/paginas.typ); en el
+// yml de un volumen compuesto van en `contraportada.texto` y
+// `contraportada.creditos` (ver ComponerPiezas.astro).
+import Parche from './fanzine/Parche.astro';
+import Sticker from './fanzine/Sticker.astro';
+import { hayAsset } from '../utils/fanzineAssets';
+
 interface Props {
   texto?: string;
+  creditos?: string[];
+  mascota?: boolean;
+  /** Placeholders TODO si faltan los SVG (sólo /fanzine/muestra). */
+  placeholders?: boolean;
 }
-const { texto = 'Bujía Project Music — Texcoco, MX' } = Astro.props;
+const { texto = 'Bujía Project Music — Texcoco, MX', creditos = [], mascota = true, placeholders = false } = Astro.props;
+const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
+export const CREDITO_MASCOTA = 'Mascota: ilustración por encargo (crédito pendiente de confirmar)';
 ---
 
-<section class="fz-contraportada fz-page-num">
-  <p class="fz-contraportada__stamp">{texto}</p>
+<section class="fz-contraportada fz-page-num tx-grain">
+  <div class="fz-contraportada__marca">
+    <Parche variante="mono" tamano={150} />
+  </div>
+  {conMascota && (
+    <div class="fz-contraportada__mascota">
+      <Sticker nombre="mascota-jirafa-mono" ancho={170} alt="La jirafa, mascota del fanzine" quieto />
+    </div>
+  )}
+  <div class="fz-contraportada__in">
+    {creditos.length > 0 && (
+      <ul class="fz-contraportada__creditos">
+        {creditos.map((c) => (
+          <li>{c}</li>
+        ))}
+      </ul>
+    )}
+    <p class="fz-contraportada__credito-mascota">{CREDITO_MASCOTA}</p>
+    <p class="fz-contraportada__stamp">{texto}</p>
+  </div>
 </section>
 
 <style>
   .fz-contraportada {
+    position: relative;
     border: var(--border-w) solid var(--ink);
     border-radius: var(--radius);
     background: var(--ink);
     color: var(--paper);
-    min-height: 40vh;
+    min-height: 60vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    flex-direction: column;
+    justify-content: flex-end;
+    text-align: left;
     margin: 2rem 0;
+    overflow: hidden;
+    --tx-grain: 0.25;
+    background-image: repeating-linear-gradient(135deg, transparent 0 18px, rgba(255, 255, 255, 0.04) 18px 20px);
+  }
+  .fz-contraportada__marca {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    color: var(--paper);
+  }
+  .fz-contraportada__mascota {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: clamp(110px, 30%, 200px);
+    color: var(--paper);
+  }
+  .fz-contraportada__mascota :global(.fz-sticker) {
+    width: 100%;
+  }
+  .fz-contraportada__in {
+    position: relative;
+    z-index: 2;
+    padding: 9rem 1.6rem 1.6rem;
+    max-width: 34rem;
+  }
+  .fz-contraportada__creditos {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0 0 0.8rem;
+    border-bottom: 2px solid var(--accent);
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  .fz-contraportada__creditos li::before {
+    content: '// ';
+    color: var(--accent);
+  }
+  .fz-contraportada__credito-mascota {
+    margin: 0 0 1.2rem;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    opacity: 0.9;
   }
   .fz-contraportada__stamp {
+    display: inline-block;
+    margin: 0;
     font-family: var(--font-head);
     font-weight: 700;
     text-transform: uppercase;
@@ -33,5 +113,17 @@ const { texto = 'Bujía Project Music — Texcoco, MX' } = Astro.props;
     border: 3px solid var(--accent);
     padding: 0.8em 1.4em;
     transform: rotate(-3deg);
+    text-wrap: balance;
+  }
+  @media (max-width: 480px) {
+    .fz-contraportada__marca :global(.fz-parche) {
+      width: 100px;
+    }
+    .fz-contraportada__in {
+      padding: 8rem 1.1rem 1.4rem;
+    }
+    .fz-contraportada__stamp {
+      font-size: 0.85rem;
+    }
   }
 </style>
