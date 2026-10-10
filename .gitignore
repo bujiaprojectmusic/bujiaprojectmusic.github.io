@@ -8,3 +8,5 @@ dist/
 print/build/
 # Reporte del presupuesto de datos (npm run check:budget en CI)
 budget-reporte.json
+# Informe del QA del fanzine (npm run qa:fanzine; en CI es artifact)
+qa-fanzine-report/

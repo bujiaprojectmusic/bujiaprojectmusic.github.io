@@ -1,0 +1,8 @@
+numero: 2
+titulo: "Créditos"
+fecha: 2026-09-01
+publishDate: 2026-09-01
+portada:
+  imagen: "/piezas/x/portada.jpg"
+piezas:
+  - { pieza: cronica, desde: 3 }

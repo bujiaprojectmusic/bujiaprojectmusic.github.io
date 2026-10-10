@@ -56,7 +56,7 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
     {/* Filtros SVG compartidos de las texturas (.tx-grain, etc; issue #7). */}
     <FzFilters />
     {prueba && (
-      <p class="fz-prueba-banner fz-no-print" role="note">
+      <p class="fz-prueba-banner fz-no-print" role="region" aria-label="Edición de prueba">
         <strong>EDICIÓN DE PRUEBA</strong> — contenido ficticio para probar el sistema del fanzine. Nombres, bandas y anuncios son inventados.
       </p>
     )}

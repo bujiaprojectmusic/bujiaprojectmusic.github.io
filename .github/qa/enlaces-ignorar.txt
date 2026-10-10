@@ -1,0 +1,8 @@
+# Enlaces externos que el QA del fanzine (npm run qa:fanzine) no prueba.
+# Una URL por línea; con * al final se ignora todo lo que empiece igual.
+# Los externos nunca tumban el CI (sólo avisan); esta lista sirve para
+# callar avisos de sitios que bloquean robots o no responden a HEAD/GET.
+https://wa.me/*
+https://api.whatsapp.com/*
+https://www.instagram.com/*
+https://instagram.com/*

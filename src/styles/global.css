@@ -278,8 +278,10 @@ a {
   line-height: 1;
   margin: 0 0 1rem;
   text-align: center;
-  color: var(--accent);
-  -webkit-text-stroke: 2px var(--ink);
+  /* Tinta con sombra de acento: el acento sobre papel claro no pasa el
+     contraste mínimo (QA de #14, axe color-contrast). */
+  color: var(--ink);
+  text-shadow: 4px 4px 0 var(--accent);
 }
 .fz-contra-datos {
   padding: 1rem 1.1rem 2rem;

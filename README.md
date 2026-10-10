@@ -217,6 +217,31 @@ se copia del `<pre>`). Tests: `npm run test:content`
 (`tests/content/colabora.test.mjs`). El manifiesto y el acuerdo de
 colaboración siguen en `/fanzine/colabora`.
 
+## QA del fanzine: `npm run qa:fanzine` (issue #14)
+
+Un solo comando, sobre `dist/` (`npm run build`) y `print/build/`
+(`npm run print`), que corre en CI en cada PR y en `main` (job `build` de
+`deploy.yml`) y escribe la tabla por chequeo en el *Job summary* y el informe
+completo en `qa-fanzine-report/` (artifact del mismo nombre):
+
+| Chequeo | Qué revisa | Falla / avisa |
+|---|---|---|
+| Enlaces y anclas | todo `href`/`src` interno resuelve a un archivo de `dist/`; toda `#ancla` existe en la página destino | internos y anclas fallan; externos (HEAD/GET con reintentos) sólo avisan |
+| Índice ↔ pliegos | cada entrada del índice apunta a un pliego que existe (y no es relleno), el número impreso coincide con su posición, el título coincide con `titulo — autor` de la pieza, ninguna pieza del yml falta; `/volumenes` y `/fanzine` enlazan cada volumen publicado | falla |
+| Metadatos y créditos | cada pieza muestra su `credito`; cada `<img>` de `/fanzine/**` tiene `alt` (vacío sólo si `aria-hidden="true"`/`role="presentation"`, lo pone `OptimizedImage`); cada foto pintada lleva "Foto: crédito"; portada con imagen lleva crédito; `licencia` y `consentimiento_ref` | falla |
+| Privacidad | correos y teléfonos MX en `src/content/piezas/**`, `src/content/volumenes/**`, `dist/fanzine/**` (texto, `mailto:`, `tel:`), `print/build/**/volumen.json` y el texto de los PDF (`pdftotext`); el log enmascara el dato (`pe***@***.com`) | falla |
+| Accesibilidad (axe) | `/fanzine`, `/fanzine/colabora`, `/volumenes` y cada volumen a 390 y 1280 px | `serious`/`critical` fallan; `moderate`/`minor` avisan |
+| Impreso | desbordes, tamaño mínimo de letra, páginas (múltiplo de 4, ≥ 16), ppi (aviso < 300, error < 150) y gemelos Typst desde `print/build/manifest.json`, más `print:check` | falla (sin manifest: aviso en local, error en CI) |
+
+Excepciones: `.github/qa/enlaces-ignorar.txt` (externos que no se prueban,
+una URL o prefijo con `*` por línea) y `.github/qa/privacidad-permitidos.txt`
+(`<valor> <ámbito>`: el correo de colaboración sólo en `/fanzine/colabora`,
+el contacto público del taller en todos lados). Opciones:
+`--sin-externos`, `--sin-axe`, `--sin-impreso`, `--dist`, `--contenido`,
+`--impreso`, `--salida`. Mensajes en español con archivo y línea o selector.
+`npm run qa:test` corre las pruebas negativas (`tests/qa/`, fixtures en
+`tests/qa/fixtures/`, fuera de `src/`): cada chequeo falla cuando debe.
+
 ## Presupuesto de datos (issue #8)
 
 El fanzine tiene que ser vistoso pero ligero. Los límites viven **sólo en

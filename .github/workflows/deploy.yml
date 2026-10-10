@@ -131,6 +131,26 @@ jobs:
           path: budget-reporte.json
           if-no-files-found: ignore
 
+      # QA del fanzine (issue #14): enlaces y anclas, índice ↔ pliegos,
+      # créditos y alt, privacidad (fuentes, dist, JSON y PDF del impreso),
+      # accesibilidad con axe y las filas del impreso (manifest de npm run
+      # print + print:check). Resumen en el Job summary; informe completo en
+      # el artifact qa-fanzine-report. Los enlaces externos sólo avisan.
+      - name: QA del fanzine (npm run qa:fanzine)
+        run: npm run qa:fanzine
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-fanzine-report
+          path: qa-fanzine-report/
+          if-no-files-found: ignore
+
+      # Pruebas negativas del QA: cada chequeo falla cuando debe (fixtures en
+      # tests/qa/fixtures/, fuera de src/).
+      - name: Tests del QA (fixtures negativos)
+        run: npm run qa:test
+
       - uses: actions/upload-artifact@v4
         with:
           name: fanzine-pdfs

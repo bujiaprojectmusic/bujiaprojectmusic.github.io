@@ -148,6 +148,7 @@ if (meta) {
         width={fallback!.attributes.width}
         height={fallback!.attributes.height}
         alt={alt}
+        aria-hidden={alt === '' ? 'true' : undefined}
         loading={loading}
         decoding={decoding}
         fetchpriority={fetchpriority}

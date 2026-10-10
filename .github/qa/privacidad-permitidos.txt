@@ -1,0 +1,11 @@
+# Datos de contacto que el QA del fanzine (npm run qa:fanzine) NO marca como
+# fuga. Formato: <valor> <ámbito>. Ámbito = * (en todos lados) o un prefijo
+# de ruta pública (/fanzine/colabora) o de archivo. Todo lo demás (correos o
+# teléfonos de colaboradores) falla, con el dato enmascarado en el log.
+#
+# Correo de colaboración (issue #12): sólo en /fanzine/colabora y /fanzine/colabora/enviar.
+bujiaprojectmusic+fanzine@gmail.com /fanzine/colabora
+# Contacto público del taller (src/data/taller.ts): sale en la contraportada
+# de cada volumen (DatosTaller, #9) y en el impreso. No es dato de un colaborador.
+5618622447 *
+bujiaprojectmusic@gmail.com *

@@ -9,6 +9,8 @@
     "build": "node scripts/check-volumes.mjs && astro build && node scripts/check-dist-volumenes.mjs && node scripts/print/copy-dist.mjs",
     "check:volumes": "node scripts/check-volumes.mjs",
     "check:budget": "node scripts/check-budget.mjs",
+    "qa:fanzine": "node scripts/qa/fanzine.mjs",
+    "qa:test": "node --test tests/qa/enlaces.test.mjs tests/qa/indice.test.mjs tests/qa/creditos.test.mjs tests/qa/privacidad.test.mjs tests/qa/axe.test.mjs tests/qa/impreso.test.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "print:install": "bash scripts/print/install-typst.sh",
@@ -26,6 +28,7 @@
     "astro": "^4.16.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "gray-matter": "4.0.3",
     "jsqr": "1.4.0",
     "pdf-lib": "1.17.1",
