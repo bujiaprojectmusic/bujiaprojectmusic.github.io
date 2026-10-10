@@ -1,5 +1,5 @@
 {
-  "$comentario": "Geometría de los gemelos Typst de los componentes web (print/lib/componentes/). La leen print/lib/componentes/*.typ y scripts/print/export.ts (para el ancho colocado de cada foto → ppi efectivo). Porcentajes sobre la caja de texto de reglas.json; pt = puntos. alto_max_pct: alto máximo de la foto como % de la caja de texto (una foto vertical se achica para caber; el texto nunca).",
+  "$comentario": "Geometría de los gemelos Typst de los componentes web (print/lib/componentes/). La leen print/lib/componentes/*.typ y scripts/print/export.ts (para el ancho colocado de cada foto → ppi efectivo). Porcentajes sobre la caja de texto de reglas.json; pt = puntos. alto_max_pct: alto máximo de la foto como % de la caja de texto (una foto vertical se achica para caber; el texto nunca). sticker/cinta/parche/textura/taller_titulos: gemelos de marca y del taller (issue #17).",
   "polaroid": {
     "ancho_pct": 78,
     "marco_pt": 9,
@@ -89,5 +89,32 @@
     "oscurecer_arriba_pct": 35,
     "oscurecer_abajo_pct": 88,
     "texto": "paper"
+  },
+  "sticker": {
+    "ancho_px_default": 96,
+    "giro_grados_max": 15
+  },
+  "cinta": {
+    "ancho_px_default": 110,
+    "alto_pct": 24,
+    "giro_grados_max": 40,
+    "color": "#f3e3a0",
+    "borde": "#b8a86a",
+    "trama": "#d9c783",
+    "trama_paso_pt": 6
+  },
+  "parche": {
+    "ancho_px_default": 140
+  },
+  "textura": {
+    "halftone_paso_pt": 6,
+    "halftone_punto_pt": 1.3,
+    "grano_paso_pt": 12,
+    "grano_punto_pt": 0.35,
+    "marco_pt": 10
+  },
+  "taller_titulos": {
+    "sticker_title_factor": 0.6,
+    "giro_grados": -2
   }
 }

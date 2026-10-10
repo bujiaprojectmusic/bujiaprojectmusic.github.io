@@ -1,0 +1,9 @@
+$ npm run test:web
+#   antes del clic: 0 peticiones a youtube/spotify/bandcamp; 3 fachadas; 0 iframes
+#   después del clic: iframe src=https://www.youtube-nocookie.com/embed/C1vfbwwdtOQ?autoplay=1; peticiones externas: 1
+# Subtest: fachadas: 0 peticiones a YouTube/Spotify/Bandcamp antes del clic y iframe después
+ok 1 - fachadas: 0 peticiones a YouTube/Spotify/Bandcamp antes del clic y iframe después
+#   sin JS: 3 enlaces → https://www.youtube.com/watch?v=C1vfbwwdtOQ | https://www.youtube.com/watch?v=C1vfbwwdtOQ | https://www.youtube.com/playlist?list=PLzMaYoBMVrDm6n8BMuAVIctRy7GFBR5Ef; el clic navega a https://www.youtube.com/watch?v=C1vfbwwdtOQ
+#   script de fachada: 408 B gzip (_astro/hoisted.GIpXZ3Bm.js + _astro/Fachada.astro_astro_type_script_index_0_lang.Czq49849.js); ausente en fanzine/index.html, fanzine/colabora/index.html, volumenes/index.html
+ok 2 - fachadas: sin JavaScript cada una es un enlace al video o playlist
+ok 3 - fachadas: el script pesa ≤ 1 KB gzip y no está en páginas sin video

@@ -41,7 +41,8 @@
   let foto = foto-de(ctx, id)
   if foto == none { panic("foto " + str(id) + " no está en volumen.json") }
   if not foto.existe { return pendiente(ctx, foto, width: width, height: if height == auto { 120pt } else { height }) }
-  let archivo = archivo-foto(ctx, foto)
+  // Dentro de .tx-duotone (#17) la foto va en gris (equivalente plano del duotono).
+  let archivo = if ctx.at("duotono", default: false) { foto.bn } else { archivo-foto(ctx, foto) }
   let w = if alto-max-pct != none and type(width) == length { ancho-ajustado(foto, width, alto-max-pct) } else { width }
   // bn: los SVG quedan en color (Typst no recolorea vectores).
   image(archivo, width: w, height: height, fit: fit)

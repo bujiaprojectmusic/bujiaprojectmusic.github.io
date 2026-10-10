@@ -1,5 +1,6 @@
 // Gemelos de los nodos Markdown y de las etiquetas HTML genéricas.
 #import "/print/lib/componentes/util.typ": *
+#import "/print/lib/componentes/marca.typ": textura
 
 /// Liga: interna → "(pág. N)" (y en pantalla, link al pliego); externa → sólo el texto.
 #let liga(ctx, nodo) = {
@@ -35,6 +36,10 @@
   if et == "blockquote" { return cita-md(ctx, nodo) }
   if et == "figcaption" or et == "small" or clase.contains("fz-small") {
     return block(width: 100%, texto("pie", quien: "<" + et + " class=\"" + clase + "\">", (ctx.inline)(ctx, nodo.hijos)))
+  }
+  // Texturas (#17): .tx-grain / .tx-halftone / .tx-duotone → tiling vectorial.
+  if clase.contains("tx-grain") or clase.contains("tx-halftone") or clase.contains("tx-duotone") {
+    return textura(ctx, clase, nodo.hijos)
   }
   if clase.contains("fz-fin-word") {
     let c = colores(ctx)

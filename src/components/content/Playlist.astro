@@ -1,0 +1,84 @@
+---
+// Playlist de YouTube, Spotify o Bandcamp con fachada (#17, pedido de
+// Ricardo: playlists sólo en digital y sólo al dar clic). Marco tipo
+// J-card de casete: etiqueta con el servicio, póster CSS con el título y
+// ▶ (o `poster` local), enlace público sin JS; con JS el iframe se mete
+// al dar clic (Fachada.astro). En papel: QR + leyenda u omitida.
+// Uso: <Playlist servicio="youtube" id="PLzMaYoBMV…" titulo="Playlist de ajuste" />
+//      <Playlist servicio="spotify" id="37i9dQZF1DX…" titulo="Punk del taller" />
+//      <Playlist servicio="bandcamp" id="123456789" tipo="album" titulo="Demo" url="https://banda.bandcamp.com/album/demo" />
+import Fachada from './Fachada.astro';
+import type { ImageSource } from '../../utils/resolveImage';
+
+interface Props {
+  servicio: 'youtube' | 'spotify' | 'bandcamp';
+  id: string;
+  titulo: string;
+  /** Spotify: playlist | album | track. Bandcamp: album | track. */
+  tipo?: 'playlist' | 'album' | 'track';
+  /** Enlace público (Bandcamp: la página del álbum en el subdominio del artista). */
+  url?: string;
+  poster?: ImageSource;
+}
+const { servicio, id, titulo, tipo, url, poster } = Astro.props;
+const NOMBRES = { youtube: 'YouTube', spotify: 'Spotify', bandcamp: 'Bandcamp' } as const;
+const t = tipo ?? (servicio === 'bandcamp' ? 'album' : 'playlist');
+let href = url ?? '';
+let embed = '';
+if (servicio === 'youtube') {
+  href ||= `https://www.youtube.com/playlist?list=${id}`;
+  embed = `https://www.youtube-nocookie.com/embed/videoseries?list=${id}&autoplay=1`;
+} else if (servicio === 'spotify') {
+  href ||= `https://open.spotify.com/${t}/${id}`;
+  embed = `https://open.spotify.com/embed/${t}/${id}`;
+} else {
+  embed = `https://bandcamp.com/EmbeddedPlayer/${t}=${id}/size=large/bgcol=ffffff/linkcol=0687f5/tracklist=true/artwork=small/transparent=true/`;
+  href ||= `https://bandcamp.com/EmbeddedPlayer/${t}=${id}/size=large/tracklist=true/artwork=small/`;
+}
+---
+
+<div class="playlist fz-no-print" data-servicio={servicio}>
+  <p class="playlist__etiqueta"><span>Playlist</span> {NOMBRES[servicio]}</p>
+  <Fachada href={href} embed={embed} title={titulo} etiqueta={`Playlist · ${NOMBRES[servicio]}`} poster={poster} aspecto={servicio === 'youtube' ? '16 / 9' : '4 / 3'} />
+  <p class="playlist__pie">Se carga al dar clic. Sin JavaScript, el enlace abre la playlist en {NOMBRES[servicio]}.</p>
+</div>
+
+<style>
+  .playlist {
+    max-width: 640px;
+    margin: 2.5rem auto;
+    border: var(--border-w) solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .playlist__etiqueta {
+    margin: 0;
+    padding: 0.45rem 0.9rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    background-image: repeating-linear-gradient(90deg, transparent 0 10px, rgba(255, 255, 255, 0.08) 10px 12px);
+  }
+  .playlist__etiqueta span {
+    background: var(--accent);
+    color: var(--ink);
+    padding: 0.1em 0.5em;
+    margin-right: 0.5em;
+  }
+  .playlist__pie {
+    margin: 0;
+    padding: 0.4rem 0.9rem 0.5rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+  @media print {
+    .playlist {
+      display: none;
+    }
+  }
+</style>

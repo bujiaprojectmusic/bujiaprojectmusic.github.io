@@ -90,8 +90,24 @@ const PROPS_IMAGEN: Record<string, string[]> = {
   OptimizedImage: ['src'], BeforeAfter: ['before', 'after'], Pliego: ['bleed'],
 };
 
-function urlVideo(props: Record<string, any>): string {
+/** URL pública del video / playlist (misma que el enlace sin JS de la fachada web). */
+export function urlVideo(props: Record<string, any>): string {
+  if (props.servicio) {
+    // <Playlist servicio id titulo tipo url> (#17): YouTube, Spotify o Bandcamp.
+    if (props.url) return String(props.url);
+    const tipo = String(props.tipo ?? (props.servicio === 'bandcamp' ? 'album' : 'playlist'));
+    if (props.servicio === 'spotify') return `https://open.spotify.com/${tipo}/${props.id}`;
+    if (props.servicio === 'bandcamp') return `https://bandcamp.com/EmbeddedPlayer/${tipo}=${props.id}/size=large/tracklist=true/artwork=small/`;
+    return `https://www.youtube.com/playlist?list=${props.id}`;
+  }
   return props.kind === 'playlist' ? `https://www.youtube.com/playlist?list=${props.id}` : `https://www.youtube.com/watch?v=${props.id}`;
+}
+export const VIDEOS = ['VideoPoster', 'VideoOldTV', 'VideoCinema', 'Playlist'];
+
+/** SVG de marca (src/assets/fanzine/<nombre>.svg) como ruta absoluta para Typst (--root = raíz), o null si falta. */
+export function archivoAsset(nombre: string): string | null {
+  const ruta = path.join(RAIZ, 'src', 'assets', 'fanzine', `${nombre}.svg`);
+  return fs.existsSync(ruta) ? '/' + rel(ruta) : null;
 }
 
 /** Fuente con los pliegos ya numerados (adaptador piezas, issue #13). */
@@ -178,14 +194,18 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
     for (const nodo of nodos) {
       if (nodo.t === 'componente') {
         const props = { ...nodo.props } as Record<string, any>;
-        if (['VideoPoster', 'VideoOldTV', 'VideoCinema'].includes(nodo.nombre)) {
+        if (VIDEOS.includes(nodo.nombre)) {
           if (multimedia === 'omitir') { avisos.push(`pág. ${n}: <${nodo.nombre} id="${props.id}"> omitido (impreso.multimedia = "omitir").`); continue; }
+          if (nodo.nombre === 'Playlist') { props.kind = 'playlist'; props.title = props.titulo; }
           props.url = urlVideo(props);
           props.qr = await qr(props.url);
           props.kind = props.kind ?? 'video';
           out.push({ ...nodo, nombre: 'VideoPoster', props, hijos: await procesar(nodo.hijos, n) });
           continue;
         }
+        // Marca (#17): el SVG real si está en src/assets/fanzine/; si no, Typst dibuja el placeholder / usa el logo.
+        if (nodo.nombre === 'Sticker') props.archivo = archivoAsset(String(props.nombre));
+        if (nodo.nombre === 'Parche') props.archivo = archivoAsset(`parche-bujia${props.ancho ? '-ancho' : ''}-${props.variante ?? 'mono'}`);
         for (const k of PROPS_IMAGEN[nodo.nombre] ?? []) {
           if (typeof props[k] === 'string') {
             const foto = await cargarFoto(fotos, props[k], fuente.archivo, avisos, `${fuente.archivo} pág. ${n} <${nodo.nombre}>`);

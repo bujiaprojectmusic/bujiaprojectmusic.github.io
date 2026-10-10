@@ -1,0 +1,2082 @@
+{
+  "$comentario": "Registro ÚNICO de los componentes del fanzine (issue #17). Lo leen src/components/fanzine/registro.ts (web: /fanzine/kit), scripts/print/lib/mdx.ts (chequeo de catálogo en el export del impreso), scripts/print/kit.ts (jirafa-kit.pdf) y scripts/check-componentes.mjs (presupuesto por componente). Regla: nada entra a un volumen sin estar acá `aprobado` y con sus dos versiones (web + typst), salvo `soloWeb` (en el impreso se omite con aviso). `typst` = archivo#función en print/lib/. `demo` = props e hijos del ejemplo (de ahí sale el MDX copiable, el render web y la página del kit en Typst). `volumen` = volumen en que entró (0 = base del sistema).",
+  "version": 1,
+  "limites": {
+    "css_gzip_kb": 1.5,
+    "svg_gzip_kb": 2,
+    "script_fachada_gzip_kb": 1
+  },
+  "esquemas_kit": [
+    "rosa",
+    "xerox",
+    "overol"
+  ],
+  "pieza_demo": {
+    "id": "kit/pieza-demo",
+    "paginas": 1,
+    "credito": "Texto y fotos: Bujía Project Music (demo del kit)",
+    "scheme": "rosa",
+    "fotos": [
+      {
+        "src": "/fanzine/vol-00/capas-pegadas.jpeg",
+        "alt": "Capas de madera pegadas y prensadas en el taller",
+        "pie": "Capas pegadas, esperando la prensa",
+        "credito": "Bujía Project Music"
+      }
+    ]
+  },
+  "componentes": [
+    {
+      "nombre": "Pliego",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Una página del cuadernillo impreso (media carta). En la web es un tramo del scroll continuo con ancla #pagina-N; al imprimir, una página con número.",
+      "web": "src/components/fanzine/Pliego.astro",
+      "typst": "print/lib/paginas.typ#pieza",
+      "props": [
+        {
+          "nombre": "n",
+          "tipo": "number",
+          "default": null,
+          "obligatoria": true,
+          "que": "Número de página del impreso (1…N); ancla #pagina-N"
+        },
+        {
+          "nombre": "tipo",
+          "tipo": "'portada' | 'indice' | 'normal' | 'relleno' | 'fin' | 'contraportada'",
+          "default": "'normal'",
+          "obligatoria": false,
+          "que": "Rol de la página en el mapa fijo"
+        },
+        {
+          "nombre": "scheme",
+          "tipo": "ColorSchemeName",
+          "default": null,
+          "obligatoria": false,
+          "que": "Esquema de color de esa página"
+        },
+        {
+          "nombre": "bleed",
+          "tipo": "boolean | string",
+          "default": "false",
+          "obligatoria": false,
+          "que": "true = fondo ink a sangre; ruta = foto a sangre"
+        },
+        {
+          "nombre": "bleedAlt",
+          "tipo": "string",
+          "default": "''",
+          "obligatoria": false,
+          "que": "Alt de la foto a sangre"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "n": 3,
+          "bleed": true
+        },
+        "hijos": "Página con fondo a sangre (`bleed`): el texto va en el color papel del esquema. Lija, tornillos, cuerdas viejas, un pedal abierto sobre la mesa."
+      },
+      "notas": "En el kit, cada esquema usa un n distinto (3, 4, 5) para no repetir anclas."
+    },
+    {
+      "nombre": "Pagina",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Página relativa de una pieza (issue #13): <Pagina n={1}> … <Pagina n={paginas}>. Al componer el volumen se vuelve un <Pliego> con su número final; la última agrega el crédito de la pieza.",
+      "web": "src/components/fanzine/Pagina.astro",
+      "typst": "print/lib/paginas.typ#pieza",
+      "props": [
+        {
+          "nombre": "n",
+          "tipo": "number",
+          "default": null,
+          "obligatoria": true,
+          "que": "Página dentro de la pieza, 1…paginas"
+        },
+        {
+          "nombre": "scheme",
+          "tipo": "ColorSchemeName",
+          "default": null,
+          "obligatoria": false,
+          "que": "Esquema de esa página"
+        },
+        {
+          "nombre": "bleed",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Foto a sangre (/piezas/<carpeta>/foto.jpg)"
+        },
+        {
+          "nombre": "bleedAlt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Alt de la foto a sangre"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 1,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "n": 1
+        },
+        "hijos": "Última página de la pieza demo: abajo sale la línea de crédito que viene del frontmatter (`credito`), igual en web y en papel."
+      },
+      "notas": "Sólo dentro de src/content/piezas/**; el kit la pinta con una pieza demo sintética (pieza_demo)."
+    },
+    {
+      "nombre": "Foto",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Foto n del frontmatter de la pieza (src, alt, pie, crédito validados por el esquema) pintada como ImageFull, ImageSide, Polaroid, PhotoOld o Xerox según `estilo`.",
+      "web": "src/components/fanzine/Foto.astro",
+      "typst": "scripts/print/sources/piezas.ts#reemplazarFotos → imagenes.typ",
+      "props": [
+        {
+          "nombre": "n",
+          "tipo": "number",
+          "default": null,
+          "obligatoria": true,
+          "que": "Índice de la foto en el frontmatter (1…)"
+        },
+        {
+          "nombre": "estilo",
+          "tipo": "'full' | 'side' | 'polaroid' | 'vieja' | 'xerox'",
+          "default": "'full'",
+          "obligatoria": false,
+          "que": "Componente de imagen que la pinta"
+        },
+        {
+          "nombre": "side",
+          "tipo": "'left' | 'right'",
+          "default": "'right'",
+          "obligatoria": false,
+          "que": "Lado (estilo side)"
+        },
+        {
+          "nombre": "width",
+          "tipo": "string",
+          "default": "'42%'",
+          "obligatoria": false,
+          "que": "Ancho (estilo side)"
+        },
+        {
+          "nombre": "tilt",
+          "tipo": "number",
+          "default": null,
+          "obligatoria": false,
+          "que": "Inclinación en grados (polaroid / vieja)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 1,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "n": 1,
+          "estilo": "polaroid",
+          "tilt": -3
+        },
+        "hijos": null
+      },
+      "notas": "El pie sale como «<pie>. Foto: <credito>»."
+    },
+    {
+      "nombre": "Relleno",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Página de relleno diseñada de un volumen compuesto: colabora, notas (hoja para dibujar) o taller (datos y servicios). Cubre los huecos del mapa de páginas con contenido real del sitio.",
+      "web": "src/components/fanzine/Relleno.astro",
+      "typst": "print/lib/paginas.typ#relleno",
+      "props": [
+        {
+          "nombre": "n",
+          "tipo": "number",
+          "default": null,
+          "obligatoria": true,
+          "que": "Número de página final"
+        },
+        {
+          "nombre": "tipo",
+          "tipo": "'colabora' | 'notas' | 'taller'",
+          "default": null,
+          "obligatoria": true,
+          "que": "Diseño de la página"
+        },
+        {
+          "nombre": "declarado",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "true = se ve también en la web; false = sólo en papel"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 1,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": {
+        "props": {
+          "n": 9,
+          "tipo": "notas",
+          "declarado": true
+        },
+        "hijos": null
+      },
+      "notas": "Lo pone el yml del volumen (src/content/volumenes/), no el MDX de una pieza."
+    },
+    {
+      "nombre": "Portada",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Portada del volumen: foto a sangre oscurecida, etiqueta Vol. NN, título en Anton, mes, parche y mascota.",
+      "web": "src/components/Portada.astro",
+      "typst": "print/lib/paginas.typ#portada",
+      "props": [
+        {
+          "nombre": "volume",
+          "tipo": "number",
+          "default": null,
+          "obligatoria": true,
+          "que": "Número de volumen"
+        },
+        {
+          "nombre": "title",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título"
+        },
+        {
+          "nombre": "subtitle",
+          "tipo": "string",
+          "default": "mes y año",
+          "obligatoria": false,
+          "que": "Bajada"
+        },
+        {
+          "nombre": "image",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Foto de portada"
+        },
+        {
+          "nombre": "mascota",
+          "tipo": "boolean",
+          "default": "true",
+          "obligatoria": false,
+          "que": "Mostrar la mascota"
+        },
+        {
+          "nombre": "placeholders",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "Placeholders TODO si faltan los SVG (sólo muestra/kit)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "volume": 1,
+          "title": "Fierros y Fuzz",
+          "subtitle": "Demo del kit · Texcoco",
+          "image": "/fanzine/vol-00/portada-taller.jpeg"
+        },
+        "hijos": null
+      },
+      "notas": "Mascota: ilustración por encargo (crédito pendiente de confirmar)."
+    },
+    {
+      "nombre": "Indice",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Índice del volumen. En la web cada ítem es una liga a #pagina-N; en papel lleva el número de página real de cada pieza.",
+      "web": "src/components/Indice.astro",
+      "typst": "print/lib/paginas.typ#indice",
+      "props": [
+        {
+          "nombre": "items",
+          "tipo": "{ page: string; title: string }[]",
+          "default": null,
+          "obligatoria": true,
+          "que": "Entradas (page = número de página)"
+        },
+        {
+          "nombre": "linkPages",
+          "tipo": "boolean",
+          "default": "true",
+          "obligatoria": false,
+          "que": "Ligar cada ítem a #pagina-N"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "items": [
+            {
+              "page": "03",
+              "title": "Editorial"
+            },
+            {
+              "page": "04",
+              "title": "Taller: rebobinado de pastillas"
+            },
+            {
+              "page": "09",
+              "title": "Playlist del mes"
+            }
+          ],
+          "linkPages": false
+        },
+        "hijos": null
+      },
+      "notas": "En jirafa-kit.pdf el índice lista las páginas reales del kit."
+    },
+    {
+      "nombre": "Contraportada",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Contraportada: fondo ink a sangre, sello rotado con el texto, créditos, mascota con su crédito y QR al volumen.",
+      "web": "src/components/Contraportada.astro",
+      "typst": "print/lib/paginas.typ#contraportada",
+      "props": [
+        {
+          "nombre": "texto",
+          "tipo": "string",
+          "default": "'Bujía Project Music — Texcoco, MX'",
+          "obligatoria": false,
+          "que": "Texto del sello"
+        },
+        {
+          "nombre": "creditos",
+          "tipo": "string[]",
+          "default": "[]",
+          "obligatoria": false,
+          "que": "Líneas de crédito"
+        },
+        {
+          "nombre": "mascota",
+          "tipo": "boolean",
+          "default": "true",
+          "obligatoria": false,
+          "que": "Mostrar la mascota"
+        },
+        {
+          "nombre": "placeholders",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "Placeholders TODO si faltan los SVG"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "texto": "Bujía Project Music — Texcoco, MX",
+          "creditos": [
+            "Textos: la redacción",
+            "Fotos: Bujía Project Music"
+          ]
+        },
+        "hijos": null
+      },
+      "notas": "Mascota: ilustración por encargo (crédito pendiente de confirmar)."
+    },
+    {
+      "nombre": "DatosTaller",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Bloque de datos del taller (logo, dirección, horario, WhatsApp, web) desde src/data/taller.ts, para la contraportada. En papel agrega un QR a la web.",
+      "web": "src/components/fanzine/DatosTaller.astro",
+      "typst": "print/lib/componentes/taller.typ#datos-taller",
+      "props": [],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {},
+        "hijos": null
+      },
+      "notas": "Acepta contenido extra adentro (p. ej. «EDICIÓN DE PRUEBA»)."
+    },
+    {
+      "nombre": "DescargaPdf",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Tarjeta «Llévatelo» debajo de la portada: PDF para leer, para imprimir en casa y cómo imprimir (manifest del impreso).",
+      "web": "src/components/fanzine/DescargaPdf.astro",
+      "typst": null,
+      "props": [
+        {
+          "nombre": "slug",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Slug del volumen (vol-NN)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": "es la descarga del propio PDF; en papel no aplica",
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": {
+        "props": {
+          "slug": "vol-00"
+        },
+        "hijos": null
+      },
+      "notas": "La pinta Pliego tipo=portada; no va en MDX."
+    },
+    {
+      "nombre": "SectionTitle",
+      "grupo": "titulos",
+      "tipo": "componente",
+      "descripcion": "Título sticker: fondo accent, recorte irregular (clip-path) e inclinación, en Anton. En papel, polígono + texto.",
+      "web": "src/components/SectionTitle.astro",
+      "typst": "print/lib/componentes/titulos.typ#section-title",
+      "props": [
+        {
+          "nombre": "scheme",
+          "tipo": "ColorSchemeName",
+          "default": null,
+          "obligatoria": false,
+          "que": "Esquema del sticker"
+        },
+        {
+          "nombre": "pageBreak",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "Salto de página antes al imprimir"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {},
+        "hijos": "Título sticker"
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "PostCover",
+      "grupo": "titulos",
+      "tipo": "componente",
+      "descripcion": "Apertura de pieza o sección en 5 variantes: sticker, stamp (sello), tape (cinta), xerox (marco grueso) y flyer. Una función por variante en papel.",
+      "web": "src/components/content/PostCover.astro",
+      "typst": "print/lib/componentes/titulos.typ#post-cover",
+      "props": [
+        {
+          "nombre": "title",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título"
+        },
+        {
+          "nombre": "subtitle",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Bajada"
+        },
+        {
+          "nombre": "tag",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Etiqueta chica"
+        },
+        {
+          "nombre": "variant",
+          "tipo": "'sticker' | 'stamp' | 'tape' | 'xerox' | 'flyer'",
+          "default": "'sticker'",
+          "obligatoria": false,
+          "que": "Look"
+        },
+        {
+          "nombre": "colorScheme",
+          "tipo": "ColorSchemeName",
+          "default": null,
+          "obligatoria": false,
+          "que": "Esquema propio"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "title": "Rebobinado de pastillas",
+          "subtitle": "Taller paso a paso",
+          "tag": "Taller",
+          "variant": "stamp"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Encabezados",
+      "grupo": "titulos",
+      "tipo": "estilo",
+      "descripcion": "Encabezados Markdown dentro de una pieza: ## línea gruesa, ### sticker, #### con //. En papel, subtítulo en Anton (reglas.json: subtitulo).",
+      "web": "src/styles/global.css (.post-body h2/h3/h4)",
+      "typst": "print/lib/render.typ#titulo",
+      "props": [],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {},
+        "hijos": "## Un h2 con línea gruesa\n\n### Un h3 tipo sticker\n\n#### Un h4 con doble barra"
+      },
+      "notas": "No es un componente: son estilos de .post-body y la regla `titulo` del render Typst."
+    },
+    {
+      "nombre": "StickerTitle",
+      "grupo": "titulos",
+      "tipo": "componente",
+      "descripcion": "Título sticker grande del taller (Anton sobre .fz-section-title) para encabezar secciones («Nuestros fierros»).",
+      "web": "src/components/taller/StickerTitle.astro",
+      "typst": "print/lib/componentes/taller.typ#sticker-title",
+      "props": [
+        {
+          "nombre": "text",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto"
+        },
+        {
+          "nombre": "class",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Clase extra"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "text": "Nuestros fierros"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "SectionLabel",
+      "grupo": "titulos",
+      "tipo": "componente",
+      "descripcion": "Etiqueta chica «[PRODUCTOS]» en Space Mono con línea abajo, para dividir una lista por tags.",
+      "web": "src/components/taller/SectionLabel.astro",
+      "typst": "print/lib/componentes/taller.typ#section-label",
+      "props": [
+        {
+          "nombre": "text",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto (sale en mayúsculas)"
+        },
+        {
+          "nombre": "class",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Clase extra"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "text": "Productos"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Columnas",
+      "grupo": "bloques",
+      "tipo": "componente",
+      "descripcion": "Texto a 2 o 3 columnas en desktop; una en móvil. En papel, máximo 2 (reglas del impreso #16).",
+      "web": "src/components/Columnas.astro",
+      "typst": "print/lib/componentes/bloques.typ#columnas",
+      "props": [
+        {
+          "nombre": "n",
+          "tipo": "2 | 3",
+          "default": "2",
+          "obligatoria": false,
+          "que": "Columnas en pantalla"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "n": 2
+        },
+        "hijos": "Dos columnas en desktop y al imprimir; una sola en móvil. Este párrafo sirve de relleno para que la división se vea: lija, tornillos, cuerdas viejas, un pedal abierto sobre la mesa y la radio a todo volumen.\n\nSegunda mitad del texto. En el impreso el máximo son dos columnas, así que n=3 también cae a dos al imprimir."
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Quote",
+      "grupo": "bloques",
+      "tipo": "componente",
+      "descripcion": "Cita grande en mayúsculas con comillas de color y línea gruesa a la izquierda.",
+      "web": "src/components/content/Quote.astro",
+      "typst": "print/lib/componentes/bloques.typ#quote",
+      "props": [
+        {
+          "nombre": "cite",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Quién lo dijo"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "cite": "Ripper, en el taller"
+        },
+        "hijos": "Si suena, está bien. Si además se ve bien, mejor."
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Note",
+      "grupo": "bloques",
+      "tipo": "componente",
+      "descripcion": "Caja de nota con etiqueta: note, warning (rojo) o tip (accent).",
+      "web": "src/components/content/Note.astro",
+      "typst": "print/lib/componentes/bloques.typ#note",
+      "props": [
+        {
+          "nombre": "variant",
+          "tipo": "'note' | 'warning' | 'tip'",
+          "default": "'note'",
+          "obligatoria": false,
+          "que": "Tipo"
+        },
+        {
+          "nombre": "title",
+          "tipo": "string",
+          "default": "Nota / Ojo / Tip",
+          "obligatoria": false,
+          "que": "Etiqueta"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "variant": "tip",
+          "title": "Tip"
+        },
+        "hijos": "Afloja las cuerdas antes de tocar el alma: el mástil te lo agradece."
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Divider",
+      "grupo": "bloques",
+      "tipo": "componente",
+      "descripcion": "Separador vectorial: zigzag (dientes de sierra), dashed, stars o tape.",
+      "web": "src/components/content/Divider.astro",
+      "typst": "print/lib/componentes/bloques.typ#divider",
+      "props": [
+        {
+          "nombre": "variant",
+          "tipo": "'zigzag' | 'dashed' | 'stars' | 'tape'",
+          "default": "'zigzag'",
+          "obligatoria": false,
+          "que": "Look"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "variant": "zigzag"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "ImageFull",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Foto a todo el ancho con pie.",
+      "web": "src/components/content/ImageFull.astro",
+      "typst": "print/lib/componentes/imagenes.typ#image-full",
+      "props": [
+        {
+          "nombre": "src",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta de la foto (/fanzine/…, /img/…, /piezas/…)"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto alternativo"
+        },
+        {
+          "nombre": "caption",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Pie («… Foto: crédito»)"
+        },
+        {
+          "nombre": "priority",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "Es la imagen LCP (eager)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "src": "/fanzine/vol-00/mural.jpeg",
+          "alt": "Mural del taller",
+          "caption": "El mural de la entrada. Foto: Bujía Project Music"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "ImageSide",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Foto lateral con el texto que sigue rodeándola (wrap-it en papel).",
+      "web": "src/components/content/ImageSide.astro",
+      "typst": "print/lib/componentes/imagenes.typ#image-side",
+      "props": [
+        {
+          "nombre": "src",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta de la foto"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto alternativo"
+        },
+        {
+          "nombre": "side",
+          "tipo": "'left' | 'right'",
+          "default": "'left'",
+          "obligatoria": false,
+          "que": "Lado"
+        },
+        {
+          "nombre": "caption",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Pie"
+        },
+        {
+          "nombre": "width",
+          "tipo": "string",
+          "default": "'42%'",
+          "obligatoria": false,
+          "que": "Ancho (% o px)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "src": "/fanzine/vol-00/pintura.jpeg",
+          "alt": "Cuerpo de guitarra recién pintado",
+          "side": "right",
+          "caption": "Pintura fresca. Foto: Bujía Project Music",
+          "width": "42%"
+        },
+        "hijos": null,
+        "despues": "El texto que sigue rodea la foto. Una Skatecaster nace de tablas de patineta viejas: se pegan las capas, se prensan, se corta el cuerpo en la CNC y se lija a mano hasta que el canto queda parejo. Después viene el mástil, la pintura y el cableado, y al final las pastillas, que es donde todo el ruido empieza."
+      },
+      "notas": "El párrafo que viene después en el MDX es el que la rodea."
+    },
+    {
+      "nombre": "Polaroid",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Foto con marco blanco, pie abajo, inclinación y cinta adhesiva arriba.",
+      "web": "src/components/Polaroid.astro",
+      "typst": "print/lib/componentes/imagenes.typ#polaroid",
+      "props": [
+        {
+          "nombre": "src",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta de la foto"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto alternativo"
+        },
+        {
+          "nombre": "caption",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Pie"
+        },
+        {
+          "nombre": "tilt",
+          "tipo": "number",
+          "default": "-3",
+          "obligatoria": false,
+          "que": "Inclinación en grados (±4 en papel)"
+        },
+        {
+          "nombre": "cinta",
+          "tipo": "boolean",
+          "default": "true",
+          "obligatoria": false,
+          "que": "Cinta arriba"
+        },
+        {
+          "nombre": "cintaAngulo",
+          "tipo": "number",
+          "default": "-3",
+          "obligatoria": false,
+          "que": "Ángulo de la cinta"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "src": "/fanzine/vol-00/skatecaster-terminada.jpeg",
+          "alt": "Skatecaster terminada",
+          "caption": "Skatecaster terminada. Foto: Bujía Project Music",
+          "tilt": -3
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "PhotoOld",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Foto vieja: sepia, viñeta y cintas en las esquinas. En papel, variante sepia del build + cinta vectorial.",
+      "web": "src/components/content/PhotoOld.astro",
+      "typst": "print/lib/componentes/imagenes.typ#photo-old",
+      "props": [
+        {
+          "nombre": "src",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta de la foto"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto alternativo"
+        },
+        {
+          "nombre": "caption",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Pie"
+        },
+        {
+          "nombre": "tilt",
+          "tipo": "number",
+          "default": "-2",
+          "obligatoria": false,
+          "que": "Inclinación"
+        },
+        {
+          "nombre": "cinta",
+          "tipo": "boolean",
+          "default": "true",
+          "obligatoria": false,
+          "que": "Cintas en las esquinas"
+        },
+        {
+          "nombre": "cintaAngulo",
+          "tipo": "number",
+          "default": "35",
+          "obligatoria": false,
+          "que": "Ángulo de las cintas"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "src": "/fanzine/vol-00/taller-completo.jpeg",
+          "alt": "El taller completo",
+          "caption": "El taller, 2019. Foto: Bujía Project Music",
+          "tilt": 2
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Xerox",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Foto fotocopiada: B/N de alto contraste, grano y sello «COPIA». En papel siempre va en gris, también en la imprenta a color.",
+      "web": "src/components/content/Xerox.astro",
+      "typst": "print/lib/componentes/imagenes.typ#xerox",
+      "props": [
+        {
+          "nombre": "src",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta de la foto"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto alternativo"
+        },
+        {
+          "nombre": "caption",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Pie (mayúsculas)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "src": "/fanzine/vol-00/mesa-trabajo.jpeg",
+          "alt": "Mesa de trabajo",
+          "caption": "Mesa de trabajo. Foto: Bujía Project Music"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Gallery",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Fotos «tiradas en la mesa», cada una con su giro. En papel, rejilla de hasta 3 columnas.",
+      "web": "src/components/content/Gallery.astro",
+      "typst": "print/lib/componentes/imagenes.typ#gallery",
+      "props": [
+        {
+          "nombre": "images",
+          "tipo": "{ src: string; alt: string; caption?: string }[]",
+          "default": null,
+          "obligatoria": true,
+          "que": "Fotos"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "images": [
+            {
+              "src": "/fanzine/vol-00/patinetas.jpeg",
+              "alt": "Patinetas apiladas",
+              "caption": "Patinetas"
+            },
+            {
+              "src": "/fanzine/vol-00/skate-001.jpeg",
+              "alt": "Tabla marcada 001",
+              "caption": "001"
+            },
+            {
+              "src": "/fanzine/vol-00/tablas-cortadas.jpeg",
+              "alt": "Tablas cortadas",
+              "caption": "Cortadas"
+            }
+          ]
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "BeforeAfter",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Antes / después: dos fotos con etiquetas.",
+      "web": "src/components/content/BeforeAfter.astro",
+      "typst": "print/lib/componentes/imagenes.typ#before-after",
+      "props": [
+        {
+          "nombre": "before",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Foto de antes"
+        },
+        {
+          "nombre": "after",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Foto de después"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto alternativo"
+        },
+        {
+          "nombre": "beforeLabel",
+          "tipo": "string",
+          "default": "'Antes'",
+          "obligatoria": false,
+          "que": "Etiqueta"
+        },
+        {
+          "nombre": "afterLabel",
+          "tipo": "string",
+          "default": "'Después'",
+          "obligatoria": false,
+          "que": "Etiqueta"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "before": "/fanzine/vol-00/cuerpo-pelon.jpeg",
+          "after": "/fanzine/vol-00/skatecaster-terminada.jpeg",
+          "alt": "Cuerpo pelón y Skatecaster terminada"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "OptimizedImage",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Imagen optimizada por astro:assets (AVIF/WebP/JPG por ancho) con placeholder si falta. Base de todos los componentes de foto.",
+      "web": "src/components/OptimizedImage.astro",
+      "typst": "print/lib/componentes/imagenes.typ#optimized-image",
+      "props": [
+        {
+          "nombre": "src",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto alternativo (vacío = decorativa)"
+        },
+        {
+          "nombre": "width",
+          "tipo": "number",
+          "default": "mayor de widths",
+          "obligatoria": false,
+          "que": "Ancho del <img>"
+        },
+        {
+          "nombre": "widths",
+          "tipo": "number[]",
+          "default": null,
+          "obligatoria": false,
+          "que": "Anchos del srcset"
+        },
+        {
+          "nombre": "sizes",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Atributo sizes"
+        },
+        {
+          "nombre": "print",
+          "tipo": "boolean",
+          "default": "true",
+          "obligatoria": false,
+          "que": "<source media=print> en alta"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "src": "/img/logo.png",
+          "alt": "Logo de Bujía Project Music",
+          "width": 180
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "MissingImage",
+      "grupo": "imagenes",
+      "tipo": "componente",
+      "descripcion": "Placeholder que pinta OptimizedImage cuando la imagen no existe. En un volumen publicado una imagen faltante es ERROR en el impreso: no tiene gemelo a propósito.",
+      "web": "src/components/MissingImage.astro",
+      "typst": null,
+      "props": [
+        {
+          "nombre": "src",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta que faltó"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Texto alternativo"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": {
+        "props": {
+          "src": "/img/no-existe.jpg",
+          "alt": "Imagen que no existe"
+        },
+        "hijos": null
+      },
+      "notas": "Usarlo en una pieza hace fallar el export (sin gemelo Typst): es el comportamiento buscado."
+    },
+    {
+      "nombre": "VideoOldTV",
+      "grupo": "multimedia",
+      "tipo": "componente",
+      "descripcion": "Video de YouTube en una tele vieja (marco, antena, perillas, scanlines). Fachada: en la página sólo hay el póster y un enlace; el iframe de youtube-nocookie se mete al dar clic. En papel: QR + leyenda, u omitido (impreso.multimedia).",
+      "web": "src/components/content/VideoOldTV.astro",
+      "typst": "print/lib/componentes/video.typ#video-poster",
+      "props": [
+        {
+          "nombre": "id",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "ID del video (lo que sigue a v=)"
+        },
+        {
+          "nombre": "title",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título (se ve en el póster)"
+        },
+        {
+          "nombre": "poster",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Imagen local del póster (astro:assets); sin ella, pantalla CSS"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "id": "C1vfbwwdtOQ",
+          "title": "Guitar Set Up 101"
+        },
+        "hijos": null
+      },
+      "notas": "0 peticiones a YouTube antes del clic. Sin JS, el póster es un enlace al video."
+    },
+    {
+      "nombre": "VideoCinema",
+      "grupo": "multimedia",
+      "tipo": "componente",
+      "descripcion": "Video de YouTube con rollo de cine (perforaciones) y claqueta. Misma fachada que VideoOldTV.",
+      "web": "src/components/content/VideoCinema.astro",
+      "typst": "print/lib/componentes/video.typ#video-poster",
+      "props": [
+        {
+          "nombre": "id",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "ID del video"
+        },
+        {
+          "nombre": "title",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título"
+        },
+        {
+          "nombre": "clap",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Texto de la claqueta"
+        },
+        {
+          "nombre": "poster",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Imagen local del póster"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "id": "C1vfbwwdtOQ",
+          "title": "Sesión en vivo",
+          "clap": "Toma 1"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "VideoPoster",
+      "grupo": "multimedia",
+      "tipo": "componente",
+      "descripcion": "Video o playlist de YouTube como póster CSS dentro de un <details>: el iframe sólo se carga al abrir. Cero JS.",
+      "web": "src/components/content/VideoPoster.astro",
+      "typst": "print/lib/componentes/video.typ#video-poster",
+      "props": [
+        {
+          "nombre": "id",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "ID del video o de la playlist"
+        },
+        {
+          "nombre": "title",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título"
+        },
+        {
+          "nombre": "kind",
+          "tipo": "'video' | 'playlist'",
+          "default": "'video'",
+          "obligatoria": false,
+          "que": "Tipo"
+        },
+        {
+          "nombre": "meta",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Texto chico bajo el título"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "id": "C1vfbwwdtOQ",
+          "title": "Guitar Set Up 101",
+          "meta": "Canal del taller"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "Playlist",
+      "grupo": "multimedia",
+      "tipo": "componente",
+      "descripcion": "Playlist de YouTube, Spotify o Bandcamp con fachada: póster CSS con el título y ▶, enlace sin JS, iframe al dar clic. En papel: QR + leyenda, u omitida.",
+      "web": "src/components/content/Playlist.astro",
+      "typst": "print/lib/componentes/video.typ#video-poster",
+      "props": [
+        {
+          "nombre": "servicio",
+          "tipo": "'youtube' | 'spotify' | 'bandcamp'",
+          "default": null,
+          "obligatoria": true,
+          "que": "Servicio"
+        },
+        {
+          "nombre": "id",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "ID de la playlist (YouTube: list=; Spotify: id; Bandcamp: album=)"
+        },
+        {
+          "nombre": "titulo",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título"
+        },
+        {
+          "nombre": "tipo",
+          "tipo": "'playlist' | 'album' | 'track'",
+          "default": "'playlist' (bandcamp: 'album')",
+          "obligatoria": false,
+          "que": "Tipo de contenido (Spotify / Bandcamp)"
+        },
+        {
+          "nombre": "url",
+          "tipo": "string",
+          "default": "según servicio",
+          "obligatoria": false,
+          "que": "Enlace público (Bandcamp: la página del álbum)"
+        },
+        {
+          "nombre": "poster",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Imagen local del póster"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 1,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "servicio": "youtube",
+          "id": "PLzMaYoBMVrDm6n8BMuAVIctRy7GFBR5Ef",
+          "titulo": "Playlist de ajuste"
+        },
+        "hijos": null
+      },
+      "notas": "Pedido de Ricardo: playlists sólo en digital y sólo al dar clic."
+    },
+    {
+      "nombre": "Fachada",
+      "grupo": "multimedia",
+      "tipo": "componente",
+      "descripcion": "Fachada interna que usan VideoOldTV, VideoCinema y Playlist: enlace + póster (CSS o astro:assets) y el único script del fanzine (≤ 1 KB gzip, una vez por página y sólo en páginas con video) que mete el iframe al dar clic.",
+      "web": "src/components/content/Fachada.astro",
+      "typst": null,
+      "props": [
+        {
+          "nombre": "href",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Enlace público (sin JS)"
+        },
+        {
+          "nombre": "embed",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "URL del iframe al dar clic"
+        },
+        {
+          "nombre": "title",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título"
+        },
+        {
+          "nombre": "etiqueta",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "«Video · YouTube», «Playlist · Spotify»…"
+        },
+        {
+          "nombre": "poster",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Imagen local del póster"
+        },
+        {
+          "nombre": "aspecto",
+          "tipo": "string",
+          "default": "'16 / 9'",
+          "obligatoria": false,
+          "que": "Relación de aspecto"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 1,
+      "soloWeb": "es la mecánica web del clic; en papel los videos son QR (video.typ) u omitidos",
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": null,
+      "notas": "No va en MDX: la usan los tres componentes de video/playlist por adentro."
+    },
+    {
+      "nombre": "Sticker",
+      "grupo": "marca",
+      "tipo": "componente",
+      "descripcion": "Sticker de marca (rayo, púa, bujía, llave, estrella, sello COPIA, mascota) en SVG de src/assets/fanzine/ en currentColor; placeholder TODO si falta el archivo.",
+      "web": "src/components/fanzine/Sticker.astro",
+      "typst": "print/lib/componentes/marca.typ#sticker",
+      "props": [
+        {
+          "nombre": "nombre",
+          "tipo": "NombreAsset",
+          "default": null,
+          "obligatoria": true,
+          "que": "Nombre del SVG (utils/fanzineAssets.ts)"
+        },
+        {
+          "nombre": "ancho",
+          "tipo": "number",
+          "default": "96",
+          "obligatoria": false,
+          "que": "Ancho en px"
+        },
+        {
+          "nombre": "rotar",
+          "tipo": "number",
+          "default": "0",
+          "obligatoria": false,
+          "que": "Giro en grados"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Si significa algo; si no, decorativo"
+        },
+        {
+          "nombre": "quieto",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "Sin animación de aparición"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "nombre": "rayo",
+          "ancho": 96,
+          "rotar": -8
+        },
+        "hijos": null
+      },
+      "notas": "En papel el SVG real se incrusta (vector); sin archivo, el mismo placeholder dibujado en Typst. Mascota: ilustración por encargo (crédito pendiente de confirmar)."
+    },
+    {
+      "nombre": "Cinta",
+      "grupo": "marca",
+      "tipo": "componente",
+      "descripcion": "Pedazo de cinta adhesiva para «pegar» cosas: SVG de marca si existe, si no una tira CSS. Con `pos` se coloca en el borde del contenedor.",
+      "web": "src/components/fanzine/Cinta.astro",
+      "typst": "print/lib/componentes/marca.typ#cinta",
+      "props": [
+        {
+          "nombre": "angulo",
+          "tipo": "number",
+          "default": "-4",
+          "obligatoria": false,
+          "que": "Giro en grados"
+        },
+        {
+          "nombre": "ancho",
+          "tipo": "number",
+          "default": "110",
+          "obligatoria": false,
+          "que": "Ancho en px (alto = 24 %)"
+        },
+        {
+          "nombre": "pos",
+          "tipo": "'arriba' | 'abajo' | 'izquierda' | 'derecha'",
+          "default": null,
+          "obligatoria": false,
+          "que": "Borde donde se pega (contenedor position: relative)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "angulo": -6,
+          "ancho": 140
+        },
+        "hijos": null
+      },
+      "notas": "En papel: tira plana color papel-amarillo con trama diagonal (tiling), sin transparencia."
+    },
+    {
+      "nombre": "Parche",
+      "grupo": "marca",
+      "tipo": "componente",
+      "descripcion": "Parche ovalado de Bujía (SVG mono/color de marca) o, mientras no esté, el logo del taller optimizado.",
+      "web": "src/components/fanzine/Parche.astro",
+      "typst": "print/lib/componentes/marca.typ#parche",
+      "props": [
+        {
+          "nombre": "variante",
+          "tipo": "'mono' | 'color'",
+          "default": "'mono'",
+          "obligatoria": false,
+          "que": "Una tinta o color"
+        },
+        {
+          "nombre": "ancho",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "Versión ancha (header)"
+        },
+        {
+          "nombre": "tamano",
+          "tipo": "number",
+          "default": "140",
+          "obligatoria": false,
+          "que": "Ancho en px"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "variante": "mono",
+          "tamano": 150
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "FzFilters",
+      "grupo": "marca",
+      "tipo": "componente",
+      "descripcion": "Filtros SVG compartidos (#fz-grain, #fz-rough) que usan las texturas; FanzineLayout lo incluye una vez por página.",
+      "web": "src/components/fanzine/FzFilters.astro",
+      "typst": null,
+      "props": [],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": "son filtros del DOM; en Typst las texturas son tiling vectorial (ver Texturas)",
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": null,
+      "notas": ""
+    },
+    {
+      "nombre": "Texturas",
+      "grupo": "marca",
+      "tipo": "estilo",
+      "descripcion": "Clases .tx-grain (grano de fotocopia), .tx-halftone (trama de puntos) y .tx-duotone (foto a dos tintas) de src/styles/fanzine-textures.css. En papel: tiling vectorial de puntos/grano (sin filtros rasterizados); duotono = foto en gris sobre marco accent.",
+      "web": "src/styles/fanzine-textures.css",
+      "typst": "print/lib/componentes/marca.typ#textura",
+      "props": [
+        {
+          "nombre": "class",
+          "tipo": "'tx-grain' | 'tx-halftone' | 'tx-duotone'",
+          "default": null,
+          "obligatoria": true,
+          "que": "Clase en un <div>/<span>"
+        },
+        {
+          "nombre": "--tx-dot / --tx-size / --tx-grain",
+          "tipo": "CSS custom properties",
+          "default": null,
+          "obligatoria": false,
+          "que": "Color, tamaño de la trama, intensidad del grano"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {},
+        "hijos": "<div class=\"tx-halftone\"><p>Caja con trama de medio tono (.tx-halftone).</p></div>\n\n<div class=\"tx-grain\"><p>Caja con grano de fotocopia (.tx-grain).</p></div>"
+      },
+      "notas": "Se usan como clase en etiquetas HTML del MDX; el gemelo lo aplica print/lib/componentes/texto.typ#html por clase."
+    },
+    {
+      "nombre": "PunkButton",
+      "grupo": "taller",
+      "tipo": "componente",
+      "descripcion": "Botón/liga píldora del taller (fondo accent, borde grueso).",
+      "web": "src/components/taller/PunkButton.astro",
+      "typst": null,
+      "props": [
+        {
+          "nombre": "href",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Destino"
+        },
+        {
+          "nombre": "label",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": "es navegación; en papel no hay a dónde ir (se omite con aviso)",
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "href": "/fanzine",
+          "label": "Ver el fanzine"
+        },
+        "hijos": null
+      },
+      "notas": ""
+    },
+    {
+      "nombre": "BackToTop",
+      "grupo": "taller",
+      "tipo": "componente",
+      "descripcion": "Botón flotante «volver arriba» del layout del taller (aparece con scroll; único componente del taller con JS).",
+      "web": "src/components/taller/BackToTop.astro",
+      "typst": null,
+      "props": [],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": "control de scroll; en papel no existe",
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": null,
+      "notas": "Se monta una vez en el layout del taller (/); el fanzine usa anclas sin JS."
+    },
+    {
+      "nombre": "ColorSchemeStyles",
+      "grupo": "infra",
+      "tipo": "componente",
+      "descripcion": "Define --ink / --accent / --paper por esquema (.scheme-rosa, …). En Typst los esquemas son la paleta del volumen (vol.paleta → colores()).",
+      "web": "src/components/ColorSchemeStyles.astro",
+      "typst": null,
+      "props": [],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": "sin componente en papel: los esquemas se mapean a paletas Typst",
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": null,
+      "notas": "El kit muestra las paletas de los esquemas."
+    },
+    {
+      "nombre": "Volumen",
+      "grupo": "infra",
+      "tipo": "componente",
+      "descripcion": "Envoltorio de la página web de un volumen (esquema, variables de pliego, descarga). El impreso compone en export.ts + paginas.typ.",
+      "web": "src/components/fanzine/Volumen.astro",
+      "typst": null,
+      "props": [],
+      "estado": "aprobado",
+      "volumen": 0,
+      "soloWeb": "composición de la página web; en papel lo hace print/volumen.typ",
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": null,
+      "notas": ""
+    },
+    {
+      "nombre": "ComponerPiezas",
+      "grupo": "infra",
+      "tipo": "componente",
+      "descripcion": "Compone un volumen yml (issue #13): portada, índice, piezas, rellenos, fin y contraportada en la web.",
+      "web": "src/components/fanzine/ComponerPiezas.astro",
+      "typst": null,
+      "props": [],
+      "estado": "aprobado",
+      "volumen": 1,
+      "soloWeb": "composición de la página web; en papel lo hace scripts/print/sources/piezas.ts",
+      "soloImpreso": false,
+      "mdx": false,
+      "demo": null,
+      "notas": ""
+    },
+    {
+      "nombre": "CintaCanela",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "Tira de cinta canela (duct tape) con extremos rasgados (polígono irregular) para pegar fotos o títulos.",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "angulo",
+          "tipo": "number",
+          "default": "-4",
+          "obligatoria": false,
+          "que": "Giro"
+        },
+        {
+          "nombre": "largo",
+          "tipo": "number",
+          "default": "160",
+          "obligatoria": false,
+          "que": "Largo en px"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 1 del issue #17. Entra en el PR (b) de componentes nuevos."
+    },
+    {
+      "nombre": "SelloGoma",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "Sello de goma con doble borde, rotado y tinta irregular (máscara de puntos), con texto libre («APROBADO», «HECHO EN TEXCOCO»).",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "texto",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Texto del sello"
+        },
+        {
+          "nombre": "angulo",
+          "tipo": "number",
+          "default": "-8",
+          "obligatoria": false,
+          "que": "Giro"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 2 del issue #17. Entra en el PR (b)."
+    },
+    {
+      "nombre": "TituloRescate",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "Título estilo carta de rescate: cada letra es un recorte con fondo, giro y tipografía (Anton/Space Mono) distintos, con semilla determinista en build; igual en web y Typst, sin JS ni fuentes extra.",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "texto",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título"
+        },
+        {
+          "nombre": "semilla",
+          "tipo": "number",
+          "default": "hash del texto",
+          "obligatoria": false,
+          "que": "Semilla determinista"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 3 del issue #17. Entra en el PR (b)."
+    },
+    {
+      "nombre": "CollageXerox",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "2–4 fotos encimadas en B/N de alto contraste, con grano y cinta, para fotoensayos.",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "images",
+          "tipo": "{ src: string; alt: string }[]",
+          "default": null,
+          "obligatoria": true,
+          "que": "2 a 4 fotos"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 4 del issue #17. Entra en el PR (b)."
+    },
+    {
+      "nombre": "PapelRoto",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "Orilla de papel rasgado (path irregular determinista) para abrir/cerrar bloques o como borde de una foto.",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "pos",
+          "tipo": "'arriba' | 'abajo'",
+          "default": "'abajo'",
+          "obligatoria": false,
+          "que": "Borde rasgado"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 5 del issue #17: queda propuesto hasta que Ricardo lo apruebe en la puerta 2."
+    },
+    {
+      "nombre": "Imperdible",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "Seguro (safety pin) en SVG inline ≤ 1 KB para «prender» notas y fotos.",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "angulo",
+          "tipo": "number",
+          "default": "-30",
+          "obligatoria": false,
+          "que": "Giro"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 6 del issue #17: queda propuesto."
+    },
+    {
+      "nombre": "CartelTocada",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "Bloque de cartel de tocada (fecha, lugar, bandas) con diagonal a dos tintas, para anunciar eventos.",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "fecha",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Fecha"
+        },
+        {
+          "nombre": "lugar",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Lugar"
+        },
+        {
+          "nombre": "bandas",
+          "tipo": "string[]",
+          "default": null,
+          "obligatoria": true,
+          "que": "Bandas"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 7 del issue #17: queda propuesto."
+    },
+    {
+      "nombre": "Tracklist",
+      "grupo": "propuestos",
+      "tipo": "componente",
+      "descripcion": "J-card de casete con lista de canciones. En web puede llevar una playlist (fachada); en papel es lista numerada + QR.",
+      "web": null,
+      "typst": null,
+      "props": [
+        {
+          "nombre": "titulo",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Título del casete"
+        },
+        {
+          "nombre": "canciones",
+          "tipo": "string[]",
+          "default": null,
+          "obligatoria": true,
+          "que": "Lista"
+        },
+        {
+          "nombre": "playlist",
+          "tipo": "{ servicio; id }",
+          "default": null,
+          "obligatoria": false,
+          "que": "Playlist asociada"
+        }
+      ],
+      "estado": "propuesto",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": null,
+      "notas": "Propuesta 8 del issue #17: queda propuesto."
+    }
+  ]
+}
