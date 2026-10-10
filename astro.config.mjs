@@ -2,12 +2,14 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { listFanzineRedirects, listFanzinePrueba } from './scripts/fanzine-redirects.mjs';
+import { fanzine } from './src/config/site.ts';
 
 // Fuera del sitemap: las URLs viejas del fanzine que sólo existen para
 // redirigir a /fanzine/vol-NN (meta refresh + canonical) y los volúmenes de
 // prueba (`prueba: true`, noindex).
 // También /fanzine/muestra (página de muestra de componentes, noindex; issue #7).
-const fanzineRedirects = new Set([...listFanzineRedirects(), ...listFanzinePrueba(), '/fanzine/muestra']);
+// Y /fanzine/colabora/enviar mientras fanzine.colabora.publicada sea false (issue #12).
+const fanzineRedirects = new Set([...listFanzineRedirects(), ...listFanzinePrueba(), '/fanzine/muestra', ...(fanzine.colabora.publicada ? [] : [fanzine.colabora.ruta])]);
 
 export default defineConfig({
   // Dominio real del sitio (GitHub Pages con dominio propio). De acá salen

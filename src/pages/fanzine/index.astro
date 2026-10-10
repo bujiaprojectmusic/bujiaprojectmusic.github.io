@@ -5,6 +5,7 @@ import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 import { listarVolumenes } from '../../utils/volumenes';
+import { fanzine } from '../../config/site';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // Volúmenes compuestos (src/content/volumenes/*.yml) y MDX (issue #13);
@@ -23,6 +24,10 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
       <p class="fz-index__eyebrow">Fanzine</p>
       <h1 class="fz-index__title">La Jirafa Elektrika</h1>
       <p class="fz-index__sub">Se leen en esta página, con scroll. El cuadernillo impreso va en media carta, en múltiplos de 4 páginas.</p>
+      {/* Enlace a la página de envío de colaboraciones (issue #12) sólo cuando esté publicada. */}
+      {fanzine.colabora.publicada && (
+        <p class="fz-index__sub"><a href={`${base}${fanzine.colabora.ruta}`}>¿Quieres colaborar? Manda tu pieza por correo →</a></p>
+      )}
     </header>
 
     <ul class="fz-index__list">
