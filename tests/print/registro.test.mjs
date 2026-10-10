@@ -71,7 +71,9 @@ test('registro: el inventario del issue #17 está completo', () => {
   const inventario = ['Portada', 'Indice', 'Contraportada', 'SectionTitle', 'Columnas', 'Polaroid', 'PostCover', 'ImageFull', 'ImageSide', 'PhotoOld', 'Xerox', 'Gallery', 'BeforeAfter', 'Divider', 'Quote', 'Note', 'VideoOldTV', 'VideoCinema', 'Encabezados', 'StickerTitle', 'SectionLabel', 'PunkButton', 'BackToTop', 'Pliego', 'Sticker', 'Cinta', 'FzFilters', 'Texturas', 'OptimizedImage', 'MissingImage', 'ColorSchemeStyles', 'Pagina', 'Foto', 'DatosTaller', 'VideoPoster', 'Playlist', 'Parche', 'Relleno'];
   const faltan = inventario.filter((n) => !C.some((c) => c.nombre === n));
   assert.deepEqual(faltan, []);
-  const propuestos = ['CintaCanela', 'SelloGoma', 'TituloRescate', 'CollageXerox', 'PapelRoto', 'Imperdible', 'CartelTocada', 'Tracklist'];
+  // Parte (b): sin comentario de Ricardo, 1–4 aprobados (vol. 01) y 5–8 propuestos.
+  for (const n of ['CintaCanela', 'SelloGoma', 'TituloRescate', 'CollageXerox']) assert.equal(C.find((c) => c.nombre === n)?.estado, 'aprobado', `${n} debería estar aprobado`);
+  const propuestos = ['PapelRoto', 'Imperdible', 'CartelTocada', 'Tracklist'];
   assert.deepEqual(C.filter((c) => c.estado === 'propuesto').map((c) => c.nombre), propuestos);
   console.log(`  ${C.length} entradas: ${aprobados.length} aprobadas, ${propuestos.length} propuestas → ${C.map((c) => c.nombre).join(', ')}`);
 });

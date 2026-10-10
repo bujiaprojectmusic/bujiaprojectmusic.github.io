@@ -1839,73 +1839,99 @@
     },
     {
       "nombre": "CintaCanela",
-      "grupo": "propuestos",
+      "grupo": "marca",
       "tipo": "componente",
       "descripcion": "Tira de cinta canela (duct tape) con extremos rasgados (polígono irregular) para pegar fotos o títulos.",
-      "web": null,
-      "typst": null,
+      "web": "src/components/fanzine/CintaCanela.astro",
+      "typst": "print/lib/componentes/punk.typ#cinta-canela",
       "props": [
         {
           "nombre": "angulo",
           "tipo": "number",
           "default": "-4",
           "obligatoria": false,
-          "que": "Giro"
+          "que": "Giro en grados"
         },
         {
           "nombre": "largo",
           "tipo": "number",
           "default": "160",
           "obligatoria": false,
-          "que": "Largo en px"
+          "que": "Largo en px (alto = 22 %)"
+        },
+        {
+          "nombre": "pos",
+          "tipo": "'arriba' | 'abajo' | 'izquierda' | 'derecha'",
+          "default": null,
+          "obligatoria": false,
+          "que": "Pegada al borde del contenedor (position: relative)"
         }
       ],
-      "estado": "propuesto",
-      "volumen": null,
+      "estado": "aprobado",
+      "volumen": 1,
       "soloWeb": false,
       "soloImpreso": false,
       "mdx": true,
-      "demo": null,
-      "notas": "Propuesta 1 del issue #17. Entra en el PR (b) de componentes nuevos."
+      "demo": {
+        "props": {
+          "angulo": -5,
+          "largo": 180
+        },
+        "hijos": null
+      },
+      "notas": "Aprobado para el vol. 01 (issue #17, propuesta 1; sin comentario de Ricardo se implementan 1–4). Extremos rasgados: polígono de print/componentes.json (cinta_canela), el mismo en web (clip-path) y Typst."
     },
     {
       "nombre": "SelloGoma",
-      "grupo": "propuestos",
+      "grupo": "marca",
       "tipo": "componente",
       "descripcion": "Sello de goma con doble borde, rotado y tinta irregular (máscara de puntos), con texto libre («APROBADO», «HECHO EN TEXCOCO»).",
-      "web": null,
-      "typst": null,
+      "web": "src/components/fanzine/SelloGoma.astro",
+      "typst": "print/lib/componentes/punk.typ#sello-goma",
       "props": [
         {
           "nombre": "texto",
           "tipo": "string",
           "default": null,
           "obligatoria": true,
-          "que": "Texto del sello"
+          "que": "Texto del sello (mayúsculas)"
         },
         {
           "nombre": "angulo",
           "tipo": "number",
           "default": "-8",
           "obligatoria": false,
-          "que": "Giro"
+          "que": "Giro en grados"
+        },
+        {
+          "nombre": "color",
+          "tipo": "'rojo' | 'azul' | 'ink' | 'accent'",
+          "default": "'rojo'",
+          "obligatoria": false,
+          "que": "Tinta del sello"
         }
       ],
-      "estado": "propuesto",
-      "volumen": null,
+      "estado": "aprobado",
+      "volumen": 1,
       "soloWeb": false,
       "soloImpreso": false,
       "mdx": true,
-      "demo": null,
-      "notas": "Propuesta 2 del issue #17. Entra en el PR (b)."
+      "demo": {
+        "props": {
+          "texto": "Hecho en Texcoco",
+          "angulo": -8
+        },
+        "hijos": null
+      },
+      "notas": "Aprobado para el vol. 01 (issue #17, propuesta 2). Tinta irregular: máscara de puntos en web; puntos color papel encima en Typst (plano)."
     },
     {
       "nombre": "TituloRescate",
-      "grupo": "propuestos",
+      "grupo": "titulos",
       "tipo": "componente",
       "descripcion": "Título estilo carta de rescate: cada letra es un recorte con fondo, giro y tipografía (Anton/Space Mono) distintos, con semilla determinista en build; igual en web y Typst, sin JS ni fuentes extra.",
-      "web": null,
-      "typst": null,
+      "web": "src/components/fanzine/TituloRescate.astro",
+      "typst": "print/lib/componentes/punk.typ#titulo-rescate",
       "props": [
         {
           "nombre": "texto",
@@ -1919,40 +1945,78 @@
           "tipo": "number",
           "default": "hash del texto",
           "obligatoria": false,
-          "que": "Semilla determinista"
+          "que": "Semilla determinista (src/utils/rescate.ts)"
+        },
+        {
+          "nombre": "etiqueta",
+          "tipo": "'h2' | 'h3' | 'p'",
+          "default": "'h2'",
+          "obligatoria": false,
+          "que": "Etiqueta HTML en la web"
         }
       ],
-      "estado": "propuesto",
-      "volumen": null,
+      "estado": "aprobado",
+      "volumen": 1,
       "soloWeb": false,
       "soloImpreso": false,
       "mdx": true,
-      "demo": null,
-      "notas": "Propuesta 3 del issue #17. Entra en el PR (b)."
+      "demo": {
+        "props": {
+          "texto": "Ruido de prueba"
+        },
+        "hijos": null
+      },
+      "notas": "Aprobado para el vol. 01 (issue #17, propuesta 3). Las letras (estilo, fuente, giro, escala) las calcula src/utils/rescate.ts en build; el export pasa la misma lista a Typst (props.letras). Sin JS ni fuentes extra."
     },
     {
       "nombre": "CollageXerox",
-      "grupo": "propuestos",
+      "grupo": "imagenes",
       "tipo": "componente",
       "descripcion": "2–4 fotos encimadas en B/N de alto contraste, con grano y cinta, para fotoensayos.",
-      "web": null,
-      "typst": null,
+      "web": "src/components/fanzine/CollageXerox.astro",
+      "typst": "print/lib/componentes/punk.typ#collage-xerox",
       "props": [
         {
           "nombre": "images",
           "tipo": "{ src: string; alt: string }[]",
           "default": null,
           "obligatoria": true,
-          "que": "2 a 4 fotos"
+          "que": "2 a 4 fotos (posiciones y giros fijos de componentes.json)"
+        },
+        {
+          "nombre": "caption",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Pie (mayúsculas)"
         }
       ],
-      "estado": "propuesto",
-      "volumen": null,
+      "estado": "aprobado",
+      "volumen": 1,
       "soloWeb": false,
       "soloImpreso": false,
       "mdx": true,
-      "demo": null,
-      "notas": "Propuesta 4 del issue #17. Entra en el PR (b)."
+      "demo": {
+        "props": {
+          "images": [
+            {
+              "src": "/fanzine/vol-00/patinetas.jpeg",
+              "alt": "Patinetas apiladas"
+            },
+            {
+              "src": "/fanzine/vol-00/skate-001.jpeg",
+              "alt": "Tabla marcada 001"
+            },
+            {
+              "src": "/fanzine/vol-00/tablas-cortadas.jpeg",
+              "alt": "Tablas cortadas"
+            }
+          ],
+          "caption": "Tablas, 2026. Foto: Bujía Project Music"
+        },
+        "hijos": null
+      },
+      "notas": "Aprobado para el vol. 01 (issue #17, propuesta 4). En papel las fotos van siempre en gris (variante bn), con marco blanco y cinta canela."
     },
     {
       "nombre": "PapelRoto",
@@ -1976,7 +2040,7 @@
       "soloImpreso": false,
       "mdx": true,
       "demo": null,
-      "notas": "Propuesta 5 del issue #17: queda propuesto hasta que Ricardo lo apruebe en la puerta 2."
+      "notas": "Propuesta 5 del issue #17: queda propuesto (sin comentario de Ricardo en el issue #17 sólo entran 1–4) hasta que Ricardo lo apruebe en la puerta 2."
     },
     {
       "nombre": "Imperdible",
@@ -2000,7 +2064,7 @@
       "soloImpreso": false,
       "mdx": true,
       "demo": null,
-      "notas": "Propuesta 6 del issue #17: queda propuesto."
+      "notas": "Propuesta 6 del issue #17: queda propuesto (sin comentario de Ricardo en el issue #17 sólo entran 1–4)."
     },
     {
       "nombre": "CartelTocada",
@@ -2038,7 +2102,7 @@
       "soloImpreso": false,
       "mdx": true,
       "demo": null,
-      "notas": "Propuesta 7 del issue #17: queda propuesto."
+      "notas": "Propuesta 7 del issue #17: queda propuesto (sin comentario de Ricardo en el issue #17 sólo entran 1–4)."
     },
     {
       "nombre": "Tracklist",
@@ -2076,7 +2140,7 @@
       "soloImpreso": false,
       "mdx": true,
       "demo": null,
-      "notas": "Propuesta 8 del issue #17: queda propuesto."
+      "notas": "Propuesta 8 del issue #17: queda propuesto (sin comentario de Ricardo en el issue #17 sólo entran 1–4)."
     }
   ]
 }

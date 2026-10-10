@@ -314,6 +314,51 @@ por página por `FanzineLayout`); nada de PNG/JPG:
 
 ---
 
+## 4d. Componentes nuevos del vol. 01 (issue #17, parte b)
+
+Propuestas 1–4 del catálogo, aprobadas para el vol. 01 (sin comentario
+de Ricardo en el issue se implementan 1–4; 5–8 quedan `propuesto`).
+Gemelos en `print/lib/componentes/punk.typ`; geometría compartida en
+`print/componentes.json` (`cinta_canela`, `sello_goma`, `titulo_rescate`,
+`collage_xerox`): la web lee los mismos puntos y posiciones.
+
+```mdx
+import CintaCanela from '../../../components/fanzine/CintaCanela.astro';
+import SelloGoma from '../../../components/fanzine/SelloGoma.astro';
+import TituloRescate from '../../../components/fanzine/TituloRescate.astro';
+import CollageXerox from '../../../components/fanzine/CollageXerox.astro';
+
+{/* Título carta de rescate: cada letra un recorte; misma semilla → mismo look en web y papel */}
+<TituloRescate texto="Ruido de prueba" />
+<TituloRescate texto="Fierros y fuzz" semilla={7} etiqueta="h3" />
+
+{/* Sello de goma: doble borde, giro, tinta irregular */}
+<SelloGoma texto="Hecho en Texcoco" />
+<SelloGoma texto="Aprobado" color="ink" angulo={6} />
+
+{/* Cinta canela con extremos rasgados; con pos se pega al borde del contenedor */}
+<CintaCanela angulo={-5} largo={180} />
+
+{/* Collage xerox: 2–4 fotos encimadas en B/N alto contraste, grano y cinta canela */}
+<CollageXerox images={[{ src: '/fanzine/vol-00/patinetas.jpeg', alt: 'Patinetas' }, { src: '/fanzine/vol-00/skate-001.jpeg', alt: '001' }]} caption="Tablas, 2026. Foto: Bujía Project Music" />
+```
+
+- `CintaCanela`: `angulo?`, `largo?` (px), `pos?`. Web: `clip-path: polygon(…)` +
+  trama CSS; Typst: polígono con `tiling` de tela. 0 imágenes.
+- `SelloGoma`: `texto`, `angulo?`, `color?` (`rojo` | `azul` | `ink` | `accent`).
+  Web: borde + outline y máscara de puntos; Typst: doble `stroke` y puntos
+  color papel encima (plano, sin transparencia).
+- `TituloRescate`: `texto`, `semilla?`, `etiqueta?`. Las letras (estilo 0–3,
+  Anton/Space Mono, giro, escala) las genera `src/utils/rescate.ts` con un
+  Park–Miller de 31 bits en build; el export pasa la lista a Typst
+  (`props.letras`). Lector de pantalla: `aria-label` con el texto; en B/N el
+  estilo acento va en negro.
+- `CollageXerox`: `images` (2–4; el build falla fuera de ese rango),
+  `caption?`. Web: `filter: grayscale contrast` + `.tx-grain` + cinta; Typst:
+  variante `bn` de cada foto, marco blanco y cinta canela.
+
+---
+
 ## 5. Videos y playlists (`VideoOldTV`, `VideoCinema`, `VideoPoster`, `Playlist`)
 
 Pedido de Ricardo (#17): playlists y videos **sólo en digital** y **se
@@ -537,10 +582,10 @@ a un volumen.
 | `ColorSchemeStyles` | Infraestructura | `ColorSchemeStyles.astro` | sólo web: sin componente en papel: los esquemas se mapean a paletas Typst | aprobado (vol. 00) |
 | `Volumen` | Infraestructura | `fanzine/Volumen.astro` | sólo web: composición de la página web; en papel lo hace print/volumen.typ | aprobado (vol. 00) |
 | `ComponerPiezas` | Infraestructura | `fanzine/ComponerPiezas.astro` | sólo web: composición de la página web; en papel lo hace scripts/print/sources/piezas.ts | aprobado (vol. 01) |
-| `CintaCanela` | Propuestos | — | — | propuesto |
-| `SelloGoma` | Propuestos | — | — | propuesto |
-| `TituloRescate` | Propuestos | — | — | propuesto |
-| `CollageXerox` | Propuestos | — | — | propuesto |
+| `CintaCanela` | Marca: stickers, cintas, texturas | `fanzine/CintaCanela.astro` | `componentes/punk.typ#cinta-canela` | aprobado (vol. 01) |
+| `SelloGoma` | Marca: stickers, cintas, texturas | `fanzine/SelloGoma.astro` | `componentes/punk.typ#sello-goma` | aprobado (vol. 01) |
+| `TituloRescate` | Títulos | `fanzine/TituloRescate.astro` | `componentes/punk.typ#titulo-rescate` | aprobado (vol. 01) |
+| `CollageXerox` | Imágenes | `fanzine/CollageXerox.astro` | `componentes/punk.typ#collage-xerox` | aprobado (vol. 01) |
 | `PapelRoto` | Propuestos | — | — | propuesto |
 | `Imperdible` | Propuestos | — | — | propuesto |
 | `CartelTocada` | Propuestos | — | — | propuesto |

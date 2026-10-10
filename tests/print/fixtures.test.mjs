@@ -105,3 +105,14 @@ test('catálogo (#17): un componente sólo web se omite del impreso con aviso y 
   assert.ok(res.avisos.some((a) => /catalogo-solo-web\.mdx:33: <PunkButton> es sólo web/.test(a)), res.avisos.join('\n'));
   assert.doesNotMatch(texto('catalogo-solo-web'), /Ver el fanzine/);
 });
+
+test('componentes del vol. 01 (#17 b): el fixture compila y el PDF trae el sello y el pie del collage', () => {
+  const r = build('componentes-vol-01');
+  assert.equal(r.status, 0, r.stderr);
+  const t = texto('componentes-vol-01');
+  assert.match(t, /HECHO EN TEXCOCO/);
+  assert.match(t, /APROBADO/);
+  assert.match(t, /TABLAS, 2026\. FOTO: BUJÍA PROJECT MUSIC/);
+  const res = resultado('componentes-vol-01');
+  assert.equal(res.fotos.filter((f) => f.componente === 'CollageXerox').length, 3);
+});

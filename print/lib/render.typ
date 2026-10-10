@@ -9,6 +9,7 @@
 #import "/print/lib/componentes/video.typ": video-poster
 #import "/print/lib/componentes/taller.typ": datos-taller, sticker-title, section-label
 #import "/print/lib/componentes/marca.typ": sticker, cinta, parche
+#import "/print/lib/componentes/punk.typ": cinta-canela, sello-goma, titulo-rescate, collage-xerox
 
 // Un gemelo por componente web (la lista viene del registro: src/components/fanzine/registro.json).
 // Portada, Indice y Contraportada viven en paginas.typ (definen la página).
@@ -35,6 +36,11 @@
   Parche: parche,
   StickerTitle: sticker-title,
   SectionLabel: section-label,
+  // #17 (b): componentes nuevos del vol. 01.
+  CintaCanela: cinta-canela,
+  SelloGoma: sello-goma,
+  TituloRescate: titulo-rescate,
+  CollageXerox: collage-xerox,
 )
 
 #let render-nodo(ctx, n) = {
