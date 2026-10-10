@@ -6,7 +6,8 @@ import { listFanzineRedirects, listFanzinePrueba } from './scripts/fanzine-redir
 // Fuera del sitemap: las URLs viejas del fanzine que sólo existen para
 // redirigir a /fanzine/vol-NN (meta refresh + canonical) y los volúmenes de
 // prueba (`prueba: true`, noindex).
-const fanzineRedirects = new Set([...listFanzineRedirects(), ...listFanzinePrueba()]);
+// También /fanzine/muestra (página de muestra de componentes, noindex; issue #7).
+const fanzineRedirects = new Set([...listFanzineRedirects(), ...listFanzinePrueba(), '/fanzine/muestra']);
 
 export default defineConfig({
   // Dominio real del sitio (GitHub Pages con dominio propio). De acá salen

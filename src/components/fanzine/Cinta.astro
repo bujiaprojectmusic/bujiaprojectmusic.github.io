@@ -1,0 +1,75 @@
+---
+// Cinta adhesiva (issue #7): pedazo de cinta semitransparente para "pegar"
+// cosas. Usa src/assets/fanzine/cinta-adhesiva.svg si existe; si no, una
+// tira CSS. Uso: <Cinta angulo={-6} ancho={120} pos="arriba" />
+// Dentro de un contenedor con position: relative, `pos` la coloca en el
+// borde (arriba, abajo, izquierda, derecha); sin `pos` va en el flujo.
+import { svgAsset } from '../../utils/fanzineAssets';
+
+interface Props {
+  angulo?: number;
+  ancho?: number;
+  pos?: 'arriba' | 'abajo' | 'izquierda' | 'derecha';
+  class?: string;
+}
+const { angulo = -4, ancho = 110, pos, class: clase } = Astro.props;
+const svg = svgAsset('cinta-adhesiva');
+---
+
+<span
+  class:list={['fz-cinta', pos && `fz-cinta--${pos}`, !svg && 'fz-cinta--css', clase]}
+  style={`--fz-angulo:${angulo}deg;--fz-ancho:${ancho}px`}
+  aria-hidden="true"
+  set:html={svg ?? ''}
+/>
+
+<style>
+  .fz-cinta {
+    display: inline-block;
+    width: var(--fz-ancho);
+    height: calc(var(--fz-ancho) * 0.24);
+    line-height: 0;
+    transform: rotate(var(--fz-angulo));
+    color: var(--ink);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .fz-cinta :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* Placeholder CSS: masking tape semitransparente con trama. */
+  .fz-cinta--css {
+    background: rgba(255, 236, 160, 0.55);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(0, 0, 0, 0.04) 6px 8px);
+  }
+  .fz-cinta--arriba,
+  .fz-cinta--abajo,
+  .fz-cinta--izquierda,
+  .fz-cinta--derecha {
+    position: absolute;
+  }
+  .fz-cinta--arriba {
+    top: calc(var(--fz-ancho) * -0.1);
+    left: 50%;
+    transform: translateX(-50%) rotate(var(--fz-angulo));
+  }
+  .fz-cinta--abajo {
+    bottom: calc(var(--fz-ancho) * -0.1);
+    left: 50%;
+    transform: translateX(-50%) rotate(var(--fz-angulo));
+  }
+  .fz-cinta--izquierda {
+    top: calc(var(--fz-ancho) * -0.06);
+    left: calc(var(--fz-ancho) * -0.3);
+    transform: rotate(calc(var(--fz-angulo) - 35deg));
+  }
+  .fz-cinta--derecha {
+    top: calc(var(--fz-ancho) * -0.06);
+    right: calc(var(--fz-ancho) * -0.3);
+    transform: rotate(calc(var(--fz-angulo) + 35deg));
+  }
+</style>

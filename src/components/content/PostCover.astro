@@ -17,7 +17,7 @@ interface Props {
 const { title, subtitle, tag, variant = 'sticker', colorScheme } = Astro.props;
 ---
 
-<div class:list={['post-cover', `post-cover--${variant}`, colorScheme && `scheme-${colorScheme}`]}>
+<div class:list={['post-cover', `post-cover--${variant}`, variant === 'sticker' && 'tx-halftone', colorScheme && `scheme-${colorScheme}`]}>
   {variant === 'flyer' && <span class="post-cover__flyer-bg" aria-hidden="true" />}
   {variant === 'xerox' && <span class="post-cover__xerox-title" aria-hidden="true">{title}</span>}
 
@@ -67,8 +67,7 @@ const { title, subtitle, tag, variant = 'sticker', colorScheme } = Astro.props;
 
   /* ── sticker: banda punteada + título tipo sticker con sombra dura ─── */
   .post-cover--sticker {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.15) 1.5px, transparent 1.5px);
-    background-size: 15px 15px;
+    /* Trama de medio tono compartida: .tx-halftone (fanzine-textures.css). */
     border: var(--border-w) solid var(--ink);
     border-radius: var(--radius);
     background-color: var(--paper);

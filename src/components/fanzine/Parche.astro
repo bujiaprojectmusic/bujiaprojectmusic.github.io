@@ -1,0 +1,55 @@
+---
+// Parche ovalado de "Bujía" (issue #7). Usa src/assets/fanzine/
+// parche-bujia-{mono,color}.svg (o la variante "ancho") si existe; si no,
+// el logo PNG del taller optimizado por el pipeline de #4 (no inventa arte).
+// Uso: <Parche variante="mono" ancho={140} />
+import OptimizedImage from '../OptimizedImage.astro';
+import { svgAsset } from '../../utils/fanzineAssets';
+import { taller } from '../../config/site';
+
+interface Props {
+  variante?: 'mono' | 'color';
+  ancho?: boolean;
+  /** Ancho en px. */
+  tamano?: number;
+  class?: string;
+}
+const { variante = 'mono', ancho = false, tamano = 140, class: clase } = Astro.props;
+const nombre = `parche-bujia${ancho ? '-ancho' : ''}-${variante}`;
+const svg = svgAsset(nombre);
+---
+
+<span class:list={['fz-parche', clase]} style={`--fz-ancho:${tamano}px`} data-parche={nombre} data-placeholder={svg ? undefined : 'true'}>
+  {svg ? (
+    <Fragment set:html={svg} />
+  ) : taller.logo.image ? (
+    <OptimizedImage src={taller.logo.image} alt={taller.logo.alt} widths={[140, 280, 420]} sizes={`${tamano}px`} width={tamano} print={false} context="Parche (placeholder con el logo)" />
+  ) : (
+    <span class="fz-parche__txt">{taller.logo.text}</span>
+  )}
+</span>
+
+<style>
+  .fz-parche {
+    display: inline-block;
+    width: var(--fz-ancho);
+    max-width: 100%;
+    line-height: 0;
+    color: var(--ink);
+  }
+  .fz-parche :global(svg),
+  .fz-parche :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .fz-parche__txt {
+    display: inline-block;
+    font-family: var(--font-head);
+    font-weight: 700;
+    line-height: 1;
+    border: 3px solid currentColor;
+    border-radius: 999px;
+    padding: 0.4em 1em;
+  }
+</style>

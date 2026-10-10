@@ -109,7 +109,8 @@ import BeforeAfter from '../../components/content/BeforeAfter.astro';
   Si necesitás cortar el flujo de texto después (por ejemplo antes de un
   `<Divider />` o un `<PostCover />`), agregá `<div style="clear:both" />`.
 - **`PhotoOld`** — sepia, viñeta, cinta en las esquinas, para fotos de
-  archivo o de hace años.
+  archivo o de hace años. Las cintas son pseudoelementos semitransparentes
+  (issue #7): `cinta={false}` las quita, `cintaAngulo={25}` cambia el ángulo.
   ```mdx
   <PhotoOld src="/img/taller-2019.jpg" alt="El taller en 2019" caption="El local, 2019" tilt={2} />
   ```
@@ -141,7 +142,13 @@ Polaroid con marco blanco:
 import Polaroid from '../../components/Polaroid.astro';
 
 <Polaroid src="/img/taller-1.jpg" alt="Rebobinando una pastilla" caption="Marzo 2026" tilt={-4} />
+<Polaroid src="/img/taller-2.jpg" alt="Otra" cinta={false} />
+<Polaroid src="/img/taller-3.jpg" alt="Otra más" cintaAngulo={5} />
 ```
+
+Desde el issue #7 la Polaroid trae un pedazo de cinta adhesiva arriba
+(pseudoelemento, sin imágenes) y, como `PhotoOld`, aparece al hacer scroll
+(clase `fz-anim`; apagada con `prefers-reduced-motion` y al imprimir).
 
 ---
 
@@ -231,7 +238,75 @@ Este es otro párrafo, sigue dentro de las columnas.
 Y acá ya seguís en una sola columna, como cualquier párrafo normal.
 ```
 
-Usá `n={3}` para 3 columnas. En mobile siempre cae a 1 columna sola.
+Usá `n={3}` para 3 columnas. En móvil (menos de 640 px) siempre cae a 1
+columna sola; al imprimir el máximo son 2 (`n={3}` cae a 2, reglas de #16).
+
+---
+
+## 4b. Portada, Contraportada y la marca (issue #7)
+
+```mdx
+<Portada volume={7} title="Fierros y Fuzz" subtitle="Julio 2026" image="/img/vol7-cover.jpg" />
+<Contraportada texto="Bujía Project Music — Texcoco, MX" creditos={["Textos: …", "Fotos: …"]} />
+```
+
+- **`Portada`**: foto a sangre (eager + `fetchpriority="high"`), parche de
+  Bujía arriba a la izquierda, número de volumen tipo sello arriba a la
+  derecha (`etiqueta-vol.svg` o sello CSS), título balanceado sin huecos
+  raros en móvil (`text-wrap: balance`) y la mascota abajo a la derecha
+  (`mascota={false}` la quita). Dentro de `<Pliego tipo="portada">` va a
+  sangre en la web.
+- **`Contraportada`**: parche, mascota, `creditos` (una línea por entrada;
+  en un volumen compuesto salen de `contraportada.creditos` del yml o, si no
+  hay, de las piezas), **siempre** la línea "Mascota: ilustración por encargo
+  (crédito pendiente de confirmar)" y el sello con `texto`.
+- **Assets de marca** (`src/assets/fanzine/*.svg`, hechos por el bot de
+  Diseño): `mascota-jirafa-mono`, `mascota-jirafa-3tintas`,
+  `mascota-escena-taller-mono`, `parche-bujia-{mono,color}`,
+  `parche-bujia-ancho-{mono,color}`, `cinta-adhesiva`, `sello-copia`,
+  `etiqueta-vol`, `bujia-chispa`, `rayo`, `pua`, `llave-inglesa`,
+  `estrella-medio-tono`, `patron-medio-tono`. Se incrustan en el HTML para
+  que funcionen `currentColor` y `--ink/--accent/--paper`. **Si falta un
+  archivo, sale un placeholder neutro marcado TODO** (el parche usa el logo
+  del taller) y el build no se rompe: con copiar el SVG ahí, aparece. En los
+  volúmenes publicados la mascota de Portada/Contraportada sólo se pinta
+  cuando existe `mascota-jirafa-mono.svg` (los placeholders se ven en
+  `/fanzine/muestra`, que pasa `placeholders`). Ver
+  `src/utils/fanzineAssets.ts` y la lista de faltantes en `/fanzine/muestra`.
+
+## 4c. Stickers, cintas y texturas (issue #7)
+
+Sólo en páginas `.astro` del fanzine por ahora (`/fanzine/muestra`): los
+gemelos Typst para usarlos dentro de un volumen llegan en #17.
+
+```astro
+import Sticker from '../../components/fanzine/Sticker.astro';
+import Cinta from '../../components/fanzine/Cinta.astro';
+import Parche from '../../components/fanzine/Parche.astro';
+
+<Sticker nombre="rayo" ancho={90} rotar={-8} />
+<Sticker nombre="mascota-jirafa-mono" ancho={160} alt="La jirafa, mascota del fanzine" />
+<Parche variante="mono" tamano={140} />
+<div style="position: relative">
+  <Cinta pos="arriba" angulo={-5} ancho={120} />
+  …lo que esté pegado…
+</div>
+```
+
+Texturas (clases CSS en `src/styles/fanzine-textures.css`, filtros SVG
+compartidos en `src/components/fanzine/FzFilters.astro`, incluido una vez
+por página por `FanzineLayout`); nada de PNG/JPG:
+
+- `.tx-grain`: grano de fotocopia encima del elemento (`feTurbulence`).
+  Intensidad con `--tx-grain` (0–1).
+- `.tx-halftone`: trama de medio tono (`radial-gradient`); `--tx-dot`,
+  `--tx-r`, `--tx-size`. Es la misma de `PostCover` sticker y `TallerCover`.
+- `.tx-duotone`: envolvé una foto y sale a dos tintas con `--ink` y
+  `--accent` del esquema activo (`filter` + `mix-blend-mode`); la foto no se
+  toca.
+- `.fz-anim`: aparece al entrar en pantalla (`animation-timeline: view()`,
+  sólo donde el navegador lo soporta). Apagada con `prefers-reduced-motion`
+  y en `@media print`: todo queda visible.
 
 ---
 

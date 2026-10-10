@@ -25,8 +25,10 @@ interface Props {
   scheme?: string;
   prueba: boolean;
   contraportada: string;
+  /** Créditos de la contraportada (issue #7); si no vienen del yml, se arman con las piezas. */
+  creditosContraportada?: string[];
 }
-const { composicion, piezas, numero, scheme, prueba, contraportada } = Astro.props;
+const { composicion, piezas, numero, scheme, prueba, contraportada, creditosContraportada = [] } = Astro.props;
 
 const htmlDe = new Map<string, string>();
 for (const r of piezas) {
@@ -34,7 +36,9 @@ for (const r of piezas) {
   htmlDe.set(r.pieza.id, await Astro.slots.render('default', [r]));
 }
 setPiezaActual(null);
-const creditos = piezas.map((r) => `${r.pieza.data.titulo}: ${r.pieza.data.credito}`).join(' · ');
+const lineasCredito = piezas.map((r) => `${r.pieza.data.titulo}: ${r.pieza.data.credito}`);
+const creditos = lineasCredito.join(' · ');
+const creditosCp = creditosContraportada.length ? creditosContraportada : lineasCredito;
 ---
 
 {composicion.paginas.map((p) => {
@@ -54,7 +58,7 @@ const creditos = piezas.map((r) => `${r.pieza.data.titulo}: ${r.pieza.data.credi
   if (p.tipo === 'contraportada') {
     return (
       <Pliego n={p.n} tipo="contraportada">
-        <Contraportada texto={contraportada} />
+        <Contraportada texto={contraportada} creditos={creditosCp} />
         <DatosTaller />
       </Pliego>
     );

@@ -15,6 +15,7 @@ import { site, taller } from '../config/site';
 import type { ColorSchemeName } from '../config/site';
 import ColorSchemeStyles from '../components/ColorSchemeStyles.astro';
 import OptimizedImage from '../components/OptimizedImage.astro';
+import FzFilters from '../components/fanzine/FzFilters.astro';
 
 interface Props {
   title?: string;
@@ -25,9 +26,11 @@ interface Props {
   // de la página + data-prueba en <body> (al imprimir, cada página lleva
   // la marca en el pie; ver Pliego.astro).
   prueba?: boolean;
+  // Página fuera del índice de buscadores (p. ej. /fanzine/muestra), sin franja.
+  noindex?: boolean;
 }
 
-const { title, description = site.description, colorScheme = 'xerox', prueba = false } = Astro.props;
+const { title, description = site.description, colorScheme = 'xerox', prueba = false, noindex = false } = Astro.props;
 const pageTitle = title ? `${site.title} - ${title}` : `${site.title} - Fanzine`;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}${href}`);
@@ -40,7 +43,7 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    {prueba && <meta name="robots" content="noindex,nofollow" />}
+    {(prueba || noindex) && <meta name="robots" content="noindex,nofollow" />}
     <link rel="icon" type="image/png" sizes="32x32" href={`${import.meta.env.BASE_URL}favicon-32x32.png`} />
     <link rel="icon" type="image/png" sizes="16x16" href={`${import.meta.env.BASE_URL}favicon-16x16.png`} />
     <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
@@ -50,6 +53,8 @@ const withBase = (href: string) => (/^https?:\/\//.test(href) ? href : `${base}$
     <ColorSchemeStyles />
   </head>
   <body id="inicio" data-layout="fanzine" data-prueba={prueba ? 'true' : undefined} class:list={['fz-body', `scheme-${colorScheme}`]}>
+    {/* Filtros SVG compartidos de las texturas (.tx-grain, etc; issue #7). */}
+    <FzFilters />
     {prueba && (
       <p class="fz-prueba-banner fz-no-print" role="note">
         <strong>EDICIÓN DE PRUEBA</strong> — contenido ficticio para probar el sistema del fanzine. Nombres, bandas y anuncios son inventados.
