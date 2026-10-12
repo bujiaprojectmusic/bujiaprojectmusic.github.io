@@ -26,6 +26,7 @@ portada:
   alt: "Qué se ve en la portada"
   credito: "Nombre"
   # subtitulo: "Noviembre 2026 — Texcoco"
+  # completa: true   # la imagen ya es la portada entera (arte aprobado): sin velo, título ni mascota encima
 # Piezas en orden, con la página FINAL donde empieza cada una. `pieza` es la
 # carpeta de src/content/piezas/. También se pueden declarar rellenos.
 piezas:
@@ -42,4 +43,7 @@ impreso:
 # (sin la franja de prueba), fuera de /fanzine, /volumenes y el sitemap, y sin
 # la tarjeta de descarga de PDF. Para compartir por enlace antes de anunciarlo.
 sin_listar: false
+# mostrar_credito_mascota: false → oculta sólo el crédito de la mascota / arte de
+# la casa (issue #37) en web y papel; los créditos de las piezas siempre se ven.
+mostrar_credito_mascota: true
 draft: true

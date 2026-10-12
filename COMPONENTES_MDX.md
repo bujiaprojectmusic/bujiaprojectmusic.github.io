@@ -258,8 +258,12 @@ columna sola; al imprimir el máximo son 2 (`n={3}` cae a 2, reglas de #16).
   sangre en la web.
 - **`Contraportada`**: parche, mascota, `creditos` (una línea por entrada;
   en un volumen compuesto salen de `contraportada.creditos` del yml o, si no
-  hay, de las piezas), **siempre** la línea "Mascota: ilustración por encargo
-  (crédito pendiente de confirmar)" y el sello con `texto`.
+  hay, de las piezas), la línea de crédito de la mascota «Mascota (la jirafa
+  mecánica punk): ilustración de @olafh_ace (Instagram)» (se apaga por volumen
+  con `mostrar_credito_mascota: false` en el yml, issue #37: sólo ese crédito;
+  los de las piezas siempre se ven) y el sello con `texto`. Con
+  `portada.completa: true` en el yml la imagen de portada es el arte entero:
+  sin velo, título, parche ni mascota encima, sólo la etiqueta Vol. NN.
 - **Assets de marca** (`src/assets/fanzine/*.svg`, hechos por el bot de
   Diseño): `mascota-jirafa-mono`, `mascota-jirafa-3tintas`,
   `mascota-escena-taller-mono`, `parche-bujia-{mono,color}`,
@@ -591,7 +595,7 @@ a un volumen.
 | `CartelTocada` | Propuestos | — | — | propuesto |
 | `Tracklist` | Propuestos | — | — | propuesto |
 
-Mascota (donde aparezca): «ilustración por encargo (crédito pendiente de confirmar)».
+Mascota (donde aparezca, al 60 % de su tamaño original desde el issue #37): «Mascota (la jirafa mecánica punk): ilustración de @olafh_ace (Instagram)»; se apaga por volumen con `mostrar_credito_mascota: false`.
 
 ---
 

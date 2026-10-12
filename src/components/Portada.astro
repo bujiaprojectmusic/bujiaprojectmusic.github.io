@@ -22,16 +22,18 @@ interface Props {
   image?: ImageSource;
   /** Sin mascota (p. ej. si la foto ya la trae). */
   mascota?: boolean;
+  /** La imagen ya es la portada entera (arte aprobado): sin velo, título, subtítulo, parche ni mascota encima; sólo la etiqueta Vol. NN. */
+  completa?: boolean;
   /** Mostrar placeholders TODO si faltan los SVG (sólo /fanzine/muestra). En
       un volumen publicado la mascota aparece cuando esté el archivo. */
   placeholders?: boolean;
 }
-const { volume, title, subtitle, image, mascota = true, placeholders = false } = Astro.props;
+const { volume, title, subtitle, image, mascota = true, placeholders = false, completa = false } = Astro.props;
 const sello = etiquetaVolumen(volume);
-const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
+const conMascota = !completa && mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
 ---
 
-<section class:list={['fz-portada', 'tx-grain', !image && 'fz-portada--sin-foto']}>
+<section class:list={['fz-portada', 'tx-grain', !image && 'fz-portada--sin-foto', completa && 'fz-portada--completa']} aria-label={completa ? `${title}, volumen ${volume}` : undefined}>
   {image && (
     <OptimizedImage
       src={image}
@@ -46,9 +48,11 @@ const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
       context={`Portada del volumen ${volume}`}
     />
   )}
-  <div class="fz-portada__marca">
-    <Parche variante="mono" tamano={120} />
-  </div>
+  {!completa && (
+    <div class="fz-portada__marca">
+      <Parche variante="mono" tamano={120} />
+    </div>
+  )}
   <div
     class:list={['fz-portada__sello', sello.esPlaceholder && 'fz-portada__sello--css']}
     data-placeholder={sello.esPlaceholder ? 'true' : undefined}
@@ -66,13 +70,17 @@ const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
   </div>
   {conMascota && (
     <div class="fz-portada__mascota">
-      <Sticker nombre="mascota-jirafa-mono" ancho={150} alt="La jirafa, mascota del fanzine" quieto />
+      <Sticker nombre="mascota-jirafa-mono" ancho={90} alt="La jirafa, mascota del fanzine" quieto />
     </div>
   )}
   <div class="fz-portada__in">
     <p class="fz-portada__vol">Volumen {volume}</p>
-    <h1 class="fz-portada__title">{title}</h1>
-    {subtitle && <p class="fz-portada__subtitle">{subtitle}</p>}
+    {completa ? (
+      <h1 class="fz-portada__title fz-portada__title--oculto">{title}</h1>
+    ) : (
+      <h1 class="fz-portada__title">{title}</h1>
+    )}
+    {subtitle && !completa && <p class="fz-portada__subtitle">{subtitle}</p>}
   </div>
 </section>
 
@@ -166,7 +174,8 @@ const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
     right: 0.6rem;
     bottom: 0.4rem;
     z-index: 1;
-    width: clamp(90px, 24%, 170px);
+    /* issue #37: mascota al 60 % (antes clamp(90px, 24%, 170px)). */
+    width: clamp(54px, 14%, 102px);
     color: var(--paper);
     opacity: 0.95;
     filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.4));
@@ -235,8 +244,32 @@ const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
     .fz-portada__mascota {
       right: 0.3rem;
       bottom: 0.3rem;
-      width: 26%;
+      width: 16%;
     }
+  }
+  /* Portada completa (arte aprobado): la imagen entera, sin velo ni degradado; el
+     título queda sólo para lectores de pantalla y el <title>. */
+  .fz-portada--completa {
+    aspect-ratio: 1162 / 1600;
+    min-height: 0;
+    align-items: flex-start;
+  }
+  .fz-portada--completa .fz-portada__bg {
+    opacity: 1;
+  }
+  .fz-portada--completa::before {
+    display: none;
+  }
+  .fz-portada--completa .fz-portada__in {
+    padding: 1rem 1.1rem;
+  }
+  .fz-portada__title--oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
   @media print {
     .fz-portada::before,

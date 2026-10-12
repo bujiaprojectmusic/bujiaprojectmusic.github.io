@@ -138,7 +138,7 @@
       "nombre": "Foto",
       "grupo": "pagina",
       "tipo": "componente",
-      "descripcion": "Foto n del frontmatter de la pieza (src, alt, pie, crédito validados por el esquema) pintada como ImageFull, ImageSide, Polaroid, PhotoOld o Xerox según `estilo`.",
+      "descripcion": "Foto n del frontmatter de la pieza (src, alt, pie, crédito validados por el esquema) pintada como ImageFull, ImageSide, Polaroid, PhotoOld, Xerox o Gallery (galeria: fotos n…hasta) según `estilo`.",
       "web": "src/components/fanzine/Foto.astro",
       "typst": "scripts/print/sources/piezas.ts#reemplazarFotos → imagenes.typ",
       "props": [
@@ -151,7 +151,7 @@
         },
         {
           "nombre": "estilo",
-          "tipo": "'full' | 'side' | 'polaroid' | 'vieja' | 'xerox'",
+          "tipo": "'full' | 'side' | 'polaroid' | 'vieja' | 'xerox' | 'galeria'",
           "default": "'full'",
           "obligatoria": false,
           "que": "Componente de imagen que la pinta"
@@ -176,6 +176,13 @@
           "default": null,
           "obligatoria": false,
           "que": "Inclinación en grados (polaroid / vieja)"
+        },
+        {
+          "nombre": "hasta",
+          "tipo": "number",
+          "default": "n",
+          "obligatoria": false,
+          "que": "galeria: última foto de la rejilla (n…hasta)"
         }
       ],
       "estado": "aprobado",
@@ -287,6 +294,13 @@
           "default": "false",
           "obligatoria": false,
           "que": "Placeholders TODO si faltan los SVG (sólo muestra/kit)"
+        },
+        {
+          "nombre": "completa",
+          "tipo": "boolean",
+          "default": "false",
+          "obligatoria": false,
+          "que": "La imagen ya es la portada entera: sin velo, título, parche ni mascota encima (yml: portada.completa)"
         }
       ],
       "estado": "aprobado",
@@ -303,7 +317,7 @@
         },
         "hijos": null
       },
-      "notas": "Mascota: ilustración por encargo (crédito pendiente de confirmar)."
+      "notas": "Mascota (la jirafa mecánica punk): ilustración de @olafh_ace (Instagram); se apaga por volumen con mostrar_credito_mascota."
     },
     {
       "nombre": "Indice",
@@ -390,6 +404,13 @@
           "default": "false",
           "obligatoria": false,
           "que": "Placeholders TODO si faltan los SVG"
+        },
+        {
+          "nombre": "creditoMascota",
+          "tipo": "boolean",
+          "default": "true",
+          "obligatoria": false,
+          "que": "Línea de crédito de la mascota (yml: mostrar_credito_mascota)"
         }
       ],
       "estado": "aprobado",
@@ -407,7 +428,7 @@
         },
         "hijos": null
       },
-      "notas": "Mascota: ilustración por encargo (crédito pendiente de confirmar)."
+      "notas": "Mascota (la jirafa mecánica punk): ilustración de @olafh_ace (Instagram); se apaga por volumen con mostrar_credito_mascota."
     },
     {
       "nombre": "DatosTaller",
@@ -1596,7 +1617,7 @@
         },
         "hijos": null
       },
-      "notas": "En papel el SVG real se incrusta (vector); sin archivo, el mismo placeholder dibujado en Typst. Mascota: ilustración por encargo (crédito pendiente de confirmar)."
+      "notas": "En papel el SVG real se incrusta (vector); sin archivo, el mismo placeholder dibujado en Typst. Mascota (la jirafa mecánica punk): ilustración de @olafh_ace (Instagram); se apaga por volumen con mostrar_credito_mascota."
     },
     {
       "nombre": "Cinta",

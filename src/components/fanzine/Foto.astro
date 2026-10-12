@@ -1,7 +1,8 @@
 ---
 // Foto n del frontmatter de la pieza (issue #13): <Foto n={1} /> toma
 // `fotos[n-1]` (src, alt, pie, credito) y la pinta con el componente que
-// pida `estilo`: full (default), side, polaroid, vieja o xerox. Así el
+// pida `estilo`: full (default), side, polaroid, vieja, xerox o galeria
+// (varias fotos n…hasta en rejilla, dos por página en papel). Así el
 // pie y el crédito salen siempre de los datos validados por el esquema,
 // y el impreso (#9) los recibe iguales. Sólo props literales.
 import ImageFull from '../content/ImageFull.astro';
@@ -9,26 +10,37 @@ import ImageSide from '../content/ImageSide.astro';
 import Polaroid from '../Polaroid.astro';
 import PhotoOld from '../content/PhotoOld.astro';
 import Xerox from '../content/Xerox.astro';
+import Gallery from '../content/Gallery.astro';
 import { getPiezaActual } from '../../utils/piezaActual';
 
 interface Props {
   n: number;
-  estilo?: 'full' | 'side' | 'polaroid' | 'vieja' | 'xerox';
+  estilo?: 'full' | 'side' | 'polaroid' | 'vieja' | 'xerox' | 'galeria';
+  /** galeria: última foto de la rejilla (n…hasta). */
+  hasta?: number;
   side?: 'left' | 'right';
   width?: string;
   tilt?: number;
 }
-const { n, estilo = 'full', side = 'right', width = '42%', tilt } = Astro.props;
+const { n, estilo = 'full', side = 'right', width = '42%', tilt, hasta } = Astro.props;
 const { pieza } = getPiezaActual('Foto');
 const fotos = pieza.data.fotos;
 if (!Number.isInteger(n) || n < 1 || n > fotos.length) {
   throw new Error(`${pieza.id}: <Foto n={${n}}> no existe: el frontmatter tiene ${fotos.length} foto(s).`);
 }
+const pieDe = (x: (typeof fotos)[number]) => `${x.pie}${x.pie && !/[.!?]$/.test(x.pie.trim()) ? '.' : ''} Foto: ${x.credito}`.trim();
 const f = fotos[n - 1];
-const caption = `${f.pie}${f.pie && !/[.!?]$/.test(f.pie.trim()) ? '.' : ''} Foto: ${f.credito}`.trim();
+const caption = pieDe(f);
+const fin = estilo === 'galeria' ? (hasta ?? n) : n;
+if (estilo === 'galeria' && (!Number.isInteger(fin) || fin < n || fin > fotos.length)) {
+  throw new Error(`${pieza.id}: <Foto n={${n}} estilo="galeria" hasta={${hasta}}>: hasta tiene que estar entre ${n} y ${fotos.length}.`);
+}
+const galeria = fotos.slice(n - 1, fin).map((x) => ({ src: x.src, alt: x.alt, caption: pieDe(x) }));
 ---
 
-{estilo === 'side' ? (
+{estilo === 'galeria' ? (
+  <Gallery images={galeria} />
+) : estilo === 'side' ? (
   <ImageSide src={f.src} alt={f.alt} caption={caption} side={side} width={width} />
 ) : estilo === 'polaroid' ? (
   <Polaroid src={f.src} alt={f.alt} caption={caption} tilt={tilt ?? -3} />

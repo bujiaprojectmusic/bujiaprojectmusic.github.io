@@ -52,6 +52,9 @@
   let p = if P != none { P.props } else { (:) }
   let G = geo.portada
   let foto = p.at("image", default: none)
+  // completa: la imagen ya es la portada entera (arte aprobado): sin velo,
+  // título, subtítulo, parche ni mascota encima; sólo la etiqueta Vol. NN.
+  let completa = p.at("completa", default: false)
   // En B/N (fotocopia) la página se aclara: fondo papel, foto velada en
   // blanco y texto negro (reglas.bn: nada de negro sólido a toda página).
   let base = if es-bn { blanco } else { c.ink }
@@ -59,14 +62,16 @@
     rect(width: 100%, height: 100%, fill: base)
     if foto != none and foto-de(ctx, foto).existe {
       place(top + left, box(width: 100%, height: 100%, clip: true, imagen(ctx, foto, width: 100%, height: 100%, fit: "cover")))
-      place(top + left, rect(width: 100%, height: 100%, fill: base.transparentize(G.opacidad_foto * 100%)))
+      if not completa { place(top + left, rect(width: 100%, height: 100%, fill: base.transparentize(G.opacidad_foto * 100%))) }
     }
   }
   let cuerpo = {
     // Resto de nodos del pliego (texto extra de portada), arriba.
     render-nodos(ctx, pliego.nodos.filter(x => not (x.t == "componente" and x.nombre == "Portada")))
-    place(top + right, dx: 0pt, dy: 0pt, imagen(ctx, vol.mascota, width: pt(G.mascota_ancho_pt)))
-    place(bottom + left, {
+    if not completa { place(top + right, dx: 0pt, dy: 0pt, imagen(ctx, vol.mascota, width: pt(G.mascota_ancho_pt))) }
+    if completa {
+      place(bottom + left, box(fill: c.accent, inset: (x: 6pt, y: 3pt), text(font: fuente-texto, weight: "bold", size: pt(estilos.folio.pt), fill: c.ink, tracking: 0.15em, upper("Volumen " + vol-nn(p.at("volume", default: vol.volumen))))))
+    } else { place(bottom + left, {
       let tinta-texto = if es-bn { negro } else { c.paper }
       box(fill: c.accent, inset: (x: 6pt, y: 3pt), text(font: fuente-texto, weight: "bold", size: pt(estilos.folio.pt), fill: c.ink, tracking: 0.15em, upper("Volumen " + vol-nn(p.at("volume", default: vol.volumen)))))
       v(6pt)
@@ -80,7 +85,7 @@
       // Parche: sello con el mes y la web.
       rotate(-3deg, reflow: true, box(stroke: 1.5pt + c.accent, inset: (x: 6pt, y: 3pt),
         text(font: fuente-texto, weight: "bold", size: pt(estilos.pie.pt), fill: c.accent, tracking: 0.08em, upper(mes-anio(vol.fecha) + " · " + vol.sitio.replace("https://", "")))))
-    })
+    }) }
   }
   pagina(vol, 1, cuerpo, fondo: fondo, fill: if es-bn { negro } else { c.paper })
 }
@@ -201,7 +206,8 @@
       let piezas = C.at("piezas", default: ())
       if piezas.len() > 0 { [ #piezas.join(" · ").] } else { [ Textos: #C.autor.] }
       if C.fotografos.len() > 0 { [ Fotos: #C.fotografos.join(", ").] }
-      [ #C.mascota.]
+      // Crédito de la mascota apagable (issue #37): sin él, el colofón sigue sin hueco.
+      if C.mascota != "" { [ #C.mascota.] }
       parbreak()
       [Próximo volumen: Vol. #vol-nn(vol.volumen + 1).]
       parbreak()
@@ -234,8 +240,7 @@
     v(1fr)
     align(center, {
       imagen(ctx, vol.mascota, width: pt(geo.contraportada.mascota_ancho_pt))
-      v(3pt)
-      texto("pie", quien: "Contraportada", fill: tinta-texto, geo.mascota.credito)
+      if vol.creditos.mascota != "" { v(3pt); texto("pie", quien: "Contraportada", fill: tinta-texto, vol.creditos.mascota) }
       if not tiene-datos { v(6pt); qr(ctx, vol.qr_volumen, lado: inch(geo.contraportada.qr_in)); v(2pt); texto("pie", quien: "Contraportada", fill: tinta-texto, vol.url.replace("https://", "")) }
     })
   }

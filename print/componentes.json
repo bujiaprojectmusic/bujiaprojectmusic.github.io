@@ -50,22 +50,23 @@
     "alto_max_pct": 30
   },
   "portada": {
-    "mascota_ancho_pt": 70,
+    "mascota_ancho_pt": 42,
     "parche_ancho_pt": 54,
     "opacidad_foto": 0.55
   },
   "contraportada": {
     "logo_ancho_pt": 110,
-    "mascota_ancho_pt": 80,
+    "mascota_ancho_pt": 48,
     "qr_in": 0.75
   },
   "fin": {
-    "mascota_ancho_pt": 56
+    "mascota_ancho_pt": 34
   },
   "mascota": {
     "archivo": "/img/nosotros/Mascota.svg.svg",
-    "credito": "Mascota: ilustración por encargo (crédito pendiente de confirmar)",
-    "ancho_pt_default": 120
+    "credito": "Mascota (la jirafa mecánica punk): ilustración de @olafh_ace (Instagram)",
+    "ancho_pt_default": 120,
+    "nota": "issue #37: tamaño al 60 % del original (70/80/56 pt → 42/48/34 pt); el crédito se apaga por volumen con mostrar_credito_mascota: false (export.ts → creditos.mascota = \"\")"
   },
   "logo": {
     "archivo": "/img/logo.png"

@@ -56,6 +56,10 @@ Desde el #13 el contenido del fanzine se separa en **piezas** y
   `sin_listar: true` publica `/fanzine/vol-NN` sin listarlo: `noindex` (sin
   franja de prueba), fuera de `/fanzine`, `/volumenes` y el sitemap, y sin la
   tarjeta de descarga de PDF; `scripts/check-dist-volumenes.mjs` lo verifica.
+  `mostrar_credito_mascota: false` apaga sólo el crédito de la mascota / arte
+  de la casa (issue #37); `portada.completa: true` usa la imagen como portada
+  entera (sin velo ni título encima). En el cuerpo, `<Foto n={1}
+  estilo="galeria" hasta={2} />` pone varias fotos en rejilla (dos por página).
 
 **Agregar una pieza**: copiá `src/content/piezas/_plantilla.mdx` a
 `src/content/piezas/<AAAA-MM-slug>/index.mdx`, llená el frontmatter, poné

@@ -10,6 +10,7 @@ import Pliego from './Pliego.astro';
 import Relleno from './Relleno.astro';
 import Contraportada from '../Contraportada.astro';
 import DatosTaller from './DatosTaller.astro';
+import { CREDITO_MASCOTA } from '../Contraportada.astro';
 import { setPiezaActual } from '../../utils/piezaActual';
 import type { Composicion } from '../../utils/componer';
 
@@ -27,8 +28,10 @@ interface Props {
   contraportada: string;
   /** Créditos de la contraportada (issue #7); si no vienen del yml, se arman con las piezas. */
   creditosContraportada?: string[];
+  /** Crédito de la mascota / arte de la casa (yml: mostrar_credito_mascota, issue #37). */
+  mostrarCreditoMascota?: boolean;
 }
-const { composicion, piezas, numero, scheme, prueba, contraportada, creditosContraportada = [] } = Astro.props;
+const { composicion, piezas, numero, scheme, prueba, contraportada, creditosContraportada = [], mostrarCreditoMascota = true } = Astro.props;
 
 const htmlDe = new Map<string, string>();
 for (const r of piezas) {
@@ -49,7 +52,7 @@ const creditosCp = creditosContraportada.length ? creditosContraportada : lineas
       <Pliego n={p.n} tipo="fin">
         <p class="fz-fin-word">Fin</p>
         <p class="fz-small">
-          <strong>Créditos.</strong> {creditos}. Mascota: ilustración por encargo (crédito pendiente de confirmar). Tipografías: Space Mono y Anton (OFL).
+          <strong>Créditos.</strong> {creditos}. {mostrarCreditoMascota && `${CREDITO_MASCOTA}. `}Tipografías: Space Mono y Anton (OFL).
         </p>
         <p class="fz-small">Hecho en Texcoco con Astro, viruta y café frío. Próximo volumen: Vol. {String(numero + 1).padStart(2, '0')}.</p>
       </Pliego>
@@ -58,7 +61,7 @@ const creditosCp = creditosContraportada.length ? creditosContraportada : lineas
   if (p.tipo === 'contraportada') {
     return (
       <Pliego n={p.n} tipo="contraportada">
-        <Contraportada texto={contraportada} creditos={creditosCp} />
+        <Contraportada texto={contraportada} creditos={creditosCp} creditoMascota={mostrarCreditoMascota} />
         <DatosTaller />
       </Pliego>
     );

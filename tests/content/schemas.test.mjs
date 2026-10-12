@@ -54,6 +54,15 @@ test('volumen: sin_listar es booleano, default false', () => {
   assert.equal(volumen.safeParse({ ...v, sin_listar: 'sí' }).success, false);
 });
 
+test('volumen: mostrar_credito_mascota default true y portada.completa default false (issue #37)', () => {
+  const v = { numero: 2, titulo: 'x', fecha: '2026-11-01', publishDate: '2026-11-15', portada: { alt: '' }, piezas: [{ pieza: 'a', desde: 3 }] };
+  const r = volumen.safeParse(v);
+  assert.equal(r.data.mostrar_credito_mascota, true);
+  assert.equal(r.data.portada.completa, false);
+  assert.equal(volumen.safeParse({ ...v, mostrar_credito_mascota: false, portada: { alt: '', completa: true } }).data.mostrar_credito_mascota, false);
+  assert.equal(volumen.safeParse({ ...v, mostrar_credito_mascota: 'no' }).success, false);
+});
+
 const P = (id, paginas, draft = false) => ({ id, titulo: id, autor: 'A', paginas, draft });
 
 test('composición: hueco → aviso + relleno, N múltiplo de 4', () => {

@@ -74,7 +74,7 @@ export function listarVolumenesCompuestos(raiz: string, datosTaller: Map<string,
     const pliegos: VolumenCompuestoFuente['pliegos'] = [];
     const subtitulo = v.portada.subtitulo ?? `${new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(v.fecha)} — Texcoco`;
     pliegos.push({ n: 1, tipo: 'portada', esquema: null, props: {}, linea: 0, archivo: path.relative(raiz, f), hijos: [
-      { t: 'componente', nombre: 'Portada', props: { volume: v.numero, title: v.titulo, subtitle: subtitulo, ...(v.portada.imagen ? { image: v.portada.imagen } : {}) }, hijos: [] },
+      { t: 'componente', nombre: 'Portada', props: { volume: v.numero, title: v.titulo, subtitle: subtitulo, ...(v.portada.imagen ? { image: v.portada.imagen } : {}), ...(v.portada.completa ? { completa: true } : {}) }, hijos: [] },
       ...(v.portada.credito ? [{ t: 'html', etiqueta: 'p', clase: 'fz-small', hijos: [{ t: 'texto', v: `Foto de portada: ${v.portada.credito}` }] } as Nodo] : []),
     ] });
     pliegos.push({ n: 2, tipo: 'indice', esquema: null, props: {}, linea: 0, archivo: path.relative(raiz, f), hijos: [
@@ -132,7 +132,7 @@ export function listarVolumenesCompuestos(raiz: string, datosTaller: Map<string,
       indice: comp.indice.map((i) => ({ pagina: i.pagina, titulo: i.titulo, autor: i.autor })),
       creditos: [...piezas.values()].map((p) => `${p.data.titulo}: ${p.data.credito}`),
       // Frontmatter "como el de un post" para exportar(): sin consentimiento_ref ni redes.
-      frontmatter: { title: v.titulo, volume: v.numero, date: v.fecha, author: [...new Set([...piezas.values()].map((p) => p.data.autor))].join(', ') || 'Ripper', description: v.descripcion, colorScheme: v.colorScheme, prueba: v.prueba, impreso: v.impreso, fotos_creditos: [...piezas.values()].flatMap((p) => p.data.fotos.map((x: any) => x.credito)) },
+      frontmatter: { title: v.titulo, volume: v.numero, date: v.fecha, mostrar_credito_mascota: v.mostrar_credito_mascota, author: [...new Set([...piezas.values()].map((p) => p.data.autor))].join(', ') || 'Ripper', description: v.descripcion, colorScheme: v.colorScheme, prueba: v.prueba, impreso: v.impreso, fotos_creditos: [...piezas.values()].flatMap((p) => p.data.fotos.map((x: any) => x.credito)) },
     });
   }
   return out.sort((a, b) => a.frontmatter.volume - b.frontmatter.volume);
@@ -145,8 +145,15 @@ function reemplazarFotos(nodos: Nodo[], p: ReturnType<typeof leerPieza>): Nodo[]
       const k = Number(n.props.n);
       const f = p.data.fotos[k - 1];
       if (!f) throw new ErrorExport(`${p.archivo}: <Foto n={${n.props.n}}> no existe: el frontmatter tiene ${p.data.fotos.length} foto(s).`);
-      const pie = `${f.pie}${f.pie && !/[.!?]$/.test(f.pie.trim()) ? '.' : ''} Foto: ${f.credito}`.trim();
+      const pieDe = (x: any) => `${x.pie}${x.pie && !/[.!?]$/.test(x.pie.trim()) ? '.' : ''} Foto: ${x.credito}`.trim();
+      const pie = pieDe(f);
       const estilo = String(n.props.estilo ?? 'full');
+      if (estilo === 'galeria') {
+        // <Foto n estilo="galeria" hasta /> → Gallery con las fotos n…hasta (dos por página en papel).
+        const fin = Number(n.props.hasta ?? k);
+        if (!Number.isInteger(fin) || fin < k || fin > p.data.fotos.length) throw new ErrorExport(`${p.archivo}: <Foto n={${k}} estilo="galeria" hasta={${n.props.hasta}}>: hasta tiene que estar entre ${k} y ${p.data.fotos.length}.`);
+        return { t: 'componente', nombre: 'Gallery', props: { images: p.data.fotos.slice(k - 1, fin).map((x: any) => ({ src: x.src, alt: x.alt, caption: pieDe(x) })) }, hijos: [] };
+      }
       const nombre = estilo === 'side' ? 'ImageSide' : estilo === 'polaroid' ? 'Polaroid' : estilo === 'vieja' ? 'PhotoOld' : estilo === 'xerox' ? 'Xerox' : 'ImageFull';
       const props: Record<string, unknown> = { src: f.src, alt: f.alt, caption: pie };
       if (nombre === 'ImageSide') { props.side = n.props.side ?? 'right'; props.width = n.props.width ?? '42%'; }
