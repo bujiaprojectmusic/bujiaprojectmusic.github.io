@@ -47,6 +47,13 @@ test('volumen: clave extra y desde < 3 rompen', () => {
   assert.equal(volumen.safeParse({ ...v, paginas_minimo: 18 }).success, false);
 });
 
+test('volumen: sin_listar es booleano, default false', () => {
+  const v = { numero: 2, titulo: 'x', fecha: '2026-11-01', publishDate: '2026-11-15', portada: { alt: '' }, piezas: [{ pieza: 'a', desde: 3 }] };
+  assert.equal(volumen.safeParse(v).data.sin_listar, false);
+  assert.equal(volumen.safeParse({ ...v, sin_listar: true }).data.sin_listar, true);
+  assert.equal(volumen.safeParse({ ...v, sin_listar: 'sí' }).success, false);
+});
+
 const P = (id, paginas, draft = false) => ({ id, titulo: id, autor: 'A', paginas, draft });
 
 test('composición: hueco → aviso + relleno, N múltiplo de 4', () => {

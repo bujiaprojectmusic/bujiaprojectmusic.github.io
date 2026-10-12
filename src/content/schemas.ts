@@ -120,6 +120,9 @@ export function volumenSchema(image: ImageFn, reference: (c: 'piezas') => z.ZodT
         .default({}),
       impreso: z.object({ multimedia: z.enum(['qr', 'omitir']).default('qr') }).strict().default({}),
       prueba: z.boolean().default(false),
+      /** Publicado pero sin listar: /fanzine/vol-NN existe con noindex (sin banner de prueba),
+          no sale en /fanzine, /volumenes ni el sitemap, y su tarjeta de descarga de PDF no se pinta. */
+      sin_listar: z.boolean().default(false),
       draft: z.boolean().default(false),
     })
     .strict();

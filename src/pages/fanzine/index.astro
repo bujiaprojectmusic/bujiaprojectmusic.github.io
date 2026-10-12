@@ -4,13 +4,13 @@
 import { getCollection } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
 import OptimizedImage from '../../components/OptimizedImage.astro';
-import { listarVolumenes } from '../../utils/volumenes';
+import { listarVolumenesPublicos } from '../../utils/volumenes';
 import { fanzine } from '../../config/site';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // Volúmenes compuestos (src/content/volumenes/*.yml) y MDX (issue #13);
-// los de prueba (prueba: true) no van en el archivo público.
-const volumes = (await listarVolumenes()).filter((v) => !v.prueba);
+// los de prueba (prueba: true) y los sin_listar no van en el archivo público.
+const volumes = await listarVolumenesPublicos();
 const allPosts = await getCollection('posts', ({ data }) => !data.draft && !data.prueba);
 const others = allPosts
   .filter((p) => !p.data.fanzine)

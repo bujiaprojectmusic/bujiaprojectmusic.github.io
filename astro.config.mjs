@@ -1,16 +1,16 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import { listFanzineRedirects, listFanzinePrueba } from './scripts/fanzine-redirects.mjs';
+import { listFanzineRedirects, listFanzinePrueba, listVolumenesOcultos } from './scripts/fanzine-redirects.mjs';
 import { fanzine } from './src/config/site.ts';
 
 // Fuera del sitemap: las URLs viejas del fanzine que sólo existen para
 // redirigir a /fanzine/vol-NN (meta refresh + canonical) y los volúmenes de
-// prueba (`prueba: true`, noindex).
+// prueba (`prueba: true`, noindex) y los volúmenes yml con sin_listar o prueba.
 // También /fanzine/muestra (página de muestra de componentes, noindex; issue #7),
 // /fanzine/kit y /fanzine/kit/fachadas (catálogo de componentes y fixture de fachadas, noindex; issue #17).
 // Y /fanzine/colabora/enviar mientras fanzine.colabora.publicada sea false (issue #12).
-const fanzineRedirects = new Set([...listFanzineRedirects(), ...listFanzinePrueba(), '/fanzine/muestra', '/fanzine/kit', '/fanzine/kit/fachadas', ...(fanzine.colabora.publicada ? [] : [fanzine.colabora.ruta])]);
+const fanzineRedirects = new Set([...listFanzineRedirects(), ...listFanzinePrueba(), ...listVolumenesOcultos(), '/fanzine/muestra', '/fanzine/kit', '/fanzine/kit/fachadas', ...(fanzine.colabora.publicada ? [] : [fanzine.colabora.ruta])]);
 
 export default defineConfig({
   // Dominio real del sitio (GitHub Pages con dominio propio). De acá salen

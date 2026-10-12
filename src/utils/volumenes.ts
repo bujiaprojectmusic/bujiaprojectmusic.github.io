@@ -14,6 +14,8 @@ export interface VolumenListado {
   fecha: Date;
   descripcion?: string;
   prueba: boolean;
+  /** sin_listar del yml: publicado pero fuera de /fanzine, /volumenes y el sitemap (noindex). */
+  sinListar: boolean;
   cover?: ImageMetadata;
   origen: 'yml' | 'mdx';
 }
@@ -22,11 +24,11 @@ export async function listarVolumenes(): Promise<VolumenListado[]> {
   const out: VolumenListado[] = [];
   const posts = await getCollection('posts', ({ data }) => data.fanzine && !data.draft && !data.legado);
   for (const p of posts) {
-    out.push({ slug: fanzineSlug(p), numero: p.data.volume!, titulo: p.data.title, fecha: p.data.date, descripcion: p.data.description, prueba: p.data.prueba, cover: p.data.cover, origen: 'mdx' });
+    out.push({ slug: fanzineSlug(p), numero: p.data.volume!, titulo: p.data.title, fecha: p.data.date, descripcion: p.data.description, prueba: p.data.prueba, sinListar: false, cover: p.data.cover, origen: 'mdx' });
   }
   const ymls = await getCollection('volumenes', ({ data }) => !data.draft);
   for (const v of ymls) {
-    out.push({ slug: slugVolumen(v.data.numero), numero: v.data.numero, titulo: v.data.titulo, fecha: v.data.fecha, descripcion: v.data.descripcion, prueba: v.data.prueba, cover: v.data.portada.imagen, origen: 'yml' });
+    out.push({ slug: slugVolumen(v.data.numero), numero: v.data.numero, titulo: v.data.titulo, fecha: v.data.fecha, descripcion: v.data.descripcion, prueba: v.data.prueba, sinListar: v.data.sin_listar, cover: v.data.portada.imagen, origen: 'yml' });
   }
   const vistos = new Map<string, string>();
   for (const v of out) {
@@ -34,6 +36,11 @@ export async function listarVolumenes(): Promise<VolumenListado[]> {
     vistos.set(v.slug, v.origen);
   }
   return out.sort((a, b) => b.numero - a.numero);
+}
+
+/** Los que salen en /fanzine y /volumenes: sin prueba y sin sin_listar. */
+export async function listarVolumenesPublicos(): Promise<VolumenListado[]> {
+  return (await listarVolumenes()).filter((v) => !v.prueba && !v.sinListar);
 }
 
 export interface VolumenCompuesto {

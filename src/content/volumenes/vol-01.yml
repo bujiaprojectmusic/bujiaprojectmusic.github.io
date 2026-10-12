@@ -25,3 +25,5 @@ contraportada:
   texto: "Bujía Project Music — Texcoco, MX"
 impreso:
   multimedia: qr
+# Publicado sin listar mientras se completan las págs. 7–14 y la portada.
+sin_listar: true
