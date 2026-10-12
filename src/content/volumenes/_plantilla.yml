@@ -38,4 +38,8 @@ contraportada:
 impreso:
   # qr (default): videos y playlists salen como QR en el PDF; omitir: no salen.
   multimedia: qr
+# sin_listar: true → se publica en /fanzine/vol-NN pero sin listar: noindex
+# (sin la franja de prueba), fuera de /fanzine, /volumenes y el sitemap, y sin
+# la tarjeta de descarga de PDF. Para compartir por enlace antes de anunciarlo.
+sin_listar: false
 draft: true

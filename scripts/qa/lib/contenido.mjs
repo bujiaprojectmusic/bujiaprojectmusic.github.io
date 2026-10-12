@@ -1,7 +1,7 @@
 // Lee el contenido fuente del fanzine (issue #14): volúmenes yml, piezas y
 // posts MDX con fanzine: true. JS plano (sin astro:content) para correr
 // fuera de Astro. Replica las reglas de src/utils/volumenes.ts:
-//  - yml: no draft; prueba → no sale en /fanzine ni /volumenes.
+//  - yml: no draft; prueba o sin_listar → no sale en /fanzine ni /volumenes.
 //  - MDX fanzine: true, no draft, no legado.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -55,6 +55,7 @@ export function leerVolumenesYml(raiz = 'src/content') {
       archivo: f,
       data,
       prueba: !!data.prueba,
+      sinListar: !!data.sin_listar,
       draft: !!data.draft,
       piezas: (data.piezas ?? []).filter((p) => p && p.pieza).map((p) => ({ pieza: String(p.pieza), desde: Number(p.desde) })),
     });
@@ -70,7 +71,7 @@ export function leerVolumenesMdx(raiz = 'src/content') {
     const m = matter(fs.readFileSync(f, 'utf8'));
     const d = m.data;
     if (!d.fanzine || d.draft || d.legado) continue;
-    out.push({ origen: 'mdx', slug: slugVolumen(d.volume), numero: d.volume, titulo: d.title, archivo: f, data: d, prueba: !!d.prueba, draft: false, piezas: [] });
+    out.push({ origen: 'mdx', slug: slugVolumen(d.volume), numero: d.volume, titulo: d.title, archivo: f, data: d, prueba: !!d.prueba, sinListar: false, draft: false, piezas: [] });
   }
   return out;
 }
@@ -80,7 +81,7 @@ export function leerVolumenes(raiz = 'src/content') {
   return [...leerVolumenesYml(raiz).filter((v) => !v.draft), ...leerVolumenesMdx(raiz)].sort((a, b) => a.numero - b.numero);
 }
 
-/** Los que salen en /fanzine y /volumenes: sin prueba. */
+/** Los que salen en /fanzine y /volumenes: sin prueba ni sin_listar. */
 export function volumenesPublicados(raiz = 'src/content') {
-  return leerVolumenes(raiz).filter((v) => !v.prueba);
+  return leerVolumenes(raiz).filter((v) => !v.prueba && !v.sinListar);
 }

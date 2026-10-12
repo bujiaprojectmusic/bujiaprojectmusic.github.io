@@ -4,6 +4,9 @@
 //   redirigir a /fanzine/vol-NN (fuera del sitemap).
 // - listFanzinePrueba(): las URLs de los volúmenes de prueba
 //   (`prueba: true`, noindex): también fuera del sitemap.
+// - listVolumenesOcultos(): /fanzine/vol-NN de los volúmenes yml
+//   (src/content/volumenes/*.yml, sin los que empiezan con "_") con
+//   `sin_listar: true` o `prueba: true`: fuera del sitemap.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -49,4 +52,19 @@ export function listFanzinePrueba(postsDir = path.join('src', 'content', 'posts'
   return entries(postsDir)
     .filter((e) => e.prueba)
     .map((e) => `/fanzine/${e.vol}`);
+}
+
+/** Volúmenes yml con sin_listar o prueba (no draft): sus /fanzine/vol-NN no van al sitemap. */
+export function listVolumenesOcultos(volDir = path.join('src', 'content', 'volumenes')) {
+  if (!fs.existsSync(volDir)) return [];
+  const out = [];
+  for (const f of fs.readdirSync(volDir)) {
+    if (f.startsWith('_') || !/\.ya?ml$/.test(f)) continue;
+    const src = fs.readFileSync(path.join(volDir, f), 'utf8');
+    if (/^draft:\s*true\s*$/m.test(src)) continue;
+    const numero = src.match(/^numero:\s*(\d+)\s*$/m)?.[1];
+    if (!numero) continue;
+    if (/^(sin_listar|prueba):\s*true\s*$/m.test(src)) out.push(`/fanzine/vol-${numero.padStart(2, '0')}`);
+  }
+  return out;
 }

@@ -53,6 +53,9 @@ Desde el #13 el contenido del fanzine se separa en **piezas** y
   `{ relleno: notas, desde: 8 }` (entonces también se muestran en
   pantalla); traslapes y piezas `draft` son error.
   `paginas_minimo: 16` rellena hasta ahí aunque sobren páginas.
+  `sin_listar: true` publica `/fanzine/vol-NN` sin listarlo: `noindex` (sin
+  franja de prueba), fuera de `/fanzine`, `/volumenes` y el sitemap, y sin la
+  tarjeta de descarga de PDF; `scripts/check-dist-volumenes.mjs` lo verifica.
 
 **Agregar una pieza**: copiá `src/content/piezas/_plantilla.mdx` a
 `src/content/piezas/<AAAA-MM-slug>/index.mdx`, llená el frontmatter, poné

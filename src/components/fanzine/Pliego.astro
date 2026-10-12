@@ -37,9 +37,11 @@ interface Props {
   tipo?: PliegoTipo;
   /** Texto alternativo si `bleed` es una imagen. */
   bleedAlt?: string;
+  /** Portada: pintar la tarjeta de descarga de PDF (false en volúmenes sin_listar). */
+  descarga?: boolean;
 }
 
-const { n, scheme, bleed = false, tipo = 'normal', bleedAlt = '' } = Astro.props;
+const { n, scheme, bleed = false, tipo = 'normal', bleedAlt = '', descarga = true } = Astro.props;
 
 if (!Number.isInteger(n) || n < 1 || n > 64) {
   throw new Error(`<Pliego n={${n}}>: n tiene que ser un entero entre 1 y 64 (el total del volumen lo valida scripts/check-volumes.mjs).`);
@@ -108,7 +110,7 @@ const LABELS: Record<PliegoTipo, string> = {
 
   {showNum && <span class="pliego__num" aria-hidden="true">{n}</span>}
 </section>
-{tipo === 'portada' && <DescargaPdf slug={slugVolumen} />}
+{tipo === 'portada' && descarga && <DescargaPdf slug={slugVolumen} />}
 
 <style>
   /* ── Pantalla: un tramo más del scroll, no una página ─────────────── */

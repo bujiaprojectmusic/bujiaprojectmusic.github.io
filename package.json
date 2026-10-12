@@ -23,7 +23,7 @@
     "print": "node scripts/print/build.mjs",
     "print:export": "tsx scripts/print/export.ts",
     "print:test": "node --test tests/print/registro.test.mjs tests/print/fixtures.test.mjs tests/print/impose.test.mjs",
-    "test:content": "node --import tsx --test tests/content/schemas.test.mjs tests/content/colabora.test.mjs"
+    "test:content": "node --import tsx --test tests/content/schemas.test.mjs tests/content/colabora.test.mjs tests/content/sin-listar.test.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.0",

@@ -1,10 +1,10 @@
 ---
 import FanzineLayout from '../layouts/FanzineLayout.astro';
-import { listarVolumenes } from '../utils/volumenes';
+import { listarVolumenesPublicos } from '../utils/volumenes';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-// Volúmenes yml y MDX (issue #13), sin los de prueba.
-const volumes = (await listarVolumenes()).filter((v) => !v.prueba);
+// Volúmenes yml y MDX (issue #13), sin los de prueba ni los sin_listar.
+const volumes = await listarVolumenesPublicos();
 ---
 
 <FanzineLayout title="Volúmenes" description="Todos los volúmenes de La Jirafa Elektrika.">

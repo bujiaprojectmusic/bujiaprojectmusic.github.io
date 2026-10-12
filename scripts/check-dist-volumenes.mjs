@@ -3,7 +3,9 @@
 // sobre el HTML ya generado en dist/fanzine/vol-NN/index.html: es la
 // validación de #6 aplicada al volumen compuesto, más el índice contra el
 // yml, los créditos y las fotos por astro:assets. Corre después de
-// `astro build` (package.json → build) y falla con código 1.
+// `astro build` (package.json → build) y falla con código 1. También revisa
+// `sin_listar`: noindex sin franja de prueba, sin tarjeta de descarga, fuera
+// de /fanzine, /volumenes y del sitemap (y lo contrario para los listados).
 import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
@@ -18,6 +20,9 @@ const frontmatter = (src) => yaml.load(src.match(/^---\r?\n([\s\S]*?)\r?\n---/)?
 const ymls = fs.existsSync(dirVol) ? fs.readdirSync(dirVol).filter((f) => /^vol-\d+\.ya?ml$/.test(f)) : [];
 if (!ymls.length) { console.log('(no hay volúmenes yml que revisar)'); process.exit(0); }
 if (fs.existsSync(path.join(RAIZ, 'dist', 'fanzine', '_plantilla'))) mal('dist/fanzine/_plantilla existe: la plantilla generó una ruta');
+const leerSiExiste = (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '');
+const listados = { '/fanzine': leerSiExiste(path.join(RAIZ, 'dist', 'fanzine', 'index.html')), '/volumenes': leerSiExiste(path.join(RAIZ, 'dist', 'volumenes', 'index.html')) };
+const sitemap = fs.existsSync(path.join(RAIZ, 'dist')) ? fs.readdirSync(path.join(RAIZ, 'dist')).filter((f) => /^sitemap-\d+\.xml$/.test(f)).map((f) => fs.readFileSync(path.join(RAIZ, 'dist', f), 'utf8')).join('\n') : '';
 
 for (const f of ymls) {
   const v = yaml.load(fs.readFileSync(path.join(dirVol, f), 'utf8'));
@@ -57,7 +62,26 @@ for (const f of ymls) {
   // Fotos por astro:assets: ningún src crudo a src/assets/piezas.
   const crudas = [...h.matchAll(/src="([^"]*src\/assets\/piezas[^"]*)"/g)].map((m) => m[1]);
   if (crudas.length) problemas.push(`fotos sin optimizar: ${crudas.join(', ')}`);
+  // sin_listar / prueba: publicado pero fuera de listados, sitemap y descarga; noindex.
+  const oculto = !!v.sin_listar || !!v.prueba;
+  const noindex = /<meta name="robots" content="noindex,nofollow">/.test(h);
+  const banner = /<p class="fz-prueba-banner/.test(h); // el elemento, no su CSS
+  const descarga = /class="fz-lleva\b/.test(h);
+  const enlazado = Object.entries(listados).filter(([, html]) => new RegExp(`href="(?:https?://[^"/]+)?/fanzine/${slug}"`).test(html)).map(([p]) => p);
+  const enSitemap = sitemap.includes(`/fanzine/${slug}<`) || sitemap.includes(`/fanzine/${slug}/<`);
+  if (oculto) {
+    if (!noindex) problemas.push(`${v.sin_listar ? 'sin_listar' : 'prueba'}: falta <meta name="robots" content="noindex,nofollow">`);
+    if (v.sin_listar && !v.prueba && banner) problemas.push('sin_listar: trae la franja "EDICIÓN DE PRUEBA" y no es prueba');
+    if (v.sin_listar && descarga) problemas.push('sin_listar: trae la tarjeta de descarga de PDF (.fz-lleva)');
+    if (enlazado.length) problemas.push(`${v.sin_listar ? 'sin_listar' : 'prueba'}: aparece enlazado en ${enlazado.join(' y ')}`);
+    if (enSitemap) problemas.push(`${v.sin_listar ? 'sin_listar' : 'prueba'}: aparece en el sitemap`);
+  } else {
+    if (noindex) problemas.push('volumen listado con noindex');
+    if (enlazado.length < 2) problemas.push(`no aparece enlazado en ${Object.keys(listados).filter((p) => !enlazado.includes(p)).join(' ni ')}`);
+    if (sitemap && !enSitemap) problemas.push('no aparece en el sitemap');
+  }
   if (problemas.length) mal(`${slug}:\n  - ${problemas.join('\n  - ')}`);
+  else if (oculto) console.log(`✔ dist/fanzine/${slug}: ${N} pliegos, índice = yml, créditos y fotos ok · ${v.sin_listar ? 'sin_listar' : 'prueba'}: noindex${v.sin_listar && !v.prueba ? ' sin franja de prueba' : ''}, ${v.sin_listar ? 'sin tarjeta de descarga, ' : ''}no enlazado en /fanzine ni /volumenes, fuera del sitemap`);
   else console.log(`✔ dist/fanzine/${slug}: ${N} pliegos (1 portada, 2 índice, ${N - 1} fin, ${N} contraportada), índice = yml (${items.map((i) => `${i.pagina} ${i.titulo}`).join('; ')}), créditos y fotos ok`);
 }
 process.exit(fallos ? 1 : 0);
