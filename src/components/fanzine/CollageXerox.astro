@@ -1,0 +1,79 @@
+---
+// Collage xerox (issue #17 parte b, vol. 01): 2–4 fotos encimadas en B/N de
+// alto contraste, con grano (.tx-grain) y cinta canela, para fotoensayos.
+// Posiciones y giros fijos en print/componentes.json (collage_xerox): los
+// mismos que usa el gemelo Typst. Las fotos pasan por OptimizedImage.
+// Uso: <CollageXerox images={[{ src: '/img/a.jpg', alt: '…' }, { src: '/img/b.jpg', alt: '…' }]} caption="…" />
+import OptimizedImage from '../OptimizedImage.astro';
+import CintaCanela from './CintaCanela.astro';
+import type { ImageSource } from '../../utils/resolveImage';
+import geo from '../../../print/componentes.json';
+
+interface Imagen {
+  src: ImageSource;
+  alt: string;
+}
+interface Props {
+  images: Imagen[];
+  caption?: string;
+}
+const G = geo.collage_xerox;
+const { images, caption } = Astro.props;
+if (!Array.isArray(images) || images.length < G.minimo || images.length > G.maximo) {
+  throw new Error(`<CollageXerox>: van de ${G.minimo} a ${G.maximo} fotos (recibí ${Array.isArray(images) ? images.length : 0}).`);
+}
+---
+
+<figure class="fz-collage">
+  <div class="fz-collage__mesa tx-grain" style={`--fz-alto:${G.alto_pct}%`}>
+    {images.map((im, i) => {
+      const [x, y, w] = G.posiciones_pct[i];
+      return (
+        <span class="fz-collage__foto" style={`--x:${x}%;--y:${y}%;--w:${w}%;--g:${G.giros[i]}deg`}>
+          <OptimizedImage src={im.src} alt={im.alt} widths={[320, 480, 640, 960]} sizes="(max-width: 640px) 60vw, 520px" context="CollageXerox" />
+          <CintaCanela pos="arriba" angulo={i % 2 ? 5 : -6} largo={90} />
+        </span>
+      );
+    })}
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .fz-collage {
+    margin: 2rem 0;
+  }
+  .fz-collage__mesa {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    overflow: hidden;
+  }
+  .fz-collage__foto {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--w);
+    transform: rotate(var(--g));
+    background: #fff;
+    padding: 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  }
+  .fz-collage__foto :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: grayscale(1) contrast(1.9) brightness(1.05);
+  }
+  .fz-collage figcaption {
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    text-align: center;
+    opacity: 0.7;
+    margin-top: 0.6rem;
+  }
+</style>

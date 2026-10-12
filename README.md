@@ -212,6 +212,9 @@ ven todos en `/fanzine/muestra` (noindex, fuera del sitemap). Detalle en
 - **Fachadas:** `VideoOldTV`, `VideoCinema` y `Playlist` (youtube | spotify
   | bandcamp) no meten iframe hasta el clic; sin JS son enlaces. Script
   compartido ≤ 1 KB gzip, sólo en páginas con video.
+- **Vol. 01 (parte b):** `CintaCanela`, `SelloGoma`, `TituloRescate` y
+  `CollageXerox` (`src/components/fanzine/`, gemelos en
+  `print/lib/componentes/punk.typ`); 5–8 siguen `propuesto`.
 - **Componente nuevo:** Redacción propone 2–3 por volumen en el PR del
   volumen, Ricardo aprueba en la puerta 2, se abre un issue con la
   plantilla `componente-punk` y entra al registro. Detalle en

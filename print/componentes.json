@@ -1,5 +1,5 @@
 {
-  "$comentario": "Geometría de los gemelos Typst de los componentes web (print/lib/componentes/). La leen print/lib/componentes/*.typ y scripts/print/export.ts (para el ancho colocado de cada foto → ppi efectivo). Porcentajes sobre la caja de texto de reglas.json; pt = puntos. alto_max_pct: alto máximo de la foto como % de la caja de texto (una foto vertical se achica para caber; el texto nunca). sticker/cinta/parche/textura/taller_titulos: gemelos de marca y del taller (issue #17).",
+  "$comentario": "Geometría de los gemelos Typst de los componentes web (print/lib/componentes/). La leen print/lib/componentes/*.typ y scripts/print/export.ts (para el ancho colocado de cada foto → ppi efectivo). Porcentajes sobre la caja de texto de reglas.json; pt = puntos. alto_max_pct: alto máximo de la foto como % de la caja de texto (una foto vertical se achica para caber; el texto nunca). sticker/cinta/parche/textura/taller_titulos: gemelos de marca y del taller (issue #17). cinta_canela/sello_goma/titulo_rescate/collage_xerox: componentes nuevos del vol. 01 (issue #17, parte b); la web lee los mismos valores (puntos de la cinta, posiciones del collage).",
   "polaroid": {
     "ancho_pct": 78,
     "marco_pt": 9,
@@ -116,5 +116,121 @@
   "taller_titulos": {
     "sticker_title_factor": 0.6,
     "giro_grados": -2
+  },
+  "cinta_canela": {
+    "largo_px_default": 160,
+    "alto_pct": 22,
+    "giro_grados_max": 40,
+    "color": "#c89b5a",
+    "trama": "#a97f43",
+    "borde": "#8f6a35",
+    "trama_paso_pt": 3,
+    "puntos_pct": [
+      [
+        0,
+        40
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        8,
+        16
+      ],
+      [
+        12,
+        0
+      ],
+      [
+        97,
+        8
+      ],
+      [
+        100,
+        50
+      ],
+      [
+        96,
+        92
+      ],
+      [
+        92,
+        100
+      ],
+      [
+        88,
+        83
+      ],
+      [
+        4,
+        100
+      ],
+      [
+        1,
+        75
+      ]
+    ]
+  },
+  "sello_goma": {
+    "giro_grados_default": -8,
+    "giro_grados_max": 20,
+    "borde_ext_pt": 2.25,
+    "borde_int_pt": 0.75,
+    "separacion_pt": 3,
+    "colores": {
+      "rojo": "#c8102e",
+      "azul": "#1f4fbf",
+      "ink": "ink",
+      "accent": "accent"
+    },
+    "fallas_paso_pt": 5,
+    "fallas_punto_pt": 0.8
+  },
+  "titulo_rescate": {
+    "tamano_pt": 22,
+    "escala_min": 0.88,
+    "escala_max": 1.12,
+    "giro_grados_max": 7,
+    "inset_x_pt": 3,
+    "inset_y_pt": 1.5,
+    "estilos": 4,
+    "espacio_pt": 7,
+    "interlinea_pt": 6
+  },
+  "collage_xerox": {
+    "alto_pct": 42,
+    "marco_pt": 4,
+    "giros": [
+      -6,
+      4,
+      -3,
+      5
+    ],
+    "posiciones_pct": [
+      [
+        0,
+        0,
+        58
+      ],
+      [
+        40,
+        6,
+        56
+      ],
+      [
+        8,
+        38,
+        54
+      ],
+      [
+        44,
+        42,
+        52
+      ]
+    ],
+    "cinta_pt": 34,
+    "minimo": 2,
+    "maximo": 4
   }
 }

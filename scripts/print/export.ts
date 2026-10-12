@@ -15,6 +15,7 @@ import { listarVolumenesCompuestos } from './sources/piezas.ts';
 import type { Volumen, Pliego, Foto, Nodo } from './lib/tipos.ts';
 import { colorSchemes, taller as sitioTaller } from '../../src/config/site.ts';
 import * as taller from '../../src/data/taller.ts';
+import { letrasRescate } from '../../src/utils/rescate.ts';
 
 export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const reglas = JSON.parse(fs.readFileSync(path.join(RAIZ, 'print', 'reglas.json'), 'utf8'));
@@ -80,6 +81,7 @@ function anchoColocado(componente: string, props: Record<string, any>, foto: Fot
       return ajustado((CAJA - (cols - 1) * geo.gallery.separacion_pt) / cols, geo.gallery.alto_max_pct);
     }
     case 'BeforeAfter': return (CAJA - geo.before_after.separacion_pt) / 2;
+    case 'CollageXerox': return (CAJA * geo.collage_xerox.posiciones_pct[n][2]) / 100 - 2 * geo.collage_xerox.marco_pt;
     case 'OptimizedImage': return ajustado(Math.min(CAJA, Number(props.width ?? geo.mascota.ancho_pt_default) * geo.optimized_image.px_a_pt), geo.optimized_image.alto_max_pct);
     default: return CAJA;
   }
@@ -212,6 +214,19 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
             foto.usos.push({ pliego: n, componente: nodo.nombre, ancho_pt: anchoColocado(nodo.nombre, props, foto, 1) });
             props[k] = foto.id;
           }
+        }
+        // #17 (b): las letras del título rescate se calculan acá con la misma función que la web.
+        if (nodo.nombre === 'TituloRescate') props.letras = letrasRescate(String(props.texto ?? ''), props.semilla != null ? Number(props.semilla) : undefined);
+        if (nodo.nombre === 'CollageXerox' && Array.isArray(props.images)) {
+          const G = geo.collage_xerox;
+          if (props.images.length < G.minimo || props.images.length > G.maximo) throw new ErrorExport(`${fuente.archivo} pág. ${n}: <CollageXerox> lleva de ${G.minimo} a ${G.maximo} fotos (tiene ${props.images.length}).`);
+          const imgs = [] as any[];
+          for (const [i, im] of props.images.entries()) {
+            const foto = await cargarFoto(fotos, String(im.src), fuente.archivo, avisos, `${fuente.archivo} pág. ${n} <CollageXerox>`);
+            foto.usos.push({ pliego: n, componente: 'CollageXerox', ancho_pt: anchoColocado('CollageXerox', props, foto, i) });
+            imgs.push({ ...im, src: foto.id });
+          }
+          props.images = imgs;
         }
         if (nodo.nombre === 'Gallery' && Array.isArray(props.images)) {
           const imgs = [] as any[];

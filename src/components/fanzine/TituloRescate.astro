@@ -1,0 +1,86 @@
+---
+// Título "carta de rescate" (issue #17 parte b, vol. 01): cada letra es un
+// recorte con fondo, giro, fuente (Anton / Space Mono) y escala distintos,
+// generados en build con semilla determinista (src/utils/rescate.ts, la
+// misma función que usa el export → Typst): el mismo título se ve igual en
+// web y en papel. 0 JS, sin fuentes extra. Lector de pantalla: lee el
+// texto entero (aria-label); los recortes van aria-hidden.
+// Uso: <TituloRescate texto="Ruido de prueba" />
+//      <TituloRescate texto="Fierros y fuzz" semilla={7} etiqueta="h3" />
+import { letrasRescate } from '../../utils/rescate';
+
+interface Props {
+  texto: string;
+  /** Semilla del generador (default: hash del texto). */
+  semilla?: number;
+  /** Etiqueta HTML: h2 (default), h3 o p. */
+  etiqueta?: 'h2' | 'h3' | 'p';
+  class?: string;
+}
+const { texto, semilla, etiqueta = 'h2', class: clase } = Astro.props;
+const Tag = etiqueta;
+const letras = letrasRescate(texto, semilla);
+---
+
+<Tag class:list={['fz-rescate', clase]} aria-label={texto}>
+  {letras.map((l) =>
+    l.espacio ? (
+      <span class="fz-rescate__esp" aria-hidden="true"> </span>
+    ) : (
+      <span class:list={['fz-rescate__l', `fz-rescate__l--${l.estilo}`, `fz-rescate__l--${l.fuente}`]} style={`--r:${l.giro}deg;--s:${l.escala}`} aria-hidden="true">{l.c}</span>
+    ),
+  )}
+</Tag>
+
+<style>
+  .fz-rescate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15em 0.08em;
+    margin: 1.2rem 0 1rem;
+    font-size: clamp(1.6rem, 6vw, 2.6rem);
+    line-height: 1;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  .fz-rescate__esp {
+    width: 0.5em;
+  }
+  .fz-rescate__l {
+    display: inline-block;
+    padding: 0.08em 0.14em 0.02em;
+    transform: rotate(var(--r));
+    font-size: calc(1em * var(--s));
+    background: var(--paper);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+  }
+  .fz-rescate__l--anton {
+    font-family: 'Anton', var(--font-head);
+  }
+  .fz-rescate__l--mono {
+    font-family: var(--font-head);
+    font-weight: 700;
+  }
+  .fz-rescate__l--1 {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .fz-rescate__l--2 {
+    background: var(--accent);
+    color: var(--ink);
+  }
+  .fz-rescate__l--3 {
+    border-style: dashed;
+    color: var(--accent);
+    -webkit-text-stroke: 0.5px var(--ink);
+  }
+  @media print {
+    .fz-rescate__l {
+      box-shadow: none;
+    }
+  }
+</style>

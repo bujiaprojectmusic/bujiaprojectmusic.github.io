@@ -1,0 +1,20 @@
+$ pdffonts print/build/kit/jirafa-kit.pdf
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+QLTLNK+SpaceMono-Regular             CID TrueType      Identity-H       yes yes yes    312  0
+IKRLJK+SpaceMono-Bold                CID TrueType      Identity-H       yes yes yes    315  0
+QHRNKX+Anton-Regular                 CID TrueType      Identity-H       yes yes yes    318  0
+
+$ pdffonts print/build/kit/jirafa-kit-bn.pdf
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+QLTLNK+SpaceMono-Regular             CID TrueType      Identity-H       yes yes yes    288  0
+IKRLJK+SpaceMono-Bold                CID TrueType      Identity-H       yes yes yes    291  0
+QHRNKX+Anton-Regular                 CID TrueType      Identity-H       yes yes yes    294  0
+
+páginas: 40 componentes: 37
+gris bn: {"maxRG":0,"maxGB":0}
+  CintaCanela pág. 33 esquema rosa print/lib/componentes/punk.typ#cinta-canela
+  SelloGoma pág. 34 esquema xerox print/lib/componentes/punk.typ#sello-goma
+  TituloRescate pág. 35 esquema overol print/lib/componentes/punk.typ#titulo-rescate
+  CollageXerox pág. 36 esquema rosa print/lib/componentes/punk.typ#collage-xerox

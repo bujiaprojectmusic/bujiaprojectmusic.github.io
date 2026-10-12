@@ -1,0 +1,5 @@
+$ node scripts/print/build.mjs --fixture tests/print/fixtures/catalogo-propuesto.mdx   (PapelRoto sigue propuesto; CintaCanela ya es aprobado)
+✖ tests/print/fixtures/catalogo-propuesto.mdx:33: el componente <PapelRoto> (PapelRoto.astro) está "propuesto" en el catálogo, no aprobado. Ricardo lo aprueba en la puerta 2; hasta entonces no va en un volumen.
+
+$ node scripts/print/build.mjs --fixture tests/print/fixtures/componentes-vol-01.mdx
+exit: 0

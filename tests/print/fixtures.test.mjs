@@ -89,7 +89,7 @@ test('catálogo (#17): un componente que no está en el registro falla con archi
 test('catálogo (#17): un componente propuesto (no aprobado) falla con archivo, línea y nombre', () => {
   const r = build('catalogo-propuesto');
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /catalogo-propuesto\.mdx:33: el componente <CintaCanela> \(CintaCanela\.astro\) está "propuesto" en el catálogo, no aprobado/);
+  assert.match(r.stderr, /catalogo-propuesto\.mdx:33: el componente <PapelRoto> \(PapelRoto\.astro\) está "propuesto" en el catálogo, no aprobado/);
 });
 
 test('catálogo (#17): un componente aprobado sin gemelo Typst falla con archivo, línea y nombre', () => {
@@ -104,4 +104,21 @@ test('catálogo (#17): un componente sólo web se omite del impreso con aviso y 
   const res = resultado('catalogo-solo-web');
   assert.ok(res.avisos.some((a) => /catalogo-solo-web\.mdx:33: <PunkButton> es sólo web/.test(a)), res.avisos.join('\n'));
   assert.doesNotMatch(texto('catalogo-solo-web'), /Ver el fanzine/);
+});
+
+test('componentes del vol. 01 (#17 b): el fixture compila y el PDF trae el sello y el pie del collage', () => {
+  const r = build('componentes-vol-01');
+  assert.equal(r.status, 0, r.stderr);
+  // El título rescate son recortes sueltos (pdftotext mete espacios) y los
+  // sellos van girados (pdftotext revuelve sus letras): el sello se revisa en el JSON.
+  const t = texto('componentes-vol-01');
+  assert.match(t.replace(/\s+/g, ''), /RUIDODEPRUEBA/);
+  assert.match(t, /TABLAS, 2026\. FOTO: BUJÍA PROJECT MUSIC/);
+  const vol = JSON.parse(fs.readFileSync(path.join(RAIZ, 'print', 'build', 'fixtures', 'componentes-vol-01', 'volumen.json'), 'utf8'));
+  const sellos = vol.pliegos[2].nodos.filter((n) => n.t === 'componente' && n.nombre === 'SelloGoma').map((n) => n.props.texto);
+  assert.deepEqual(sellos, ['Hecho en Texcoco', 'Aprobado']);
+  const rescate = vol.pliegos[2].nodos.find((n) => n.t === 'componente' && n.nombre === 'TituloRescate');
+  assert.equal(rescate.props.letras.filter((l) => !l.espacio).length, 'Ruidodeprueba'.length);
+  const res = resultado('componentes-vol-01');
+  assert.equal(res.fotos.filter((f) => f.componente === 'CollageXerox').length, 3);
 });

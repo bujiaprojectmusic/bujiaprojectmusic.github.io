@@ -1,0 +1,64 @@
+---
+// Cinta canela (duct tape) con extremos rasgados (issue #17 parte b, vol. 01):
+// un <span> con clip-path polygon (los puntos viven en print/componentes.json,
+// los mismos que usa el gemelo Typst) y trama de tela por CSS. 0 JS, 0 imágenes.
+// Uso: <CintaCanela angulo={-5} largo={180} />
+//      <div style="position: relative"><CintaCanela pos="arriba" /> …</div>
+import geo from '../../../print/componentes.json';
+
+interface Props {
+  angulo?: number;
+  /** Largo en px (alto = 22 %). */
+  largo?: number;
+  /** Pegada al borde del contenedor (position: relative). */
+  pos?: 'arriba' | 'abajo' | 'izquierda' | 'derecha';
+  class?: string;
+}
+const G = geo.cinta_canela;
+const { angulo = -4, largo = G.largo_px_default, pos, class: clase } = Astro.props;
+const poligono = G.puntos_pct.map(([x, y]) => `${x}% ${y}%`).join(', ');
+---
+
+<span class:list={['fz-canela', pos && `fz-canela--${pos}`, clase]} style={`--fz-angulo:${angulo}deg;--fz-largo:${largo}px;--fz-poly:polygon(${poligono})`} aria-hidden="true" />
+
+<style>
+  .fz-canela {
+    display: inline-block;
+    width: var(--fz-largo);
+    height: calc(var(--fz-largo) * 0.22);
+    transform: rotate(var(--fz-angulo));
+    clip-path: var(--fz-poly);
+    background-color: #c89b5a;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 2px, rgba(0, 0, 0, 0.09) 2px 3px),
+      repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.07) 2px 3px);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .fz-canela--arriba,
+  .fz-canela--abajo,
+  .fz-canela--izquierda,
+  .fz-canela--derecha {
+    position: absolute;
+  }
+  .fz-canela--arriba {
+    top: calc(var(--fz-largo) * -0.09);
+    left: 50%;
+    transform: translateX(-50%) rotate(var(--fz-angulo));
+  }
+  .fz-canela--abajo {
+    bottom: calc(var(--fz-largo) * -0.09);
+    left: 50%;
+    transform: translateX(-50%) rotate(var(--fz-angulo));
+  }
+  .fz-canela--izquierda {
+    top: calc(var(--fz-largo) * -0.05);
+    left: calc(var(--fz-largo) * -0.3);
+    transform: rotate(calc(var(--fz-angulo) - 35deg));
+  }
+  .fz-canela--derecha {
+    top: calc(var(--fz-largo) * -0.05);
+    right: calc(var(--fz-largo) * -0.3);
+    transform: rotate(calc(var(--fz-angulo) + 35deg));
+  }
+</style>
