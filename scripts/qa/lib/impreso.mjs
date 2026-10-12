@@ -26,9 +26,12 @@ export function revisarImpreso({ impreso = 'print/build', reglas = 'print/reglas
     // Tamaño mínimo de letra: tamaños medidos en el PDF vs reglas.json.
     const chicos = vols.flatMap((v) => (v.tamanos ?? []).filter((t) => minimoPt != null && t.pt < minimoPt - 0.05).map((t) => ({ archivo: v.slug, mensaje: `${t.fuente} a ${t.pt} pt (${t.usos} usos) < mínimo ${minimoPt} pt` })));
     fila('Impreso: tamaño mínimo de letra', chicos.length ? 'error' : 'ok', vols.map((v) => `${v.slug}: mínimo medido ${Math.min(...(v.tamanos ?? []).map((t) => t.pt)).toFixed(1)} pt`).join(' · ') + (minimoPt != null ? ` (regla: ≥ ${minimoPt} pt)` : ''), chicos);
-    // Páginas: múltiplo de 4 y ≥ 16 (#13 permite más de 16).
-    const malPag = vols.filter((v) => v.paginas < 16 || v.paginas % 4 !== 0).map((v) => ({ archivo: v.slug, mensaje: `${v.paginas} páginas: tiene que ser múltiplo de 4 y ≥ 16` }));
-    fila('Impreso: páginas', malPag.length ? 'error' : 'ok', vols.map((v) => `${v.slug}: ${v.paginas}`).join(' · '), malPag);
+    // Páginas (reglas.json → paginas): múltiplo de `multiplo` y ≥ `minimo` es error;
+    // por debajo de `recomendado_min` sólo aviso. El total no tiene tope fijo (12, 16, 20, 24…).
+    const P = { multiplo: R?.paginas?.multiplo ?? 4, minimo: R?.paginas?.minimo ?? 4, recomendado_min: R?.paginas?.recomendado_min ?? 12 };
+    const malPag = vols.filter((v) => v.paginas < P.minimo || v.paginas % P.multiplo !== 0).map((v) => ({ archivo: v.slug, mensaje: `${v.paginas} páginas: tiene que ser múltiplo de ${P.multiplo} y ≥ ${P.minimo}` }));
+    const pocasPag = vols.filter((v) => !malPag.some((e) => e.archivo === v.slug) && v.paginas < P.recomendado_min).map((v) => ({ archivo: v.slug, mensaje: `${v.paginas} páginas: menos del mínimo recomendado (${P.recomendado_min})` }));
+    fila('Impreso: páginas', malPag.length ? 'error' : pocasPag.length ? 'aviso' : 'ok', vols.map((v) => `${v.slug}: ${v.paginas}`).join(' · ') + ` (regla: múltiplo de ${P.multiplo}, ≥ ${P.minimo}, recomendado ≥ ${P.recomendado_min})`, malPag, pocasPag);
     // ppi: aviso < 300, error < 150.
     const ppiErr = [];
     const ppiAv = [];
