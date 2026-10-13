@@ -3,8 +3,13 @@ name: Deploy a GitHub Pages
 on:
   push:
     branches: [main]
-  # En PRs sólo se corre el build (sin deploy) para ver que compila y que
-  # la caché de imágenes funciona antes de mergear.
+  # En PRs se corre el build completo (sin deploy) para ver que compila y
+  # pasa los chequeos antes de mergear. El artifact de Pages del PR se sube
+  # con el nombre github-pages-<árbol git>: al mergear, si main tiene el
+  # MISMO árbol (lo normal: el PR ya estaba al día con main), el job
+  # `reusar` lo encuentra y `deploy` publica ese artifact sin repetir los
+  # ~5 min de build + impreso. Sólo se vuelve a compilar si el árbol cambió
+  # (main avanzó entre el PR y el merge) o si el run del PR no terminó bien.
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -13,14 +18,57 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # Para buscar y bajar el artifact del run del PR (job reusar / deploy).
+  actions: read
 
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  build:
+  # ¿El árbol de este commit ya se construyó y verificó en un PR? Busca un
+  # artifact github-pages-<árbol> no vencido de un run que terminó en
+  # success. Si lo hay, build e impreso se saltan y deploy lo reusa.
+  reusar:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    outputs:
+      tree: ${{ steps.buscar.outputs.tree }}
+      run_id: ${{ steps.buscar.outputs.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Buscar un build ya verificado del mismo árbol
+        id: buscar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tree=$(git rev-parse 'HEAD^{tree}')
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          # Si la API falla, run_id queda vacío y se compila (nunca se bloquea el deploy).
+          run_id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=github-pages-$tree&per_page=20" \
+            --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .workflow_run.id // empty' || true)
+          if [ -n "$run_id" ]; then
+            conclusion=$(gh api "repos/${{ github.repository }}/actions/runs/$run_id" --jq '.conclusion // empty' || true)
+            if [ "$conclusion" != "success" ]; then
+              echo "::notice::Hay un artifact del árbol $tree en el run $run_id pero terminó en '$conclusion'; se compila de nuevo."
+              run_id=""
+            fi
+          fi
+          if [ -n "$run_id" ]; then
+            echo "::notice::Árbol $tree ya construido y verificado en el run $run_id: build e impreso se saltan y se publica ese artifact."
+          else
+            echo "::notice::No hay un build verificado del árbol $tree: se compila."
+          fi
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: reusar
+    # En PRs siempre; en main / manual sólo si no hay un build reusable.
+    if: ${{ !cancelled() && (github.event_name == 'pull_request' || needs.reusar.outputs.run_id == '') }}
+    runs-on: ubuntu-latest
+    outputs:
+      tree: ${{ steps.tree.outputs.tree }}
     steps:
       - uses: actions/checkout@v4
 
@@ -188,15 +236,25 @@ jobs:
             print/build/resumen.md
           if-no-files-found: error
 
+      # El artifact de Pages va al final, después de todos los chequeos: si
+      # existe es porque el build entero pasó. Nombre = github-pages-<árbol>,
+      # en PRs y en main, para que `reusar` lo encuentre al mergear.
+      - name: Árbol git de este build
+        id: tree
+        run: echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
         with:
           path: ./dist
+          name: github-pages-${{ steps.tree.outputs.tree }}
+          retention-days: 7
 
   # Hoja de prueba del impreso (issue #16): Typst fijado en print/TYPST_VERSION
   # con sha256 verificado, fuentes del repo, PDF verificados con poppler y
   # subidos como artifact `impreso-prueba`. Los PDF no se commitean.
   impreso:
+    needs: reusar
+    if: ${{ !cancelled() && (github.event_name == 'pull_request' || needs.reusar.outputs.run_id == '') }}
     runs-on: ubuntu-latest
     env:
       SOURCE_DATE_EPOCH: '0'
@@ -250,12 +308,37 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    needs: build
-    if: github.event_name != 'pull_request'
+    needs: [reusar, build]
+    # Publica el build de este run, o el del PR ya verificado (mismo árbol).
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && (needs.build.result == 'success' || (needs.build.result == 'skipped' && needs.reusar.outputs.run_id != '')) }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Reuso: el artifact de Pages vive en el run del PR; deploy-pages sólo
+      # ve los de este run, así que se baja (artifact.tar) y se vuelve a
+      # subir con el mismo nombre. Son segundos, contra ~5 min de build.
+      - name: Bajar el artifact de Pages del run del PR
+        if: needs.build.result == 'skipped'
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages-${{ needs.reusar.outputs.tree }}
+          run-id: ${{ needs.reusar.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: pages
+
+      - name: Subirlo a este run
+        if: needs.build.result == 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-pages-${{ needs.reusar.outputs.tree }}
+          path: pages/artifact.tar
+          retention-days: 1
+          if-no-files-found: error
+
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # El de este run (build) o el reusado (reusar); es el mismo árbol.
+          artifact_name: github-pages-${{ needs.build.outputs.tree || needs.reusar.outputs.tree }}

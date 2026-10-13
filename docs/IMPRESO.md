@@ -224,7 +224,9 @@ imprimible", en el papel que se va a usar.
 ## CI
 
 El job `impreso` de `.github/workflows/deploy.yml` corre en cada PR y en
-`main`: instala Typst con el script (caché por versión + sha256), instala
+`main` (en `main` se salta, igual que `build`, cuando el árbol ya se
+verificó en el PR y el deploy reusa ese artifact; ver README § Deploy):
+instala Typst con el script (caché por versión + sha256), instala
 `poppler-utils`, corre `print:check`, `print:prueba` y `print:verify`, y
 sube los cuatro PDF como artifact **`impreso-prueba`**. Si el sha256 del
 binario no coincide, el job falla antes de compilar.

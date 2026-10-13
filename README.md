@@ -349,7 +349,13 @@ tenías en Code Injection, portado a un archivo CSS normal.
 1. Creá el repo en GitHub y pusheá este proyecto a `main`.
 2. En **Settings → Pages**, poné "Source: GitHub Actions".
 3. El workflow `.github/workflows/deploy.yml` hace build y deploy solo con
-   cada push a `main`. `astro.config.mjs` ya calcula `site`/`base`
+   cada push a `main`. En los PRs corre el mismo build (sin deploy) y sube
+   el sitio como artifact `github-pages-<árbol git>`; al mergear, si `main`
+   queda con el mismo árbol (el PR estaba al día), el job `reusar` lo
+   encuentra, `build` e `impreso` se saltan y `deploy` publica ese artifact
+   en segundos en vez de repetir los ~5 min de build. Si `main` avanzó entre
+   el PR y el merge (otro árbol) o el run del PR no terminó en verde, se
+   compila de nuevo. `astro.config.mjs` ya calcula `site`/`base`
    automáticamente a partir de `GITHUB_REPOSITORY` — no hay que tocar nada
    a mano, funciona tanto si el repo es `usuario.github.io` (sitio en raíz)
    como si es un repo normal (`usuario/mi-fanzine`, sitio en `/mi-fanzine/`).
