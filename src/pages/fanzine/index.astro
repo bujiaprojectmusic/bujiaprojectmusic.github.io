@@ -1,56 +1,56 @@
 ---
-// Portada del fanzine: lista de volúmenes (y, si hubiera, otros posts de
-// la colección `posts` que no son volúmenes, que viven en /blog/<slug>).
-import { getCollection } from 'astro:content';
+// Portada del fanzine (issue #40): presentación editable
+// (src/content/pages/fanzine-indice.mdx) y los volúmenes como puesto de
+// revistas (PuestoRevistas), del más reciente al más antiguo. Si hubiera
+// otros posts de la colección `posts` que no son volúmenes, van al final
+// (viven en /blog/<slug>).
+import { getCollection, getEntry } from 'astro:content';
 import FanzineLayout from '../../layouts/FanzineLayout.astro';
-import OptimizedImage from '../../components/OptimizedImage.astro';
+import PuestoRevistas from '../../components/PuestoRevistas.astro';
 import { listarVolumenesPublicos } from '../../utils/volumenes';
 import { fanzine } from '../../config/site';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-// Volúmenes compuestos (src/content/volumenes/*.yml) y MDX (issue #13);
-// los de prueba (prueba: true) y los sin_listar no van en el archivo público.
-const volumes = await listarVolumenesPublicos();
+const pagina = await getEntry('pages', 'fanzine-indice');
+if (!pagina) throw new Error('Falta src/content/pages/fanzine-indice.mdx (texto de /fanzine, issue #40).');
+const { Content } = await pagina.render();
+const vacio = pagina.data.vacio ?? {
+  titulo: 'El primer número viene en camino',
+  texto: 'Todavía no hay volúmenes publicados.',
+  enlace: 'Colabora con el fanzine →',
+};
+// Volúmenes compuestos (src/content/volumenes/*.yml) y MDX (issue #13):
+// los de prueba, sin_listar y en borrador no van en el archivo público.
+// Más reciente primero: por número de volumen (el orden en que salen) y,
+// si empatan, por fecha.
+const volumes = (await listarVolumenesPublicos()).sort((a, b) => b.numero - a.numero || b.fecha.valueOf() - a.fecha.valueOf());
 const allPosts = await getCollection('posts', ({ data }) => !data.draft && !data.prueba);
 const others = allPosts
   .filter((p) => !p.data.fanzine)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' });
 ---
 
-<FanzineLayout title="Fanzine" description="La Jirafa Elektrika: el fanzine digital de Bujía Project Music.">
+<FanzineLayout title="Fanzine" description={pagina.data.description}>
   <div class="fz-index">
     <header class="fz-index__head">
-      <p class="fz-index__eyebrow">Fanzine</p>
-      <h1 class="fz-index__title">La Jirafa Elektrika</h1>
-      <p class="fz-index__sub">Se leen en esta página, con scroll. El cuadernillo impreso va en media carta, en múltiplos de 4 páginas.</p>
-      {/* Enlace a la página de envío de colaboraciones (issue #12) sólo cuando esté publicada. */}
-      {fanzine.colabora.publicada && (
-        <p class="fz-index__sub"><a href={`${base}${fanzine.colabora.ruta}`}>¿Quieres colaborar? Manda tu pieza por correo →</a></p>
-      )}
+      {pagina.data.tag && <p class="fz-index__eyebrow">{pagina.data.tag}</p>}
+      <h1 class="fz-index__title">{pagina.data.title}</h1>
+      {pagina.data.subtitle && <p class="fz-index__lema">{pagina.data.subtitle}</p>}
+      <div class="fz-index__intro">
+        <Content />
+        {/* Enlace directo al formulario de envío (issue #12) sólo cuando esté publicado. */}
+        {fanzine.colabora.publicada && (
+          <p><a href={`${base}${fanzine.colabora.ruta}`}>Manda tu pieza por correo →</a></p>
+        )}
+      </div>
     </header>
 
-    <ul class="fz-index__list">
-      {volumes.map((v) => (
-        <li>
-          <a href={`${base}/fanzine/${v.slug}`} class="fz-index__card">
-            <span class="fz-index__cover">
-              {v.cover ? (
-                <OptimizedImage src={v.cover} alt="" widths={[320, 480, 640]} sizes="(max-width: 600px) 40vw, 220px" print={false} />
-              ) : (
-                <span class="fz-index__cover-ph" aria-hidden="true">Vol. {v.numero}</span>
-              )}
-            </span>
-            <span class="fz-index__body">
-              <span class="fz-index__vol">Volumen {v.numero}</span>
-              <span class="fz-index__name">{v.titulo}</span>
-              <span class="fz-index__date">{fmt.format(v.fecha)}</span>
-              {v.descripcion && <span class="fz-index__desc">{v.descripcion}</span>}
-            </span>
-          </a>
-        </li>
-      ))}
-    </ul>
+    <section class="fz-index__puesto" aria-labelledby="fz-puesto-titulo">
+      <h2 id="fz-puesto-titulo" class="fz-index__rotulo">
+        En el puesto{volumes.length > 0 && <span class="fz-index__cuenta"> · {volumes.length} {volumes.length === 1 ? 'número' : 'números'}</span>}
+      </h2>
+      <PuestoRevistas volumenes={volumes} vacio={vacio} colabora={`${base}/fanzine/colabora`} base={base} />
+    </section>
 
     {others.length > 0 && (
       <section class="fz-index__others">
@@ -66,12 +66,13 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
 
   <style>
     .fz-index {
-      max-width: 900px;
+      max-width: 980px;
       margin: 0 auto;
       padding: 2rem 1rem 3rem;
     }
     .fz-index__head {
-      margin-bottom: 2rem;
+      max-width: 680px;
+      margin-bottom: 2.25rem;
     }
     .fz-index__eyebrow {
       font-family: var(--font-head);
@@ -79,10 +80,12 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
       text-transform: uppercase;
       letter-spacing: 0.15em;
       font-size: 0.75rem;
-      background: var(--accent);
+      background: #ff2f92;
+      color: #111;
       display: inline-block;
       padding: 0.25em 0.7em;
       margin: 0 0 0.6rem;
+      transform: rotate(-2deg);
     }
     .fz-index__title {
       font-family: 'Anton', var(--font-head);
@@ -90,90 +93,59 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
       text-transform: uppercase;
       font-size: clamp(2.4rem, 8vw, 4.5rem);
       line-height: 0.95;
-      margin: 0 0 0.5rem;
+      margin: 0 0 0.4rem;
     }
-    .fz-index__sub {
-      margin: 0;
-      opacity: 0.8;
-    }
-    .fz-index__list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 1.25rem;
-    }
-    .fz-index__card {
-      display: grid;
-      grid-template-columns: 160px 1fr;
-      gap: 1.25rem;
-      align-items: center;
-      text-decoration: none;
-      color: var(--ink);
-      background: #fff;
-      border: var(--border-w) solid var(--ink);
-      border-radius: var(--radius);
-      padding: 1rem;
-      transition: box-shadow 0.15s ease, transform 0.15s ease;
-    }
-    .fz-index__card:hover {
-      box-shadow: 6px 6px 0 var(--accent);
-      transform: translate(-3px, -3px);
-    }
-    .fz-index__cover {
-      display: block;
-      aspect-ratio: 11 / 17;
-      background: var(--ink);
-      color: var(--paper);
-      border: 3px solid var(--ink);
-      overflow: hidden;
-    }
-    .fz-index__cover :global(img) {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .fz-index__cover-ph {
-      display: flex;
-      align-items: flex-end;
-      height: 100%;
-      padding: 0.6rem;
-      box-sizing: border-box;
+    .fz-index__lema {
+      display: inline-block;
       font-family: var(--font-head);
       font-weight: 700;
       text-transform: uppercase;
       font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      background: #ffe600;
+      color: #111;
+      padding: 0.2em 0.6em;
+      margin: 0 0 1.1rem;
     }
-    .fz-index__body {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
+    .fz-index__intro :global(p) {
+      margin: 0 0 0.85rem;
+      line-height: 1.6;
     }
-    .fz-index__vol {
+    .fz-index__intro :global(a) {
+      color: inherit;
+      font-weight: 700;
+      text-decoration-color: #ff2f92;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 3px;
+    }
+    /* Pegboard del taller detrás de la repisa. */
+    .fz-index__puesto {
+      margin: 0 -1rem;
+      padding: 1.5rem 1rem 2.5rem;
+      background-color: #ece7da;
+      background-image: radial-gradient(circle, rgb(0 0 0 / 0.18) 1.6px, transparent 2.2px);
+      background-size: 18px 18px;
+      border-top: 3px solid var(--ink);
+      border-bottom: 3px solid var(--ink);
+      /* Las copias encimadas y los stickers asoman: se recortan acá y no
+         generan scroll horizontal en móvil. */
+      overflow-x: clip;
+    }
+    .fz-index__rotulo {
+      display: inline-block;
       font-family: var(--font-head);
       font-weight: 700;
-      font-size: 0.75rem;
       text-transform: uppercase;
-      background: var(--accent);
-      padding: 0.15em 0.6em;
-      align-self: flex-start;
+      letter-spacing: 0.12em;
+      font-size: 0.8rem;
+      background: #111;
+      color: #fff;
+      padding: 0.3em 0.75em;
+      margin: 0;
+      transform: rotate(-1.5deg);
     }
-    .fz-index__name {
-      font-family: var(--font-head);
-      font-weight: 700;
-      font-size: 1.4rem;
-      text-transform: uppercase;
-      line-height: 1.1;
-    }
-    .fz-index__date {
-      font-family: var(--font-head);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      opacity: 0.7;
-    }
-    .fz-index__desc {
-      font-size: 0.9rem;
-      line-height: 1.5;
+    .fz-index__cuenta {
+      color: #ffe600;
     }
     .fz-index__others {
       margin-top: 3rem;
@@ -183,10 +155,11 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
       text-transform: uppercase;
       font-size: 1rem;
     }
-    @media (max-width: 520px) {
-      .fz-index__card {
-        grid-template-columns: 100px 1fr;
-        gap: 0.9rem;
+    @media (min-width: 900px) {
+      .fz-index__puesto {
+        margin: 0;
+        padding: 1.75rem 1.75rem 3rem;
+        border: 3px solid var(--ink);
       }
     }
   </style>

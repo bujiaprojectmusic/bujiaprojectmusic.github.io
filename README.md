@@ -67,6 +67,14 @@ Desde el #13 el contenido del fanzine se separa en **piezas** y
   estilo="galeria" hasta={2} />` pone varias fotos en rejilla (dos por página);
   ver `COMPONENTES_MDX.md` § 2c para `Foto` y `FotoCita`.
 
+**Índice `/fanzine`** (issue #40): un puesto de revistas con las portadas
+de los volúmenes públicos (`portada.imagen` del yml, o `cover` del MDX), del
+más reciente al más antiguo, cada una con su sticker "Vol. XX" y enlazada a
+su volumen (`src/components/PuestoRevistas.astro`). Los de `prueba`,
+`sin_listar` o `draft` no salen. El texto de presentación, el lema y el
+mensaje del estado vacío (cuando no hay ningún volumen público) se editan en
+`src/content/pages/fanzine-indice.mdx`, sin tocar la página.
+
 **Agregar una pieza**: copiá `src/content/piezas/_plantilla.mdx` a
 `src/content/piezas/<AAAA-MM-slug>/index.mdx`, llená el frontmatter, poné
 las fotos en `src/assets/piezas/<AAAA-MM-slug>/`, escribí el cuerpo en
