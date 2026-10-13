@@ -223,13 +223,23 @@ imprimible", en el papel que se va a usar.
 
 ## CI
 
-El job `impreso` de `.github/workflows/deploy.yml` corre en cada PR y en
-`main` (en `main` se salta, igual que `build`, cuando el árbol ya se
-verificó en el PR y el deploy reusa ese artifact; ver README § Deploy):
+El job `impreso` de `.github/workflows/deploy.yml` corre en los PR que
+tocan el motor del impreso (`print/`, `scripts/print/`, `tests/print/`, el
+registro de componentes y lo que importa el export) y en `main` cuando no
+hay un build reusable del PR (ver README § Deploy):
 instala Typst con el script (caché por versión + sha256), instala
 `poppler-utils`, corre `print:check`, `print:prueba` y `print:verify`, y
 sube los cuatro PDF como artifact **`impreso-prueba`**. Si el sha256 del
 binario no coincide, el job falla antes de compilar.
+
+**Caché por volumen.** `npm run print` y `npm run print:kit` sólo compilan
+lo que cambió: la huella de cada volumen (y del kit) es su `volumen.json`
+recién exportado, los archivos que nombra (fotos master, QR, SVG de marca) y
+el motor (`print/` salvo `build/` y `cache/`, `scripts/print/`,
+`package-lock.json`). Si la huella está en `print/cache/<slug>/`, se
+restauran los PDF, las miniaturas y la entrada del manifest con los
+chequeos que ya pasaron; si no, se compila y se guarda. En CI la carpeta se
+guarda con `actions/cache`. `--sin-cache` fuerza compilar todo.
 
 ## El volumen en PDF (motor Typst, issue #9)
 

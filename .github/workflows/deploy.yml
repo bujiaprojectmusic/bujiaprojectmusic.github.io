@@ -3,6 +3,10 @@ name: Deploy a GitHub Pages
 on:
   push:
     branches: [main]
+    # Cambios sólo de documentación que ningún chequeo lee: no corre nada.
+    paths-ignore:
+      - 'docs/evidencia/**'
+      - 'README.md'
   # En PRs se corre el build completo (sin deploy) para ver que compila y
   # pasa los chequeos antes de mergear. El artifact de Pages del PR se sube
   # con el nombre github-pages-<árbol git>: al mergear, si main tiene el
@@ -10,8 +14,20 @@ on:
   # `reusar` lo encuentra y `deploy` publica ese artifact sin repetir los
   # ~5 min de build + impreso. Sólo se vuelve a compilar si el árbol cambió
   # (main avanzó entre el PR y el merge) o si el run del PR no terminó bien.
+  #
+  # Cada PR verifica sólo lo que cambió (job `cambios`) y `main` sólo publica:
+  #   - PDF de los volúmenes y kit: caché por huella (scripts/print/cache.mjs);
+  #     se compila sólo el volumen que cambió (todos si cambió el motor).
+  #   - Tests de fixtures, hoja de prueba y doble compilación: sólo si el PR
+  #     toca el motor del impreso.
+  #   - Presupuesto de datos y tests de fachadas: sólo si el PR toca la web.
+  #   - Build de Astro, QA y tests de contenido: siempre (son los que publican
+  #     y atrapan errores reales).
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/evidencia/**'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:
@@ -62,13 +78,47 @@ jobs:
           fi
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
 
+  # PR: ¿qué tocó? Clasifica sus archivos con la API (sin clonar).
+  #   motor = el impreso y lo que importa su export: print/, scripts/print/,
+  #           tests/print/, el registro de componentes, src/content/schemas.ts,
+  #           src/utils/, src/config/, src/data/, package*.json,
+  #           docs/IMPRESO.md y COMPONENTES_MDX.md (los leen print:check y
+  #           los tests del registro).
+  #   web   = cualquier archivo fuera de print/, scripts/print/, tests/print/ y docs/.
+  # Si la API falla, todo cuenta como cambiado (se verifica de más, nunca de menos).
+  cambios:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      motor: ${{ steps.clasificar.outputs.motor }}
+      web: ${{ steps.clasificar.outputs.web }}
+    steps:
+      - name: Clasificar los archivos del PR
+        id: clasificar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! archivos=$(gh api --paginate "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename') || [ -z "$archivos" ]; then
+            echo "::warning::No pude leer los archivos del PR: se verifica todo."
+            echo "motor=true" >> "$GITHUB_OUTPUT"; echo "web=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          motor=false; web=false
+          if echo "$archivos" | grep -qE '^(print/|scripts/print/|tests/print/|src/components/fanzine/registro\.|src/content/schemas\.ts$|src/utils/|src/config/|src/data/|package(-lock)?\.json$|docs/IMPRESO\.md$|COMPONENTES_MDX\.md$)'; then motor=true; fi
+          if echo "$archivos" | grep -qvE '^(print/|scripts/print/|tests/print/|docs/)'; then web=true; fi
+          echo "motor=$motor" >> "$GITHUB_OUTPUT"; echo "web=$web" >> "$GITHUB_OUTPUT"
+          echo "::notice::$(echo "$archivos" | wc -l) archivo(s) en el PR · motor del impreso: $motor · web: $web"
+
   build:
-    needs: reusar
+    needs: [reusar, cambios]
     # En PRs siempre; en main / manual sólo si no hay un build reusable.
     if: ${{ !cancelled() && (github.event_name == 'pull_request' || needs.reusar.outputs.run_id == '') }}
     runs-on: ubuntu-latest
     outputs:
       tree: ${{ steps.tree.outputs.tree }}
+    # Fuera de un PR (main, manual) `cambios` no corre y todo cuenta como cambiado.
+    env:
+      MOTOR: ${{ needs.cambios.outputs.motor != 'false' }}
+      WEB: ${{ needs.cambios.outputs.web != 'false' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -127,8 +177,20 @@ jobs:
           restore-keys: |
             impreso-img-${{ runner.os }}-
 
+      # Caché de los PDF por volumen y del kit (scripts/print/cache.mjs):
+      # se restaura la más reciente (la del PR o la de main) y build.mjs /
+      # build-kit.mjs comparan huellas: sólo compilan lo que cambió.
+      - name: Caché de los PDF por volumen y del kit (restaurar)
+        uses: actions/cache/restore@v4
+        with:
+          path: print/cache
+          key: impreso-pdf-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            impreso-pdf-${{ runner.os }}-
+
+      # --dos-veces (compilar dos veces y comparar sha256) sólo si cambió el motor.
       - name: Generar y verificar los PDF del fanzine (Typst)
-        run: npm run print -- --dos-veces
+        run: npm run print -- ${{ env.MOTOR == 'true' && '--dos-veces' || '' }}
 
       - name: Resumen del impreso
         run: cat print/build/resumen.md >> "$GITHUB_STEP_SUMMARY"
@@ -144,7 +206,19 @@ jobs:
       - name: Presupuesto por componente (npm run check:componentes)
         run: npm run check:componentes
 
+      - name: Llave de la caché del impreso (huellas vigentes)
+        id: llave-impreso
+        run: echo "llave=$(cd print/cache && find . -mindepth 2 -maxdepth 2 -type d | sort | sha256sum | cut -c1-32)" >> "$GITHUB_OUTPUT"
+
+      # Si la llave ya existe (nada cambió) sólo avisa, no falla.
+      - name: Caché de los PDF por volumen y del kit (guardar)
+        uses: actions/cache/save@v4
+        with:
+          path: print/cache
+          key: impreso-pdf-${{ runner.os }}-${{ steps.llave-impreso.outputs.llave }}
+
       - name: Tests del motor de impresión (fixtures)
+        if: env.MOTOR == 'true'
         run: npm run print:test
 
       - name: Tests de esquemas y composición de volúmenes (#13)
@@ -181,12 +255,14 @@ jobs:
           fi
 
       - name: Presupuesto de datos (budget.json)
+        if: env.WEB == 'true'
         run: npm run check:budget -- --json budget-reporte.json
 
       # Fachadas de video y playlist (issue #17): 0 peticiones a YouTube /
       # Spotify / Bandcamp antes del clic, iframe después, enlace sin JS,
       # script ≤ 1 KB gzip y ausente en páginas sin video.
       - name: Tests de las fachadas (npm run test:web)
+        if: env.WEB == 'true'
         run: npm run test:web
 
       - uses: actions/upload-artifact@v4
@@ -243,6 +319,15 @@ jobs:
         id: tree
         run: echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
 
+      # PR: lo que quedó en print/cache viaja a main al mergear (job sembrar-cache).
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: impreso-cache-${{ steps.tree.outputs.tree }}
+          path: print/cache
+          retention-days: 7
+          if-no-files-found: ignore
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
@@ -252,9 +337,10 @@ jobs:
   # Hoja de prueba del impreso (issue #16): Typst fijado en print/TYPST_VERSION
   # con sha256 verificado, fuentes del repo, PDF verificados con poppler y
   # subidos como artifact `impreso-prueba`. Los PDF no se commitean.
+  # Sólo si el PR toca el motor del impreso (o en main sin build reusable).
   impreso:
-    needs: reusar
-    if: ${{ !cancelled() && (github.event_name == 'pull_request' || needs.reusar.outputs.run_id == '') }}
+    needs: [reusar, cambios]
+    if: ${{ !cancelled() && ((github.event_name == 'pull_request' && needs.cambios.outputs.motor != 'false') || (github.event_name != 'pull_request' && needs.reusar.outputs.run_id == '')) }}
     runs-on: ubuntu-latest
     env:
       SOURCE_DATE_EPOCH: '0'
@@ -306,6 +392,36 @@ jobs:
             print/build/jirafa-prueba-impresion-bn.pdf
             print/build/jirafa-prueba-doble-cara.pdf
           if-no-files-found: error
+
+  # Al mergear con reuso, main no compila y su caché quedaría vieja (un PR
+  # sólo ve su propia caché y la de main). Este job baja la print/cache que
+  # dejó el run del PR y la guarda en la caché de main, para que el próximo
+  # PR no recompile volúmenes que no cambiaron. No bloquea el deploy.
+  sembrar-cache:
+    needs: reusar
+    if: ${{ github.event_name != 'pull_request' && needs.reusar.outputs.run_id != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bajar la caché del impreso del run del PR
+        id: bajar
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: impreso-cache-${{ needs.reusar.outputs.tree }}
+          run-id: ${{ needs.reusar.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: print/cache
+
+      - name: Llave de la caché del impreso
+        id: llave
+        if: steps.bajar.outcome == 'success'
+        run: echo "llave=$(cd print/cache && find . -mindepth 2 -maxdepth 2 -type d | sort | sha256sum | cut -c1-32)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/save@v4
+        if: steps.bajar.outcome == 'success'
+        with:
+          path: print/cache
+          key: impreso-pdf-${{ runner.os }}-${{ steps.llave.outputs.llave }}
 
   deploy:
     needs: [reusar, build]

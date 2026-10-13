@@ -6,6 +6,8 @@ node_modules/
 .DS_Store
 # Caché y salidas del impreso (Typst): se generan en CI, no se commitean
 print/build/
+# Caché de los PDF por volumen (scripts/print/cache.mjs); en CI la guarda actions/cache.
+print/cache/
 # Reporte del presupuesto de datos (npm run check:budget en CI)
 budget-reporte.json
 # Informe del QA del fanzine (npm run qa:fanzine; en CI es artifact)

@@ -363,7 +363,22 @@ tenías en Code Injection, portado a un archivo CSS normal.
    encuentra, `build` e `impreso` se saltan y `deploy` publica ese artifact
    en segundos en vez de repetir los ~5 min de build. Si `main` avanzó entre
    el PR y el merge (otro árbol) o el run del PR no terminó en verde, se
-   compila de nuevo. `astro.config.mjs` ya calcula `site`/`base`
+   compila de nuevo.
+4. Cada PR verifica sólo lo que cambió (job `cambios`):
+   - **PDF de los volúmenes y kit**: caché por huella
+     (`scripts/print/cache.mjs`). La huella de cada volumen es su
+     `volumen.json` exportado más los archivos que nombra (fotos, QR, SVG) y
+     el motor del impreso. Sólo se compila el volumen que cambió; los demás
+     salen de la caché con los chequeos que ya pasaron. Si cambia el motor
+     (Typst, reglas), se compilan todos. Local: `npm run print -- --sin-cache`
+     fuerza compilar todo.
+   - **Tests de fixtures, hoja de prueba y doble compilación**: sólo si el
+     PR toca el motor del impreso.
+   - **Presupuesto de datos y tests de fachadas**: sólo si el PR toca la web.
+   - **Build de Astro, QA y tests de contenido**: siempre.
+   - Cambios sólo en `README.md` o `docs/evidencia/` no corren el workflow.
+   Al mergear con reuso, el job `sembrar-cache` lleva la caché del PR a la de
+   `main`, para que el siguiente PR tampoco recompile lo que no cambió. `astro.config.mjs` ya calcula `site`/`base`
    automáticamente a partir de `GITHUB_REPOSITORY` — no hay que tocar nada
    a mano, funciona tanto si el repo es `usuario.github.io` (sitio en raíz)
    como si es un repo normal (`usuario/mi-fanzine`, sitio en `/mi-fanzine/`).
