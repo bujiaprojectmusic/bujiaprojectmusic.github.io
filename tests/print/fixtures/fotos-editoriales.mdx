@@ -1,0 +1,102 @@
+---
+title: "fotos editoriales"
+volume: 90
+date: 2026-10-08
+fanzine: true
+prueba: true
+colorScheme: acido
+author: Fixture
+---
+
+import Pliego from '../../../src/components/fanzine/Pliego.astro';
+import Portada from '../../../src/components/Portada.astro';
+import Indice from '../../../src/components/Indice.astro';
+import SectionTitle from '../../../src/components/SectionTitle.astro';
+import Contraportada from '../../../src/components/Contraportada.astro';
+import Note from '../../../src/components/content/Note.astro';
+import ImageFull from '../../../src/components/content/ImageFull.astro';
+import VideoPoster from '../../../src/components/content/VideoPoster.astro';
+import VideoOldTV from '../../../src/components/content/VideoOldTV.astro';
+import Foto from '../../../src/components/fanzine/Foto.astro';
+import FotoCita from '../../../src/components/fanzine/FotoCita.astro';
+
+{/* Fixture de tests/print (fotos editoriales): <FotoCita> a sangre (foto grande), <FotoCita> con margen (foto chica de 200 px) y dos <Foto ancho="mitad"> en pareja. Texto de relleno marcado TODO. */}
+
+<Pliego n={1} tipo="portada">
+  <Portada volume={90} title="fotos editoriales" subtitle="Fixture de prueba" />
+</Pliego>
+<Pliego n={2} tipo="indice">
+  <Indice items={[{ page: "03", title: "Pieza de prueba" }]} />
+</Pliego>
+<Pliego n={3} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 3</SectionTitle>
+
+  TODO texto de relleno del fixture, antes de las fotos.
+
+  <Foto foto="/fanzine/vol-00/capas-pegadas.jpeg" alt="Capas pegadas" pie="Capas pegadas, esperando la prensa" ancho="mitad" />
+  <Foto foto="/fanzine/vol-00/tablas-cortadas.jpeg" alt="Tablas cortadas" pie="Tablas cortadas" ancho="mitad" />
+
+  TODO texto de relleno del fixture, después de las fotos.
+</Pliego>
+<Pliego n={4} scheme="acido">
+  <FotoCita foto="/fanzine/vol-00/skate-001.jpeg" cita="Una tabla vieja vuelve a sonar." autor="Fixture" alt="Patineta vieja" pie="Skate 001. Foto: Bujía Project Music" />
+</Pliego>
+<Pliego n={5} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 5</SectionTitle>
+
+  <FotoCita foto="./foto-chica.png" cita="Foto chica con margen." alt="Foto chica de 200 px" pie="200 px: no da para sangre" />
+</Pliego>
+<Pliego n={6} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 6</SectionTitle>
+
+  TODO texto de relleno del fixture.
+
+  <Foto foto="/fanzine/vol-00/mesa-trabajo.jpeg" alt="Mesa de trabajo" pie="Mesa de trabajo. Foto: Bujía Project Music" ancho="columna" />
+
+  TODO texto de relleno del fixture, después de la foto.
+</Pliego>
+<Pliego n={7} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 7</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={8} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 8</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={9} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 9</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={10} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 10</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={11} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 11</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={12} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 12</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={13} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 13</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={14} scheme="acido">
+  <SectionTitle scheme="acido">Pieza 14</SectionTitle>
+
+  TODO texto de relleno del fixture.
+</Pliego>
+<Pliego n={15} tipo="fin" />
+
+<Pliego n={16} tipo="contraportada">
+  <Contraportada texto="Fixture — Texcoco, MX" />
+</Pliego>

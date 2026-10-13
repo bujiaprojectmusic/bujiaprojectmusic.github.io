@@ -1,0 +1,144 @@
+/* Estilos de los componentes que se usan DENTRO de una pieza (src/content/piezas/**):
+   <Foto>, <FotoCita> y la línea de crédito de <Pagina>. Van en un .css aparte
+   (y no en el <style> de cada .astro) porque ComponerPiezas.astro pinta las
+   piezas con Astro.slots.render en su frontmatter y ahí Astro no propaga los
+   estilos de los componentes del MDX al <head>; este archivo lo importan
+   ComponerPiezas.astro (volúmenes) y los propios componentes (kit). Clases
+   con prefijo fz-, sin scoping. */
+
+/* ── <Foto foto ancho> : foto intercalada entre párrafos ───────────────── */
+.fz-foto {
+  margin: 1.5rem 0;
+}
+.fz-foto img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+}
+.fz-foto figcaption {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.75;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+.fz-foto--columna {
+  width: 66%;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Dos "mitad" seguidas quedan lado a lado (inline-block: no hay que
+   envolverlas en nada en el MDX). */
+.fz-foto--mitad {
+  display: inline-block;
+  vertical-align: top;
+  width: calc(50% - 0.5rem);
+  margin: 1rem 0;
+}
+.fz-foto--mitad + .fz-foto--mitad {
+  margin-left: 1rem;
+}
+@media (max-width: 600px) {
+  .fz-foto--columna,
+  .fz-foto--mitad {
+    display: block;
+    width: 100%;
+  }
+  .fz-foto--mitad + .fz-foto--mitad {
+    margin-left: 0;
+  }
+}
+
+/* ── <FotoCita> : foto a todo el ancho con la cita encima ───────────────── */
+/* Rompe el padding de la columna del volumen (--fz-col-pad, ver Volumen.astro). */
+.fz-fotocita {
+  margin: 1.5rem calc(-1 * var(--fz-col-pad, 1.25rem));
+}
+.fz-fotocita__marco {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--paper);
+}
+.fz-fotocita__marco > picture,
+.fz-fotocita__marco > img {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+.fz-fotocita__marco img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Degradado: abajo (donde va la cita) la foto se oscurece con el ink del esquema. */
+.fz-fotocita__cita {
+  grid-area: 1 / 1;
+  align-self: end;
+  margin: 0;
+  padding: 4rem 1.25rem 1.25rem;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0) 0%, var(--ink) 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--ink) 0%, transparent) 0%, color-mix(in srgb, var(--ink) 85%, transparent) 100%);
+}
+.fz-fotocita__cita p {
+  font-family: 'Anton', var(--font-head);
+  font-size: clamp(1.6rem, 5.5vw, 3rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  margin: 0;
+  text-align: left;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 0.55);
+}
+.fz-fotocita__comilla {
+  display: block;
+  color: var(--accent);
+  -webkit-text-stroke: 1px var(--ink);
+  font-size: 1.2em;
+  line-height: 0.6;
+  margin-bottom: 0.15em;
+}
+.fz-fotocita__autor {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  margin-top: 0.6rem;
+}
+.fz-fotocita__pie {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.75;
+  margin: 0.5rem var(--fz-col-pad, 1.25rem) 0;
+  text-align: left;
+}
+@media (min-width: 900px) {
+  .fz-fotocita__marco {
+    border-radius: var(--radius);
+    border: var(--border-w) solid var(--ink);
+  }
+}
+
+/* ── <Pagina> : línea de crédito de la última página de la pieza ────────── */
+.fz-credito {
+  font-family: var(--font-head);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  border-top: 2px solid var(--ink);
+  padding-top: 0.4rem;
+  margin: 1.2rem 0 0;
+}
+.fz-credito__bio {
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  opacity: 0.8;
+}

@@ -13,6 +13,10 @@ import DatosTaller from './DatosTaller.astro';
 import { CREDITO_MASCOTA } from '../Contraportada.astro';
 import { setPiezaActual } from '../../utils/piezaActual';
 import type { Composicion } from '../../utils/componer';
+// Estilos de <Foto>, <FotoCita> y el crédito de <Pagina>: Astro.slots.render no
+// propaga los <style> de los componentes del MDX al <head>, así que van en un
+// .css que importa este componente (ver src/styles/fotos-pieza.css).
+import '../../styles/fotos-pieza.css';
 
 interface PiezaRender {
   Content: any;

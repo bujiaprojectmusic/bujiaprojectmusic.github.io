@@ -1,7 +1,8 @@
 // Tests del motor de impresión (issue #9) con los fixtures de
 // tests/print/fixtures/: desborde, tamaño mínimo, relleno a múltiplo de 4,
 // volumen que no cierra, multimedia qr/omitir, foto con ppi bajo y
-// componente fuera del catálogo / propuesto / sin gemelo / sólo web (#17).
+// componente fuera del catálogo / propuesto / sin gemelo / sólo web (#17) y
+// fotos editoriales (<Foto foto ancho>, <FotoCita> a sangre / con margen).
 // Corre: npm run print:test (node --test).
 // Necesita Typst (npm run print:install) y poppler.
 import { test } from 'node:test';
@@ -121,4 +122,39 @@ test('componentes del vol. 01 (#17 b): el fixture compila y el PDF trae el sello
   assert.equal(rescate.props.letras.filter((l) => !l.espacio).length, 'Ruidodeprueba'.length);
   const res = resultado('componentes-vol-01');
   assert.equal(res.fotos.filter((f) => f.componente === 'CollageXerox').length, 3);
+});
+
+test('fotos editoriales: <FotoCita> a sangre con foto grande, con margen con foto chica, y dos <Foto ancho="mitad"> en pareja', () => {
+  const r = build('fotos-editoriales');
+  assert.equal(r.status, 0, r.stderr);
+  const vol = JSON.parse(fs.readFileSync(path.join(RAIZ, 'print', 'build', 'fixtures', 'fotos-editoriales', 'volumen.json'), 'utf8'));
+  // Pág. 4: la foto de 3024×4032 da ≥ 150 ppi a sangre → modo sangre y la página la toma como bleed.
+  const p4 = vol.pliegos[3];
+  const citaSangre = p4.nodos.find((n) => n.t === 'componente' && n.nombre === 'FotoCita');
+  assert.equal(citaSangre.props.modo, 'sangre');
+  assert.equal(p4.bleed, citaSangre.props.src);
+  // Pág. 5: 200 px no dan para sangre → modo marco, al ancho que aguanta (200/150 in = 96 pt), con aviso y sin error de ppi.
+  const citaMarco = vol.pliegos[4].nodos.find((n) => n.t === 'componente' && n.nombre === 'FotoCita');
+  assert.equal(citaMarco.props.modo, 'marco');
+  assert.equal(Math.round(citaMarco.props.ancho_pt), 96);
+  assert.equal(vol.pliegos[4].bleed, undefined);
+  const res = resultado('fotos-editoriales');
+  assert.ok(res.avisos.some((a) => /<FotoCita foto="\.\/foto-chica\.png"> queda a \d+ ppi a sangre/.test(a)), res.avisos.join('\n'));
+  assert.ok(!res.fotos.some((f) => f.estado === 'ERROR'), JSON.stringify(res.fotos));
+  // Pág. 3: las fotos quedan en el orden del MDX, entre los párrafos (título, párrafo, foto, foto, párrafo).
+  const p3 = vol.pliegos[2].nodos.filter((n) => n.t === 'componente' || n.t === 'parrafo').map((n) => n.nombre ?? n.t);
+  assert.deepEqual(p3, ['SectionTitle', 'parrafo', 'Foto', 'Foto', 'parrafo']);
+  // Las dos "mitad" miden media caja menos la separación; la "columna" de la pág. 6, dos tercios (o menos si es vertical).
+  const mitad = res.fotos.filter((f) => f.componente === 'Foto' && f.pliego === 3);
+  assert.equal(mitad.length, 2);
+  for (const f of mitad) assert.ok(Math.abs(f.ancho_pt - (315 - 8) / 2) <= 1, JSON.stringify(f));
+  const columna = res.fotos.find((f) => f.componente === 'Foto' && f.pliego === 6);
+  assert.ok(columna && columna.ancho_pt <= 315 * 0.66 + 1, JSON.stringify(columna));
+  // El PDF trae la cita (en mayúsculas), el autor y los pies de las fotos.
+  const t = texto('fotos-editoriales').replace(/\s+/g, ' ');
+  assert.match(t, /UNA TABLA VIEJA VUELVE A SONAR\./);
+  assert.match(t, /— Fixture/);
+  assert.match(t, /Capas pegadas/);
+  assert.match(t, /Tablas cortadas/);
+  assert.match(t, /FOTO CHICA CON MARGEN\./);
 });

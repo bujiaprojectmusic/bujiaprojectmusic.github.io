@@ -99,3 +99,76 @@
   let w = calc.min(caja, float(p.at("width", default: geo.mascota.ancho_pt_default)) * geo.optimized_image.px_a_pt * 1pt)
   block(width: 100%, breakable: false, align(center, imagen(ctx, p.src, width: w, alto-max-pct: geo.optimized_image.alto_max_pct)))
 }
+
+// ── Fotos editoriales de una pieza ───────────────────────────────────────
+/// <Foto foto ancho="completo|columna|mitad" />: foto entre los párrafos.
+/// completo = caja entera, columna = 66 %, mitad = media caja (dos seguidas
+/// van en pareja: render.typ llama fotos-mitad). Pie de 7.5 pt (reglas.json).
+#let foto(ctx, p, hijos) = {
+  let G = geo.foto
+  let ancho = p.at("ancho", default: "completo")
+  let wmax = if ancho == "columna" { caja * G.columna_pct / 100 } else if ancho == "mitad" { (caja - pt(G.mitad_separacion_pt)) / 2 } else { caja }
+  let w = ancho-ajustado(foto-de(ctx, p.src), wmax, G.alto_max_pct)
+  block(width: 100%, breakable: false, above: 8pt, below: 8pt, align(if ancho == "mitad" { left } else { center }, box(width: w, {
+    imagen(ctx, p.src, width: 100%)
+    pie-foto(ctx, p.at("caption", default: none), align-: left)
+  })))
+}
+
+/// Dos <Foto ancho="mitad"> seguidas, una al lado de la otra.
+#let fotos-mitad(ctx, a, b) = {
+  let G = geo.foto
+  let w = (caja - pt(G.mitad_separacion_pt)) / 2
+  let celda(p) = {
+    let wi = ancho-ajustado(foto-de(ctx, p.src), w, G.alto_max_pct)
+    box(width: wi, { imagen(ctx, p.src, width: 100%); pie-foto(ctx, p.at("caption", default: none), align-: left) })
+  }
+  block(width: 100%, breakable: false, above: 8pt, below: 8pt,
+    grid(columns: (1fr, 1fr), column-gutter: pt(G.mitad_separacion_pt), align: top, celda(a), celda(b)))
+}
+
+/// <FotoCita foto cita autor alt pie />: cita grande sobre la foto.
+/// modo "sangre": la foto es el fondo de la página entera (pieza() la pone a
+/// sangre con el degradado y manda el texto abajo); acá sólo va la cita.
+/// modo "marco" (foto sin resolución para ir a sangre: el export lo decide
+/// con reglas.imagenes.ppi_error_menor_a): la foto va dentro de la caja al
+/// ancho que aguanta, con la cita encima sobre un degradado, sin escalarla de más.
+#let foto-cita(ctx, p, hijos) = {
+  let G = geo.foto_cita
+  let c = colores(ctx)
+  let modo = p.at("modo", default: "sangre")
+  let base = if es-bn { blanco } else { c.ink }
+  let claro = if es-bn { negro } else { c.paper }
+  // Tamaño de la cita: titulo.pt_max × cita_factor a página completa; en el
+  // modo marco baja con el ancho de la foto, nunca por debajo de titulo.minimo_pt.
+  let cita(fill, factor: 1.0) = {
+    let tam = calc.max(pt(estilos.titulo.minimo_pt), pt(estilos.titulo.pt_max) * G.cita_factor * factor)
+    set par(leading: tam * (estilos.titulo.interlinea_factor - 1))
+    text(font: fuente-titulos, size: tam * G.comilla_factor / G.cita_factor, fill: c.accent, stroke: 0.6pt + negro, "“")
+    linebreak()
+    text(font: fuente-titulos, size: tam, fill: fill, hyphenate: false, upper(p.cita))
+    let autor = p.at("autor", default: none)
+    if autor != none { linebreak(); v(3pt); text(font: fuente-texto, weight: "bold", size: pt(estilos.cuerpo_2col.pt), fill: fill, "— " + autor) }
+  }
+  let pie = p.at("caption", default: none)
+  if modo == "sangre" {
+    block(width: 100%, breakable: false, {
+      cita(claro)
+      if pie != none { v(8pt); texto("pie", quien: "FotoCita", fill: claro, pie) }
+    })
+  } else {
+    let f = foto-de(ctx, p.src)
+    let w = calc.min(caja, float(p.at("ancho_pt", default: caja / 1pt)) * 1pt)
+    let h = if f != none and f.existe and f.ancho_px > 0 { w * f.alto_px / f.ancho_px } else { w * 3 / 4 }
+    let hmax = caja-h * G.marco_alto_max_pct / 100
+    let (w, h) = if h > hmax { (w * (hmax / h), hmax) } else { (w, h) }
+    block(width: 100%, breakable: false, above: 8pt, below: 8pt, align(center, box(width: w, {
+      box(width: 100%, height: h, clip: true, {
+        place(top + left, imagen(ctx, p.src, width: 100%, height: 100%, fit: "cover"))
+        place(top + left, rect(width: 100%, height: 100%, fill: gradient.linear(angle: 90deg, (base.transparentize(100%), 0%), (base.transparentize(100% - G.oscurecer_pct * 1%), 100%))))
+        place(bottom + left, dx: pt(G.inset_pt), dy: -pt(G.inset_pt), box(width: w - 2 * pt(G.inset_pt), cita(claro, factor: w / caja)))
+      })
+      pie-foto(ctx, pie, align-: left)
+    })))
+  }
+}

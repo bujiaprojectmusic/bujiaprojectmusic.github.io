@@ -1,20 +1,39 @@
 ---
-// Foto n del frontmatter de la pieza (issue #13): <Foto n={1} /> toma
-// `fotos[n-1]` (src, alt, pie, credito) y la pinta con el componente que
-// pida `estilo`: full (default), side, polaroid, vieja, xerox o galeria
-// (varias fotos n…hasta en rejilla, dos por página en papel). Así el
-// pie y el crédito salen siempre de los datos validados por el esquema,
-// y el impreso (#9) los recibe iguales. Sólo props literales.
+// Fotos de una pieza (issue #13 + fotos editoriales):
+//   <Foto foto="/piezas/<carpeta>/x.jpg" ancho="completo|columna|mitad" alt pie />
+//     la foto intercalada en el texto, en el orden del MDX (una figura
+//     responsiva; dos `mitad` seguidas van lado a lado). El src, alt, pie y
+//     crédito salen de `fotos[]` del frontmatter (validados por el esquema):
+//     `foto` tiene que estar ahí; alt/pie sólo los sobreescriben.
+//   <Foto n={1} estilo="full|side|polaroid|vieja|xerox|galeria" />
+//     forma vieja: la foto n del frontmatter con un componente de imagen
+//     (galeria: varias fotos n…hasta en rejilla).
+// El impreso (#9) recibe los mismos datos (scripts/print/sources/piezas.ts).
+// Sólo props literales.
 import ImageFull from '../content/ImageFull.astro';
 import ImageSide from '../content/ImageSide.astro';
 import Polaroid from '../Polaroid.astro';
 import PhotoOld from '../content/PhotoOld.astro';
 import Xerox from '../content/Xerox.astro';
 import Gallery from '../content/Gallery.astro';
+import OptimizedImage from '../OptimizedImage.astro';
 import { getPiezaActual } from '../../utils/piezaActual';
+// Estilos en src/styles/fotos-pieza.css (ver ahí por qué no van en <style>).
+import '../../styles/fotos-pieza.css';
+import { fotoDePieza, pieDeFoto } from '../../utils/fotosPieza';
+
+export type AnchoFoto = 'completo' | 'columna' | 'mitad';
 
 interface Props {
-  n: number;
+  /** Ruta de la foto tal como está en el frontmatter ("/piezas/<carpeta>/x.jpg"). */
+  foto?: string;
+  /** completo (caja entera), columna (dos tercios) o mitad (dos seguidas van en pareja). */
+  ancho?: AnchoFoto;
+  /** Sobreescriben alt / pie del frontmatter (el crédito nunca cambia). */
+  alt?: string;
+  pie?: string;
+  /** Forma vieja: índice de la foto en el frontmatter (1…). */
+  n?: number;
   estilo?: 'full' | 'side' | 'polaroid' | 'vieja' | 'xerox' | 'galeria';
   /** galeria: última foto de la rejilla (n…hasta). */
   hasta?: number;
@@ -22,32 +41,59 @@ interface Props {
   width?: string;
   tilt?: number;
 }
-const { n, estilo = 'full', side = 'right', width = '42%', tilt, hasta } = Astro.props;
+const { foto, ancho = 'completo', alt: altProp, pie: pieProp, n: nProp, estilo = 'full', side = 'right', width = '42%', tilt, hasta } = Astro.props;
 const { pieza } = getPiezaActual('Foto');
 const fotos = pieza.data.fotos;
-if (!Number.isInteger(n) || n < 1 || n > fotos.length) {
-  throw new Error(`${pieza.id}: <Foto n={${n}}> no existe: el frontmatter tiene ${fotos.length} foto(s).`);
+
+const ANCHOS: AnchoFoto[] = ['completo', 'columna', 'mitad'];
+let f: (typeof fotos)[number];
+let n = nProp ?? 0;
+if (foto != null) {
+  // Forma nueva: la foto se busca por ruta; alt y pie pueden venir del MDX.
+  f = fotoDePieza(pieza.id, fotos, 'Foto', foto);
+  if (!ANCHOS.includes(ancho)) throw new Error(`${pieza.id}: <Foto foto="${foto}" ancho="${ancho}">: ancho va ${ANCHOS.join(' | ')}.`);
+} else {
+  if (!Number.isInteger(n) || n < 1 || n > fotos.length) {
+    throw new Error(`${pieza.id}: <Foto n={${nProp}}> no existe: el frontmatter tiene ${fotos.length} foto(s).`);
+  }
+  f = fotos[n - 1];
 }
-const pieDe = (x: (typeof fotos)[number]) => `${x.pie}${x.pie && !/[.!?]$/.test(x.pie.trim()) ? '.' : ''} Foto: ${x.credito}`.trim();
-const f = fotos[n - 1];
-const caption = pieDe(f);
+const alt = altProp ?? f.alt;
+const caption = pieDeFoto({ pie: pieProp ?? f.pie, credito: f.credito });
 const fin = estilo === 'galeria' ? (hasta ?? n) : n;
-if (estilo === 'galeria' && (!Number.isInteger(fin) || fin < n || fin > fotos.length)) {
+if (foto == null && estilo === 'galeria' && (!Number.isInteger(fin) || fin < n || fin > fotos.length)) {
   throw new Error(`${pieza.id}: <Foto n={${n}} estilo="galeria" hasta={${hasta}}>: hasta tiene que estar entre ${n} y ${fotos.length}.`);
 }
-const galeria = fotos.slice(n - 1, fin).map((x) => ({ src: x.src, alt: x.alt, caption: pieDe(x) }));
+const galeria = foto == null ? fotos.slice(n - 1, fin).map((x) => ({ src: x.src, alt: x.alt, caption: pieDeFoto(x) })) : [];
+const SIZES: Record<AnchoFoto, string> = {
+  completo: '(max-width: 900px) 100vw, 852px',
+  columna: '(max-width: 900px) 100vw, 562px',
+  mitad: '(max-width: 600px) 100vw, (max-width: 900px) 50vw, 420px',
+};
 ---
 
-{estilo === 'galeria' ? (
+{foto != null ? (
+  <figure class:list={['fz-foto', `fz-foto--${ancho}`]}>
+    <OptimizedImage
+      src={f.src}
+      alt={alt}
+      widths={ancho === 'completo' ? [480, 768, 1024, 1440, 1920] : [320, 480, 768, 1024]}
+      sizes={SIZES[ancho]}
+      context={`Foto ${foto}`}
+    />
+    <figcaption>{caption}</figcaption>
+  </figure>
+) : estilo === 'galeria' ? (
   <Gallery images={galeria} />
 ) : estilo === 'side' ? (
-  <ImageSide src={f.src} alt={f.alt} caption={caption} side={side} width={width} />
+  <ImageSide src={f.src} alt={alt} caption={caption} side={side} width={width} />
 ) : estilo === 'polaroid' ? (
-  <Polaroid src={f.src} alt={f.alt} caption={caption} tilt={tilt ?? -3} />
+  <Polaroid src={f.src} alt={alt} caption={caption} tilt={tilt ?? -3} />
 ) : estilo === 'vieja' ? (
-  <PhotoOld src={f.src} alt={f.alt} caption={caption} tilt={tilt ?? -2} />
+  <PhotoOld src={f.src} alt={alt} caption={caption} tilt={tilt ?? -2} />
 ) : estilo === 'xerox' ? (
-  <Xerox src={f.src} alt={f.alt} caption={caption} />
+  <Xerox src={f.src} alt={alt} caption={caption} />
 ) : (
-  <ImageFull src={f.src} alt={f.alt} caption={caption} />
+  <ImageFull src={f.src} alt={alt} caption={caption} />
 )}
+

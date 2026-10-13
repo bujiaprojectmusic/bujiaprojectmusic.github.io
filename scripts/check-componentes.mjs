@@ -36,7 +36,13 @@ for (const c of registro.componentes) {
   const src = fs.readFileSync(archivo, 'utf8');
   let css = 0, svg = 0;
   if (c.web.endsWith('.css')) css = gz(minCss(src));
-  else if (c.web.endsWith('.astro')) { css = gz(minCss(bloques(src, CSS_RE))); svg = gz(bloques(src, SVG_RE)); }
+  else if (c.web.endsWith('.astro')) {
+    // El <style> del .astro más los .css que importa (p. ej. src/styles/fotos-pieza.css, compartido por Foto/FotoCita/Pagina).
+    let cssSrc = bloques(src, CSS_RE);
+    for (const m of src.matchAll(/^import\s+'([^']+\.css)';/gm)) cssSrc += fs.readFileSync(path.resolve(path.dirname(archivo), m[1]), 'utf8');
+    css = gz(minCss(cssSrc));
+    svg = gz(bloques(src, SVG_RE));
+  }
   // Sticker incrusta los SVG de marca (o sus placeholders de utils/fanzineAssets.ts): se mide el placeholder más pesado.
   if (c.nombre === 'Sticker' || c.nombre === 'Cinta' || c.nombre === 'Parche') {
     const util = fs.readFileSync(path.join(RAIZ, 'src', 'utils', 'fanzineAssets.ts'), 'utf8');

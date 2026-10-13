@@ -138,23 +138,51 @@
       "nombre": "Foto",
       "grupo": "pagina",
       "tipo": "componente",
-      "descripcion": "Foto n del frontmatter de la pieza (src, alt, pie, crédito validados por el esquema) pintada como ImageFull, ImageSide, Polaroid, PhotoOld, Xerox o Gallery (galeria: fotos n…hasta) según `estilo`.",
+      "descripcion": "Foto de la pieza intercalada en el texto, en el orden del MDX: <Foto foto=\"/piezas/…\" ancho=\"completo|columna|mitad\" /> (dos `mitad` seguidas van lado a lado; en papel entre los párrafos, pie de 7.5 pt). El src, alt, pie y crédito salen de fotos[] del frontmatter. Forma vieja: <Foto n estilo> pintada como ImageFull/ImageSide/Polaroid/PhotoOld/Xerox/Gallery.",
       "web": "src/components/fanzine/Foto.astro",
-      "typst": "scripts/print/sources/piezas.ts#reemplazarFotos → imagenes.typ",
+      "typst": "print/lib/componentes/imagenes.typ#foto",
       "props": [
+        {
+          "nombre": "foto",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Ruta de la foto tal como está en fotos[] del frontmatter (/piezas/<carpeta>/x.jpg)"
+        },
+        {
+          "nombre": "ancho",
+          "tipo": "'completo' | 'columna' | 'mitad'",
+          "default": "'completo'",
+          "obligatoria": false,
+          "que": "Caja entera, dos tercios o media caja (dos mitad seguidas, en pareja)"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": "el del frontmatter",
+          "obligatoria": false,
+          "que": "Sobreescribe el alt"
+        },
+        {
+          "nombre": "pie",
+          "tipo": "string",
+          "default": "el del frontmatter",
+          "obligatoria": false,
+          "que": "Sobreescribe el pie (el crédito siempre se agrega)"
+        },
         {
           "nombre": "n",
           "tipo": "number",
           "default": null,
-          "obligatoria": true,
-          "que": "Índice de la foto en el frontmatter (1…)"
+          "obligatoria": false,
+          "que": "Forma vieja: índice de la foto en el frontmatter (1…)"
         },
         {
           "nombre": "estilo",
           "tipo": "'full' | 'side' | 'polaroid' | 'vieja' | 'xerox' | 'galeria'",
           "default": "'full'",
           "obligatoria": false,
-          "que": "Componente de imagen que la pinta"
+          "que": "Forma vieja: componente de imagen que la pinta"
         },
         {
           "nombre": "side",
@@ -192,13 +220,71 @@
       "mdx": true,
       "demo": {
         "props": {
-          "n": 1,
-          "estilo": "polaroid",
-          "tilt": -3
+          "foto": "/fanzine/vol-00/capas-pegadas.jpeg",
+          "ancho": "columna"
         },
         "hijos": null
       },
-      "notas": "El pie sale como «<pie>. Foto: <credito>»."
+      "notas": "El pie sale como «<pie>. Foto: <credito>». `foto` tiene que estar en fotos[] del frontmatter (si no, error en web y en el export): así el pie y el crédito nunca se inventan."
+    },
+    {
+      "nombre": "FotoCita",
+      "grupo": "pagina",
+      "tipo": "componente",
+      "descripcion": "Foto a página completa con una cita grande encima (Anton, comilla en accent, degradado para el contraste): a todo el ancho en la web; en papel ocupa una página entera a sangre (cuenta para el múltiplo de 4) o, si la foto no llega a 150 ppi a sangre, va con margen al ancho que aguanta, con la cita encima (lo decide el export, sin escalarla de más). El src, alt, pie y crédito salen de fotos[] del frontmatter.",
+      "web": "src/components/fanzine/FotoCita.astro",
+      "typst": "print/lib/componentes/imagenes.typ#foto-cita",
+      "props": [
+        {
+          "nombre": "foto",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Ruta de la foto tal como está en fotos[] del frontmatter"
+        },
+        {
+          "nombre": "cita",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Frase destacada (del texto de la pieza)"
+        },
+        {
+          "nombre": "autor",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": false,
+          "que": "Quién lo dice (sale como — autor)"
+        },
+        {
+          "nombre": "alt",
+          "tipo": "string",
+          "default": "el del frontmatter",
+          "obligatoria": false,
+          "que": "Sobreescribe el alt"
+        },
+        {
+          "nombre": "pie",
+          "tipo": "string",
+          "default": "el del frontmatter",
+          "obligatoria": false,
+          "que": "Sobreescribe el pie (el crédito siempre se agrega)"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": 1,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "foto": "/fanzine/vol-00/capas-pegadas.jpeg",
+          "cita": "Capas pegadas, esperando la prensa.",
+          "autor": "Bujía Project Music"
+        },
+        "hijos": null
+      },
+      "notas": "Una por página en papel: si va a sangre, esa <Pagina> no puede traer `bleed`. Sólo dentro de src/content/piezas/**; el kit la pinta con la pieza demo."
     },
     {
       "nombre": "Relleno",

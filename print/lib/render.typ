@@ -3,7 +3,7 @@
 // vuelven a entrar acá para los hijos.
 #import "/print/lib/componentes/util.typ": *
 #import "/print/lib/componentes/texto.typ": liga, cita-md, separador-md, lista-md, html
-#import "/print/lib/componentes/imagenes.typ": image-full, image-side, gallery, polaroid, photo-old, xerox, before-after, optimized-image
+#import "/print/lib/componentes/imagenes.typ": image-full, image-side, gallery, polaroid, photo-old, xerox, before-after, optimized-image, foto, fotos-mitad, foto-cita
 #import "/print/lib/componentes/titulos.typ": section-title, post-cover
 #import "/print/lib/componentes/bloques.typ": columnas, quote, note, divider
 #import "/print/lib/componentes/video.typ": video-poster
@@ -28,6 +28,9 @@
   Xerox: xerox,
   BeforeAfter: before-after,
   OptimizedImage: optimized-image,
+  // Fotos editoriales de las piezas: <Foto foto ancho> y <FotoCita>.
+  Foto: foto,
+  FotoCita: foto-cita,
   VideoPoster: video-poster,
   DatosTaller: datos-taller,
   // #17: marca y piezas del taller. Playlist llega como VideoPoster desde el export.
@@ -81,7 +84,12 @@
   let i = 0
   while i < nodos.len() {
     let n = nodos.at(i)
-    if n.t == "componente" and n.nombre == "ImageSide" {
+    let es-mitad(x) = x.t == "componente" and x.nombre == "Foto" and x.props.at("ancho", default: "completo") == "mitad"
+    if es-mitad(n) and i + 1 < nodos.len() and es-mitad(nodos.at(i + 1)) {
+      // Dos <Foto ancho="mitad"> seguidas van en pareja.
+      fotos-mitad(ctx, n.props, nodos.at(i + 1).props)
+      i += 2
+    } else if n.t == "componente" and n.nombre == "ImageSide" {
       // La foto va a un lado y el texto que sigue la rodea (wrap-it), como en la web.
       let resto = ()
       let j = i + 1

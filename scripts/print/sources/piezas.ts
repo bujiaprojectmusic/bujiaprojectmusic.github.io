@@ -13,6 +13,7 @@ import { piezaSchema, volumenSchema } from '../../../src/content/schemas.ts';
 import { componer, slugVolumen, type EntradaVolumen } from '../../../src/utils/componer.ts';
 import { parsearMdx, leerImports, convertirHijos, props as leerProps, ErrorExport, type Contexto } from '../lib/mdx.ts';
 import type { Nodo } from '../lib/tipos.ts';
+import { toAssetPath } from '../../../src/utils/rutasAssets.ts';
 
 export interface VolumenCompuestoFuente {
   slug: string;
@@ -138,14 +139,41 @@ export function listarVolumenesCompuestos(raiz: string, datosTaller: Map<string,
   return out.sort((a, b) => a.frontmatter.volume - b.frontmatter.volume);
 }
 
-/** <Foto n={k} estilo="…" /> → ImageFull/ImageSide/Polaroid/PhotoOld/Xerox con src, alt y pie + crédito del frontmatter. */
+const ANCHOS_FOTO = ['completo', 'columna', 'mitad'];
+const pieDe = (x: any) => `${x.pie}${x.pie && !/[.!?]$/.test(x.pie.trim()) ? '.' : ''} Foto: ${x.credito}`.trim();
+
+/** `foto="/piezas/…"` → la entrada del frontmatter con ese src (el pie y el crédito salen de ahí). */
+function fotoPorRuta(p: ReturnType<typeof leerPieza>, quien: string, foto: unknown) {
+  if (typeof foto !== 'string' || !foto.trim()) throw new ErrorExport(`${p.archivo}: <${quien}> necesita foto="/piezas/…" (una ruta del frontmatter fotos[]).`);
+  const f = p.data.fotos.find((x: any) => x.src === toAssetPath(foto));
+  if (!f) throw new ErrorExport(`${p.archivo}: <${quien} foto="${foto}">: esa foto no está en el frontmatter fotos[] (ahí van su alt, pie y crédito).`);
+  return f;
+}
+
+/**
+ * <Foto foto ancho alt pie /> → Foto (imagenes.typ#foto); <FotoCita foto cita autor alt pie /> → FotoCita
+ * (imagenes.typ#foto-cita); <Foto n={k} estilo="…" /> (forma vieja) → ImageFull/ImageSide/Polaroid/PhotoOld/Xerox.
+ * El src, el alt y el pie + crédito salen siempre del frontmatter.
+ */
 function reemplazarFotos(nodos: Nodo[], p: ReturnType<typeof leerPieza>): Nodo[] {
   return nodos.map((n) => {
+    if (n.t === 'componente' && n.nombre === 'FotoCita') {
+      const f = fotoPorRuta(p, 'FotoCita', n.props.foto);
+      if (typeof n.props.cita !== 'string' || !n.props.cita.trim()) throw new ErrorExport(`${p.archivo}: <FotoCita foto="${n.props.foto}"> necesita cita="…".`);
+      const props: Record<string, unknown> = { src: f.src, cita: n.props.cita, alt: n.props.alt ?? f.alt, caption: pieDe({ ...f, pie: n.props.pie ?? f.pie }) };
+      if (n.props.autor != null) props.autor = n.props.autor;
+      return { t: 'componente', nombre: 'FotoCita', props, hijos: [] };
+    }
+    if (n.t === 'componente' && n.nombre === 'Foto' && n.props.foto != null) {
+      const f = fotoPorRuta(p, 'Foto', n.props.foto);
+      const ancho = String(n.props.ancho ?? 'completo');
+      if (!ANCHOS_FOTO.includes(ancho)) throw new ErrorExport(`${p.archivo}: <Foto foto="${n.props.foto}" ancho="${ancho}">: ancho va ${ANCHOS_FOTO.join(' | ')}.`);
+      return { t: 'componente', nombre: 'Foto', props: { src: f.src, alt: n.props.alt ?? f.alt, caption: pieDe({ ...f, pie: n.props.pie ?? f.pie }), ancho }, hijos: [] };
+    }
     if (n.t === 'componente' && n.nombre === 'Foto') {
       const k = Number(n.props.n);
       const f = p.data.fotos[k - 1];
       if (!f) throw new ErrorExport(`${p.archivo}: <Foto n={${n.props.n}}> no existe: el frontmatter tiene ${p.data.fotos.length} foto(s).`);
-      const pieDe = (x: any) => `${x.pie}${x.pie && !/[.!?]$/.test(x.pie.trim()) ? '.' : ''} Foto: ${x.credito}`.trim();
       const pie = pieDe(f);
       const estilo = String(n.props.estilo ?? 'full');
       if (estilo === 'galeria') {
