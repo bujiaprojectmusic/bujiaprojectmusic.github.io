@@ -7,6 +7,8 @@
 // línea de crédito de la pieza. Sólo props literales.
 import Pliego from './Pliego.astro';
 import { getPiezaActual } from '../../utils/piezaActual';
+// Estilos en src/styles/fotos-pieza.css (ver ahí por qué no van en <style>).
+import '../../styles/fotos-pieza.css';
 import type { ColorSchemeName } from '../../config/site';
 
 interface Props {
@@ -34,18 +36,3 @@ const esquema = (scheme ?? pieza.data.scheme ?? schemeVol) as ColorSchemeName | 
   )}
 </Pliego>
 
-<style>
-  .fz-credito {
-    font-family: var(--font-head);
-    font-size: 0.75rem;
-    letter-spacing: 0.03em;
-    border-top: 2px solid var(--ink);
-    padding-top: 0.4rem;
-    margin: 1.2rem 0 0;
-  }
-  .fz-credito__bio {
-    font-family: var(--font-body);
-    letter-spacing: 0;
-    opacity: 0.8;
-  }
-</style>

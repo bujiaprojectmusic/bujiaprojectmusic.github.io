@@ -14,6 +14,7 @@ import { REGISTRO, GRUPOS, ejemploMdx, importMdx, type Componente } from '../../
 import { parsearMdx, leerImports, convertirHijos, ErrorExport, type Contexto, type PliegoCrudo } from './lib/mdx.ts';
 import { exportar, RAIZ, type FuenteCompuesta } from './export.ts';
 import type { Nodo } from './lib/tipos.ts';
+import { toAssetPath } from '../../src/utils/rutasAssets.ts';
 
 const ARCHIVO = 'src/components/fanzine/registro.json';
 
@@ -71,14 +72,24 @@ export function paginasKit(): { pliegos: (PliegoCrudo & { relleno?: string; kit?
       const hijos = nodosDe(c.demo!.hijos ?? '', c.nombre, avisos);
       hijos.push({ t: 'html', etiqueta: 'p', clase: 'fz-credito', hijos: [{ t: 'texto', v: P.credito }] });
       pliegos.push(crudo(n, 'normal', c, hijos));
-    } else if (c.nombre === 'Foto') {
+    } else if (c.nombre === 'Foto' || c.nombre === 'FotoCita') {
       // Igual que reemplazarFotos() en sources/piezas.ts, con la foto de pieza_demo.
-      const f = P.fotos[Number(c.demo!.props.n ?? 1) - 1];
-      const pie = `${f.pie}${f.pie && !/[.!?]$/.test(f.pie.trim()) ? '.' : ''} Foto: ${f.credito}`.trim();
-      const estilo = String(c.demo!.props.estilo ?? 'full');
-      const nombre = { full: 'ImageFull', side: 'ImageSide', polaroid: 'Polaroid', vieja: 'PhotoOld', xerox: 'Xerox' }[estilo] ?? 'ImageFull';
-      const props: Record<string, unknown> = { src: f.src, alt: f.alt, caption: pie };
-      if (c.demo!.props.tilt != null) props.tilt = c.demo!.props.tilt;
+      const d = c.demo!.props;
+      const f = typeof d.foto === 'string' ? P.fotos.find((x) => toAssetPath(x.src) === toAssetPath(String(d.foto))) : P.fotos[Number(d.n ?? 1) - 1];
+      if (!f) throw new ErrorExport(`registro.json: la demo de <${c.nombre}> apunta a una foto que no está en pieza_demo.fotos.`);
+      const pie = `${d.pie ?? f.pie}${(d.pie ?? f.pie) && !/[.!?]$/.test(String(d.pie ?? f.pie).trim()) ? '.' : ''} Foto: ${f.credito}`.trim();
+      const props: Record<string, unknown> = { src: f.src, alt: d.alt ?? f.alt, caption: pie };
+      let nombre = c.nombre;
+      if (c.nombre === 'FotoCita') {
+        props.cita = d.cita;
+        if (d.autor != null) props.autor = d.autor;
+      } else if (typeof d.foto === 'string') {
+        props.ancho = d.ancho ?? 'completo';
+      } else {
+        const estilo = String(d.estilo ?? 'full');
+        nombre = { full: 'ImageFull', side: 'ImageSide', polaroid: 'Polaroid', vieja: 'PhotoOld', xerox: 'Xerox' }[estilo] ?? 'ImageFull';
+        if (d.tilt != null) props.tilt = d.tilt;
+      }
       pliegos.push(crudo(n, 'normal', c, [{ t: 'componente', nombre, props, hijos: [] }]));
     } else if (c.nombre === 'Relleno') {
       const p = crudo(n, 'relleno', c, []);

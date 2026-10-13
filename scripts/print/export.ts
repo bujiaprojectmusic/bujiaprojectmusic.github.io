@@ -52,8 +52,11 @@ async function cargarFoto(fotos: Map<string, Foto>, src: string, archivoMdx: str
   return foto;
 }
 
-/** Ancho colocado (pt) de una imagen según el componente que la muestra. */
+/** Ancho colocado (pt) de una imagen según el componente que la muestra (redondeado a 0.01 pt: el JSON no lleva flotantes largos). */
 function anchoColocado(componente: string, props: Record<string, any>, foto: Foto, n: number): number {
+  return Math.round(anchoColocadoExacto(componente, props, foto, n) * 100) / 100;
+}
+function anchoColocadoExacto(componente: string, props: Record<string, any>, foto: Foto, n: number): number {
   const pct = (v: number) => (CAJA * v) / 100;
   const CAJA_H = reglas.margenes.caja_texto.alto_pt as number;
   // Igual que ancho-ajustado() en print/lib/componentes/util.typ.
@@ -80,6 +83,17 @@ function anchoColocado(componente: string, props: Record<string, any>, foto: Fot
       const cols = Math.min(n, geo.gallery.columnas_max);
       return ajustado((CAJA - (cols - 1) * geo.gallery.separacion_pt) / cols, geo.gallery.alto_max_pct);
     }
+    case 'Foto': {
+      // <Foto foto ancho="completo|columna|mitad">: igual que foto() en imagenes.typ.
+      const G = geo.foto;
+      const wmax = props.ancho === 'columna' ? pct(G.columna_pct) : props.ancho === 'mitad' ? (CAJA - G.mitad_separacion_pt) / 2 : CAJA;
+      return ajustado(wmax, G.alto_max_pct);
+    }
+    case 'FotoCita': {
+      // "sangre": cover sobre el BleedBox (como Pliego); "marco": el ancho que aguanta la foto (ancho_pt).
+      if (props.modo === 'sangre') return anchoColocado('Pliego', props, foto, 1);
+      return Math.min(CAJA, Number(props.ancho_pt ?? CAJA));
+    }
     case 'BeforeAfter': return (CAJA - geo.before_after.separacion_pt) / 2;
     case 'CollageXerox': return (CAJA * geo.collage_xerox.posiciones_pct[n][2]) / 100 - 2 * geo.collage_xerox.marco_pt;
     case 'OptimizedImage': return ajustado(Math.min(CAJA, Number(props.width ?? geo.mascota.ancho_pt_default) * geo.optimized_image.px_a_pt), geo.optimized_image.alto_max_pct);
@@ -89,8 +103,16 @@ function anchoColocado(componente: string, props: Record<string, any>, foto: Fot
 
 const PROPS_IMAGEN: Record<string, string[]> = {
   Portada: ['image'], ImageFull: ['src'], ImageSide: ['src'], Polaroid: ['src'], PhotoOld: ['src'], Xerox: ['src'],
-  OptimizedImage: ['src'], BeforeAfter: ['before', 'after'], Pliego: ['bleed'],
+  OptimizedImage: ['src'], BeforeAfter: ['before', 'after'], Pliego: ['bleed'], Foto: ['src'],
 };
+
+/** ppi efectivo de una foto puesta a sangre (recorte cover sobre el BleedBox). */
+export function ppiSangre(foto: Foto): number {
+  if (!foto.existe || !foto.ancho_px) return 0;
+  const bw = reglas.formato.bleedbox.ancho_pt, bh = reglas.formato.bleedbox.alto_pt;
+  const s = Math.max(bw / foto.ancho_px, bh / foto.alto_px);
+  return foto.ancho_px / ((foto.ancho_px * s) / 72);
+}
 
 /** URL pública del video / playlist (misma que el enlace sin JS de la fachada web). */
 export function urlVideo(props: Record<string, any>): string {
@@ -190,6 +212,8 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
     return id;
   };
   const fotografos = new Set<string>();
+  /** Página → id de la foto que va a sangre por una <FotoCita> (el pliego la toma como bleed). */
+  const bleedPorPagina = new Map<number, string>();
 
   async function procesar(nodos: Nodo[], n: number): Promise<Nodo[]> {
     const out: Nodo[] = [];
@@ -208,6 +232,32 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
         // Marca (#17): el SVG real si está en src/assets/fanzine/; si no, Typst dibuja el placeholder / usa el logo.
         if (nodo.nombre === 'Sticker') props.archivo = archivoAsset(String(props.nombre));
         if (nodo.nombre === 'Parche') props.archivo = archivoAsset(`parche-bujia${props.ancho ? '-ancho' : ''}-${props.variante ?? 'mono'}`);
+        // <Foto foto pie> / <FotoCita foto pie> escritos directo en un MDX (posts, kit): mismos nombres que el adaptador de piezas.
+        if (nodo.nombre === 'Foto' || nodo.nombre === 'FotoCita') {
+          if (props.src == null && typeof props.foto === 'string') props.src = props.foto;
+          if (props.caption == null && typeof props.pie === 'string') props.caption = props.pie;
+          delete props.foto; delete props.pie;
+        }
+        if (nodo.nombre === 'FotoCita') {
+          if (typeof props.src !== 'string') throw new ErrorExport(`${fuente.archivo} pág. ${n}: <FotoCita> necesita foto="…".`);
+          if (!props.cita) throw new ErrorExport(`${fuente.archivo} pág. ${n}: <FotoCita> necesita cita="…".`);
+          const foto = await cargarFoto(fotos, props.src, fuente.archivo, avisos, `${fuente.archivo} pág. ${n} <FotoCita>`);
+          const ppi = ppiSangre(foto);
+          const minimo = reglas.imagenes.ppi_error_menor_a as number;
+          if (foto.existe && ppi >= minimo) {
+            // A sangre: la foto es el fondo de la página entera (pieza() en paginas.typ).
+            if (bleedPorPagina.has(n)) throw new ErrorExport(`${fuente.archivo} pág. ${n}: dos <FotoCita> a sangre en la misma página; va una por página.`);
+            props.modo = 'sangre';
+            bleedPorPagina.set(n, foto.id);
+          } else {
+            // Sin resolución para ir a sangre: va dentro de la caja al ancho que aguanta a `minimo` ppi, sin escalarla de más.
+            props.modo = 'marco';
+            props.ancho_pt = foto.existe ? Math.round(Math.min(CAJA, (foto.ancho_px / minimo) * 72) * 100) / 100 : CAJA;
+            if (foto.existe) avisos.push(`pág. ${n}: <FotoCita foto="${props.src}"> queda a ${Math.round(ppi)} ppi a sangre (< ${minimo}); va con margen, a ${Math.round(props.ancho_pt)} pt de ancho, con la cita encima.`);
+          }
+          foto.usos.push({ pliego: n, componente: 'FotoCita', ancho_pt: anchoColocado('FotoCita', props, foto, 1) });
+          props.src = foto.id;
+        }
         for (const k of PROPS_IMAGEN[nodo.nombre] ?? []) {
           if (typeof props[k] === 'string') {
             const foto = await cargarFoto(fotos, props[k], fuente.archivo, avisos, `${fuente.archivo} pág. ${n} <${nodo.nombre}>`);
@@ -266,7 +316,10 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
       continue;
     }
     const nodos = await procesar(c.hijos, n);
-    if (typeof c.props.bleed === 'string') {
+    if (bleedPorPagina.has(n)) {
+      if (c.props.bleed != null) throw new ErrorExport(`${fuente.archivo} pág. ${n}: <FotoCita> a sangre en un <Pliego> que ya tiene bleed; quitá uno de los dos.`);
+      (c.props as any).bleed = bleedPorPagina.get(n);
+    } else if (typeof c.props.bleed === 'string') {
       const foto = await cargarFoto(fotos, c.props.bleed, fuente.archivo, avisos, `${fuente.archivo} pág. ${n} <Pliego bleed>`);
       foto.usos.push({ pliego: n, componente: 'Pliego', ancho_pt: anchoColocado('Pliego', c.props, foto, 1) });
       (c.props as any).bleed = foto.id;

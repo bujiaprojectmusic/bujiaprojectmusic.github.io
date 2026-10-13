@@ -39,8 +39,13 @@ Desde el #13 el contenido del fanzine se separa en **piezas** y
   marcado por páginas relativas `<Pagina n={1}>` … `<Pagina n={paginas}>`.
   Las fotos van como masters de 2400 px en `src/assets/piezas/<AAAA-MM-slug>/`
   y se declaran en `fotos` (con `alt`, `pie`, `credito`,
-  `personas_identificables`); en el cuerpo se ponen con `<Foto n={1} />`
-  (o `estilo="side|polaroid|vieja|xerox"`). Sin datos de contacto:
+  `personas_identificables`); en el cuerpo se intercalan entre los párrafos
+  con `<Foto foto="/piezas/<AAAA-MM-slug>/x.jpg" ancho="completo|columna|mitad" />`
+  (el impreso respeta el orden del MDX; dos `mitad` seguidas van lado a lado)
+  y se destacan con `<FotoCita foto="…" cita="…" autor="…" />` (foto a página
+  completa con una frase encima: a sangre si da ≥ 150 ppi, si no con margen).
+  La forma vieja `<Foto n={1} estilo="side|polaroid|vieja|xerox" />` sigue
+  valiendo. Sin datos de contacto:
   `consentimiento_ref` es una referencia interna y rechaza correos y
   teléfonos; una clave desconocida rompe el build.
 - Un **volumen** es `src/content/volumenes/vol-NN.yml`: `numero`, `titulo`,
@@ -59,7 +64,8 @@ Desde el #13 el contenido del fanzine se separa en **piezas** y
   `mostrar_credito_mascota: false` apaga sólo el crédito de la mascota / arte
   de la casa (issue #37); `portada.completa: true` usa la imagen como portada
   entera (sin velo ni título encima). En el cuerpo, `<Foto n={1}
-  estilo="galeria" hasta={2} />` pone varias fotos en rejilla (dos por página).
+  estilo="galeria" hasta={2} />` pone varias fotos en rejilla (dos por página);
+  ver `COMPONENTES_MDX.md` § 2c para `Foto` y `FotoCita`.
 
 **Agregar una pieza**: copiá `src/content/piezas/_plantilla.mdx` a
 `src/content/piezas/<AAAA-MM-slug>/index.mdx`, llená el frontmatter, poné

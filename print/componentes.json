@@ -1,5 +1,5 @@
 {
-  "$comentario": "Geometría de los gemelos Typst de los componentes web (print/lib/componentes/). La leen print/lib/componentes/*.typ y scripts/print/export.ts (para el ancho colocado de cada foto → ppi efectivo). Porcentajes sobre la caja de texto de reglas.json; pt = puntos. alto_max_pct: alto máximo de la foto como % de la caja de texto (una foto vertical se achica para caber; el texto nunca). sticker/cinta/parche/textura/taller_titulos: gemelos de marca y del taller (issue #17). cinta_canela/sello_goma/titulo_rescate/collage_xerox: componentes nuevos del vol. 01 (issue #17, parte b); la web lee los mismos valores (puntos de la cinta, posiciones del collage).",
+  "$comentario": "Geometría de los gemelos Typst de los componentes web (print/lib/componentes/). La leen print/lib/componentes/*.typ y scripts/print/export.ts (para el ancho colocado de cada foto → ppi efectivo). Porcentajes sobre la caja de texto de reglas.json; pt = puntos. alto_max_pct: alto máximo de la foto como % de la caja de texto (una foto vertical se achica para caber; el texto nunca). sticker/cinta/parche/textura/taller_titulos: gemelos de marca y del taller (issue #17). cinta_canela/sello_goma/titulo_rescate/collage_xerox: componentes nuevos del vol. 01 (issue #17, parte b); la web lee los mismos valores (puntos de la cinta, posiciones del collage). foto/foto_cita: <Foto foto ancho> y <FotoCita> de las piezas (fotos editoriales).",
   "polaroid": {
     "ancho_pct": 78,
     "marco_pt": 9,
@@ -233,5 +233,17 @@
     "cinta_pt": 34,
     "minimo": 2,
     "maximo": 4
+  },
+  "foto": {
+    "columna_pct": 66,
+    "mitad_separacion_pt": 8,
+    "alto_max_pct": 45
+  },
+  "foto_cita": {
+    "cita_factor": 0.6,
+    "comilla_factor": 0.625,
+    "marco_alto_max_pct": 70,
+    "oscurecer_pct": 80,
+    "inset_pt": 14
   }
 }

@@ -196,6 +196,52 @@ volumen, "≡ Índice" (anclas, sin JavaScript, ocultos al imprimir).
 
 ---
 
+## 2c. Fotos editoriales de una pieza (`Foto`, `FotoCita`)
+
+Sólo dentro de `src/content/piezas/**`: el src, el alt, el pie y el
+crédito salen SIEMPRE de `fotos[]` del frontmatter (validados por el
+esquema). `foto` es la ruta tal como está ahí; si no está, la web y el
+export fallan con un mensaje claro. `alt` y `pie` sólo sobreescriben;
+el crédito ("Foto: …") se agrega siempre. El impreso pinta las fotos en
+el orden del MDX, entre los párrafos (ya no todas al final).
+
+```mdx
+import Foto from '../../../components/fanzine/Foto.astro';
+import FotoCita from '../../../components/fanzine/FotoCita.astro';
+
+{/* Intercalada en el texto. ancho: completo (caja entera) | columna (dos tercios) | mitad */}
+<Foto foto="/piezas/2026-10-slug/01.jpg" ancho="columna" />
+
+{/* Dos "mitad" seguidas van lado a lado (web e impreso) */}
+<Foto foto="/piezas/2026-10-slug/02.jpg" ancho="mitad" />
+<Foto foto="/piezas/2026-10-slug/03.jpg" ancho="mitad" pie="Otro pie para esta vez" />
+
+{/* Foto a página completa con una frase del texto encima */}
+<FotoCita foto="/piezas/2026-10-slug/04.jpg" cita="Desde el primer momento, se siente una vibra peculiar." autor="Mrk Inthehat" />
+```
+
+- **`Foto`** — en la web una figura responsiva (`mitad` y `columna`
+  pasan a 100 % en celular); en papel, `imagenes.typ#foto` entre los
+  párrafos, una o dos por página, con el pie de 7.5 pt (`estilos.pie` de
+  `reglas.json`). Anchos y alto máximo (45 % de la caja: una foto vertical
+  se achica, el texto nunca) en `print/componentes.json` → `foto`. La forma
+  vieja `<Foto n={1} estilo="full|side|polaroid|vieja|xerox|galeria" />`
+  sigue valiendo.
+- **`FotoCita`** — en la web rompe el padding de la columna (a todo el
+  ancho) con la cita en Anton, la comilla en el `accent` y un degradado al
+  `ink` del esquema para el contraste. En papel ocupa **una página entera**
+  (cuenta para el múltiplo de 4) y el export decide el modo con
+  `reglas.imagenes.ppi_error_menor_a` (150 ppi):
+  - **a sangre** si la foto da ≥ 150 ppi recortada al BleedBox: la página la
+    toma como `bleed` (mismo degradado que `<Pagina bleed>`); por eso esa
+    `<Pagina>` no puede traer `bleed` y va una sola `FotoCita` por página;
+  - **con margen** si no da: la foto va dentro de la caja al ancho que
+    aguanta a 150 ppi (sin escalarla de más), la cita encima sobre su
+    degradado y el pie abajo; el build lo avisa. La cita baja con el ancho
+    de la foto, nunca por debajo de `estilos.titulo.minimo_pt`.
+  Geometría en `print/componentes.json` → `foto_cita`; gemelo
+  `imagenes.typ#foto-cita`. Fixture: `tests/print/fixtures/fotos-editoriales.mdx`.
+
 ## 3. Encabezados (h2/h3/h4)
 
 No hace falta ningún componente — escribí `##`, `###` o `####` normal en
@@ -546,7 +592,8 @@ a un volumen.
 |---|---|---|---|---|
 | `Pliego` | Páginas y estructura | `fanzine/Pliego.astro` | `paginas.typ#pieza` | aprobado (vol. 00) |
 | `Pagina` | Páginas y estructura | `fanzine/Pagina.astro` | `paginas.typ#pieza` | aprobado (vol. 01) |
-| `Foto` | Páginas y estructura | `fanzine/Foto.astro` | `scripts/print/sources/piezas.ts#reemplazarFotos → imagenes.typ` | aprobado (vol. 01) |
+| `Foto` | Páginas y estructura | `fanzine/Foto.astro` | `imagenes.typ#foto` | aprobado (vol. 01) |
+| `FotoCita` | Páginas y estructura | `fanzine/FotoCita.astro` | `imagenes.typ#foto-cita` | aprobado (vol. 01) |
 | `Relleno` | Páginas y estructura | `fanzine/Relleno.astro` | `paginas.typ#relleno` | aprobado (vol. 01) |
 | `Portada` | Páginas y estructura | `Portada.astro` | `paginas.typ#portada` | aprobado (vol. 00) |
 | `Indice` | Páginas y estructura | `Indice.astro` | `paginas.typ#indice` | aprobado (vol. 00) |

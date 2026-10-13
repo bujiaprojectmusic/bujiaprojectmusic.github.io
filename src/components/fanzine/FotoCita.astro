@@ -1,0 +1,47 @@
+---
+// <FotoCita foto="/piezas/<carpeta>/x.jpg" cita="…" autor="…" alt pie />
+// Foto a página completa con una cita grande encima (fotos editoriales):
+// en la web rompe el padding de la columna (a todo el ancho, como la
+// portada a sangre); en el impreso ocupa una página entera a sangre, o va
+// con margen si la foto no tiene resolución (lo decide el export con
+// reglas.imagenes.ppi_error_menor_a; gemelo: imagenes.typ#foto-cita). El
+// src, alt, pie y crédito salen de fotos[] del frontmatter: `foto` tiene
+// que estar ahí; alt/pie sólo los sobreescriben. Sólo props literales.
+import OptimizedImage from '../OptimizedImage.astro';
+import { getPiezaActual } from '../../utils/piezaActual';
+// Estilos en src/styles/fotos-pieza.css (ver ahí por qué no van en <style>).
+import '../../styles/fotos-pieza.css';
+import { fotoDePieza, pieDeFoto } from '../../utils/fotosPieza';
+
+interface Props {
+  foto: string;
+  cita: string;
+  autor?: string;
+  alt?: string;
+  pie?: string;
+}
+const { foto, cita, autor, alt: altProp, pie: pieProp } = Astro.props;
+const { pieza } = getPiezaActual('FotoCita');
+if (typeof cita !== 'string' || !cita.trim()) throw new Error(`${pieza.id}: <FotoCita foto="${foto}"> necesita cita="…".`);
+const f = fotoDePieza(pieza.id, pieza.data.fotos, 'FotoCita', foto);
+const alt = altProp ?? f.alt;
+const caption = pieDeFoto({ pie: pieProp ?? f.pie, credito: f.credito });
+---
+
+<figure class="fz-fotocita">
+  <div class="fz-fotocita__marco">
+    <OptimizedImage
+      src={f.src}
+      alt={alt}
+      widths={[480, 768, 1024, 1440, 1920]}
+      sizes="(max-width: 900px) 100vw, 852px"
+      context={`FotoCita ${foto}`}
+    />
+    <blockquote class="fz-fotocita__cita">
+      <p><span class="fz-fotocita__comilla" aria-hidden="true">“</span>{cita}</p>
+      {autor && <footer class="fz-fotocita__autor">— {autor}</footer>}
+    </blockquote>
+  </div>
+  <figcaption class="fz-fotocita__pie">{caption}</figcaption>
+</figure>
+
