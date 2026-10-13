@@ -1,7 +1,8 @@
 ---
 // Contraportada (issue #7): parche de Bujía, mascota, créditos del volumen
-// y el sello con el lugar/fecha. Siempre lleva la línea
-// "Mascota: ilustración por encargo (crédito pendiente de confirmar)".
+// y el sello con el lugar/fecha. Lleva la línea de crédito de la mascota
+// (CREDITO_MASCOTA) salvo que el volumen la apague con creditoMascota={false}
+// (yml: mostrar_credito_mascota, issue #37); los créditos de las piezas siempre se ven.
 // Uso: <Contraportada texto="Bujía Project Music — Texcoco, MX" creditos={["Textos: …", "Fotos: …"]} />
 // Las props llegan igual al gemelo Typst (print/lib/paginas.typ); en el
 // yml de un volumen compuesto van en `contraportada.texto` y
@@ -14,12 +15,15 @@ interface Props {
   texto?: string;
   creditos?: string[];
   mascota?: boolean;
+  /** Mostrar la línea de crédito de la mascota (issue #37). */
+  creditoMascota?: boolean;
   /** Placeholders TODO si faltan los SVG (sólo /fanzine/muestra). */
   placeholders?: boolean;
 }
-const { texto = 'Bujía Project Music — Texcoco, MX', creditos = [], mascota = true, placeholders = false } = Astro.props;
+const { texto = 'Bujía Project Music — Texcoco, MX', creditos = [], mascota = true, creditoMascota = true, placeholders = false } = Astro.props;
 const conMascota = mascota && (hayAsset('mascota-jirafa-mono') || placeholders);
-export const CREDITO_MASCOTA = 'Mascota: ilustración por encargo (crédito pendiente de confirmar)';
+/** Mismo texto que print/componentes.json → mascota.credito (fin.md aprobado por Ricardo, 2026-10-08). */
+export const CREDITO_MASCOTA = 'Mascota (la jirafa mecánica punk): ilustración de @olafh_ace (Instagram)';
 ---
 
 <section class="fz-contraportada fz-page-num tx-grain">
@@ -28,7 +32,7 @@ export const CREDITO_MASCOTA = 'Mascota: ilustración por encargo (crédito pend
   </div>
   {conMascota && (
     <div class="fz-contraportada__mascota">
-      <Sticker nombre="mascota-jirafa-mono" ancho={170} alt="La jirafa, mascota del fanzine" quieto />
+      <Sticker nombre="mascota-jirafa-mono" ancho={100} alt="La jirafa, mascota del fanzine" quieto />
     </div>
   )}
   <div class="fz-contraportada__in">
@@ -39,7 +43,7 @@ export const CREDITO_MASCOTA = 'Mascota: ilustración por encargo (crédito pend
         ))}
       </ul>
     )}
-    <p class="fz-contraportada__credito-mascota">{CREDITO_MASCOTA}</p>
+    {creditoMascota && <p class="fz-contraportada__credito-mascota">{CREDITO_MASCOTA}</p>}
     <p class="fz-contraportada__stamp">{texto}</p>
   </div>
 </section>
@@ -71,7 +75,8 @@ export const CREDITO_MASCOTA = 'Mascota: ilustración por encargo (crédito pend
     position: absolute;
     top: 1rem;
     right: 1rem;
-    width: clamp(110px, 30%, 200px);
+    /* issue #37: mascota al 60 % (antes clamp(110px, 30%, 200px)). */
+    width: clamp(66px, 18%, 120px);
     color: var(--paper);
   }
   .fz-contraportada__mascota :global(.fz-sticker) {

@@ -41,7 +41,8 @@ export function revisarCreditos({ dist, contenido = 'src/content' }) {
     const alts = new Set(etiquetas(html, 'img').map((t) => (t.attrs.alt ?? '').trim()).filter(Boolean));
     if (v.origen === 'yml') {
       const port = v.data.portada ?? {};
-      if (port.imagen && !(port.credito && texto.includes(port.credito))) errores.push({ archivo: rel, mensaje: `la portada de ${v.slug} tiene imagen pero no muestra crédito (portada.credito en ${v.archivo})` });
+      // Con mostrar_credito_mascota: false el arte de la casa va sin crédito a propósito (issue #37).
+      if (port.imagen && v.data.mostrar_credito_mascota !== false && !(port.credito && texto.includes(port.credito))) errores.push({ archivo: rel, mensaje: `la portada de ${v.slug} tiene imagen pero no muestra crédito (portada.credito en ${v.archivo})` });
       for (const p of v.piezas) {
         const pieza = piezas.get(p.pieza);
         if (!pieza) continue;

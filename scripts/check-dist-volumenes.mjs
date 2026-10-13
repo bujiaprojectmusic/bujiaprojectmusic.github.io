@@ -44,7 +44,9 @@ for (const f of ymls) {
   if (tipo(N) !== 'contraportada') problemas.push(`pág. ${N} no es contraportada`);
   // Índice generado = yml (orden, título, autor, página) y anclas.
   const piezas = (v.piezas ?? []).filter((e) => e.pieza).sort((a, b) => a.desde - b.desde);
-  const items = [...h.matchAll(/<a href="#pagina-(\d+)" class="fz-indice__link[^"]*"[^>]*>\s*<span class="fz-indice__page[^"]*"[^>]*>(\d+)<\/span>\s*<span[^>]*><\/span>\s*<span class="fz-indice__item-title[^"]*"[^>]*>([^<]*)<\/span>/g)].map((m) => ({ ancla: Number(m[1]), pagina: Number(m[2]), titulo: m[3].trim() }));
+  // Astro escapa el texto (&quot; &#39; &amp;…): se decodifica para comparar con el yml.
+  const decodificar = (t) => t.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#38;|&amp;/g, '&');
+  const items = [...h.matchAll(/<a href="#pagina-(\d+)" class="fz-indice__link[^"]*"[^>]*>\s*<span class="fz-indice__page[^"]*"[^>]*>(\d+)<\/span>\s*<span[^>]*><\/span>\s*<span class="fz-indice__item-title[^"]*"[^>]*>([^<]*)<\/span>/g)].map((m) => ({ ancla: Number(m[1]), pagina: Number(m[2]), titulo: decodificar(m[3].trim()) }));
   const esperado = piezas.map((e) => {
     const fm = frontmatter(fs.readFileSync(path.join(dirPiezas, e.pieza, 'index.mdx'), 'utf8'));
     return { pagina: e.desde, titulo: `${fm.titulo} — ${fm.autor}`, credito: fm.credito, fotos: fm.fotos ?? [] };
@@ -53,10 +55,11 @@ for (const f of ymls) {
   if (!indiceOk) problemas.push(`índice ≠ yml: HTML ${JSON.stringify(items)} vs yml ${JSON.stringify(esperado.map((e) => ({ pagina: e.pagina, titulo: e.titulo })))}`);
   // Créditos de cada pieza y pie + crédito de cada foto.
   for (const e of esperado) {
-    if (!h.includes(e.credito.replace(/&/g, '&amp;'))) problemas.push(`falta el crédito "${e.credito}" en el HTML`);
+    const hd = decodificar(h);
+    if (!hd.includes(e.credito)) problemas.push(`falta el crédito "${e.credito}" en el HTML`);
     for (const foto of e.fotos) {
-      if (!h.includes(`Foto: ${foto.credito}`)) problemas.push(`falta el crédito de foto "${foto.credito}"`);
-      if (foto.pie && !h.includes(foto.pie.replace(/&/g, '&amp;'))) problemas.push(`falta el pie de foto "${foto.pie}"`);
+      if (!hd.includes(`Foto: ${foto.credito}`)) problemas.push(`falta el crédito de foto "${foto.credito}"`);
+      if (foto.pie && !hd.includes(foto.pie)) problemas.push(`falta el pie de foto "${foto.pie}"`);
     }
   }
   // Fotos por astro:assets: ningún src crudo a src/assets/piezas.

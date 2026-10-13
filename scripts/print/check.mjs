@@ -122,7 +122,8 @@ export function revisarMapa(vol, pdf) {
     if (p === 1) { esperado = 'portada'; ok = /VOLUMEN/.test(t.replace(/\s+/g, '')) && !/ÍNDICE/.test(t); }
     else if (p === 2) { esperado = 'índice'; ok = /ÍNDICE/.test(t); }
     else if (p === N - 1) { esperado = 'fin'; ok = /\bFIN\b/i.test(t); }
-    else if (p === N) { esperado = 'contraportada'; ok = /Mascota: ilustración por encargo/.test(t); }
+    // La contraportada siempre trae la URL del volumen (QR de Contraportada o de DatosTaller); el crédito de la mascota es apagable (#37).
+    else if (p === N) { esperado = 'contraportada'; ok = t.replace(/\s+/g, '').includes(vol.url.replace(/^https?:\/\//, '')); }
     else esperado = pliego.tipo === 'relleno' ? `relleno (${pliego.relleno})` : tituloPliego(pliego);
     const folioOk = p === 1 || p === N ? !tieneFolio : tieneFolio;
     filas.push({ p, tipo: esperado, folio: tieneFolio ? folio(p) : '—', ok: ok && folioOk });

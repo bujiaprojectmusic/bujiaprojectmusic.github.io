@@ -109,6 +109,7 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
               title={compuesto.entry.data.titulo}
               subtitle={compuesto.entry.data.portada.subtitulo ?? `${fmt.format(compuesto.entry.data.fecha)} — Texcoco`}
               image={compuesto.entry.data.portada.imagen}
+              completa={compuesto.entry.data.portada.completa}
             />
             {compuesto.entry.data.portada.credito && <p class="fz-small">Foto de portada: {compuesto.entry.data.portada.credito}</p>}
           </Pliego>
@@ -123,6 +124,7 @@ const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
             prueba={prueba}
             contraportada={compuesto.entry.data.contraportada.texto}
             creditosContraportada={compuesto.entry.data.contraportada.creditos}
+            mostrarCreditoMascota={compuesto.entry.data.mostrar_credito_mascota}
           >
             {(r: any) => <r.Content />}
           </ComponerPiezas>

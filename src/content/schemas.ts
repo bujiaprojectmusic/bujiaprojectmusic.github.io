@@ -97,6 +97,8 @@ export function volumenSchema(image: ImageFn, reference: (c: 'piezas') => z.ZodT
           alt: z.string().default(''),
           credito: z.string().optional(),
           subtitulo: z.string().optional(),
+          /** La imagen ya es la portada entera (arte aprobado): sin velo, título, subtítulo ni mascota encima; sólo la etiqueta Vol. NN. */
+          completa: z.boolean().default(false),
         })
         .strict(),
       /** Orden de piezas con su página final de inicio, y rellenos declarados. */
@@ -123,6 +125,9 @@ export function volumenSchema(image: ImageFn, reference: (c: 'piezas') => z.ZodT
       /** Publicado pero sin listar: /fanzine/vol-NN existe con noindex (sin banner de prueba),
           no sale en /fanzine, /volumenes ni el sitemap, y su tarjeta de descarga de PDF no se pinta. */
       sin_listar: z.boolean().default(false),
+      /** Interruptor del crédito de la mascota / arte de la casa (issue #37): en false se oculta
+          sólo ese crédito (web y Typst); los créditos de las colaboraciones siempre se ven. */
+      mostrar_credito_mascota: z.boolean().default(true),
       draft: z.boolean().default(false),
     })
     .strict();

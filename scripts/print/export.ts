@@ -316,7 +316,7 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
     qrs,
     avisos,
     origen: fuente.archivo,
-    ...({ mascota: mascota.id, logo: logo.id, qr_volumen: qrVolumen, qr_colabora: qrColabora, creditos: { autor: String(fm.author ?? 'Ripper'), fotografos: [...new Set([...fotografos, ...(fm.fotos_creditos ?? [])])], mascota: geo.mascota.credito, piezas: 'creditos' in fuente ? fuente.creditos ?? [] : [] }, taller: { direccion: taller.direccionTexto, horario: taller.horario.map((h) => ({ dias: h.dias, texto: h.texto })), whatsapp: taller.whatsapp.numeroTexto, web: SITIO.replace(/^https?:\/\//, ''), servicios: { titulo: sitioTaller.catalog.title, subtitulo: sitioTaller.catalog.subtitle }, anuncios: [...sitioTaller.announcementBar.messages] } } as any),
+    ...({ mascota: mascota.id, logo: logo.id, qr_volumen: qrVolumen, qr_colabora: qrColabora, creditos: { autor: String(fm.author ?? 'Ripper'), fotografos: [...new Set([...fotografos, ...(fm.fotos_creditos ?? [])])], mascota: fm.mostrar_credito_mascota === false ? '' : geo.mascota.credito, piezas: 'creditos' in fuente ? fuente.creditos ?? [] : [] }, taller: { direccion: taller.direccionTexto, horario: taller.horario.map((h) => ({ dias: h.dias, texto: h.texto })), whatsapp: taller.whatsapp.numeroTexto, web: SITIO.replace(/^https?:\/\//, ''), servicios: { titulo: sitioTaller.catalog.title, subtitulo: sitioTaller.catalog.subtitle }, anuncios: [...sitioTaller.announcementBar.messages] } } as any),
   };
   fs.mkdirSync(salidaDir, { recursive: true });
   fs.writeFileSync(path.join(salidaDir, 'volumen.json'), JSON.stringify(vol, null, 2));

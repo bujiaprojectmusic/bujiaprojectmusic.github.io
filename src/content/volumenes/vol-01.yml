@@ -1,29 +1,40 @@
-# Volumen 01 "Fierros y Fuzz", migrado de src/content/posts/volumen-01.mdx
-# (issue #13). El MDX queda como legado (legado: true) y sus URLs viejas
-# redirigen acá. Las páginas 7–14 siguen sin contenido (TODO en el MDX
-# original): se rellenan con páginas diseñadas hasta cerrar en 16.
+# Volumen 01 "La Jirafa Elektrika" (octubre 2026), publicado desde el PR #10
+# de fanzine-redaccion: reseña de "Foreign Tongues" (Edy Yáñez) y "En vivo en
+# la Escandón" (Mrk Inthehat + fotorreportaje de @sailor.mauveilleux_).
+# El MDX viejo (src/content/posts/volumen-01.mdx) queda como legado y las
+# piezas 2026-08-* de la maqueta anterior quedan en el repo sin usarse.
 numero: 1
-titulo: "Fierros y Fuzz"
-fecha: 2026-08-01
-publishDate: 2026-08-01
+# Masthead de la portada aprobada (el arte dice "Jirafa Elektrika").
+titulo: "La Jirafa Elektrika"
+fecha: 2026-10-01
+publishDate: 2026-10-01
+# La portada aprobada es rosa.
 colorScheme: rosa
-descripcion: "Primer volumen de La Jirafa Elektrika: rebobinado de pastillas, playlist de agosto y fotos del taller."
+descripcion: "Reseña de “Foreign Tongues” y en vivo en la Escandón."
 portada:
-  # TODO(Ricardo): foto de portada real, ≥ 2700 px de lado largo, en
-  # src/assets/piezas/vol-01/portada.jpg → imagen: "/piezas/vol-01/portada.jpg"
-  alt: ""
-  subtitulo: "Agosto 2026 — Texcoco"
-# Cierra en 16 como el MDX original: las págs. 7–14 se rellenan hasta que
-# haya piezas.
-paginas_minimo: 16
+  # Portada aprobada en la Puerta 2 (1162 × 1600, copia byte a byte de
+  # volumenes/vol-01/portada_vol1_final.jpg del repo de redacción).
+  imagen: "/piezas/vol-01/portada.jpg"
+  alt: "Portada del volumen 1 de La Jirafa Eléctrica: jirafa mecánica con cresta, parche de Bujía, cinta y sticker sobre fondo rosa."
+  # El arte ya es la portada entera: sin velo, título ni mascota encima; sólo la etiqueta Vol. 01.
+  completa: true
+  # Sin crédito de portada aparte: el arte es de la casa y su crédito es el de
+  # la mascota (@olafh_ace), apagado con mostrar_credito_mascota.
+# Reseña págs. 3–4 (2), en vivo págs. 5–10 (2 de texto + 4 de fotos). Cierra en 12.
 piezas:
-  - { pieza: 2026-08-editorial, desde: 3 }
-  - { pieza: 2026-08-rebobinado-pastillas, desde: 4 }
-  - { pieza: 2026-08-playlist-agosto, desde: 6 }
-  # TODO(Ricardo): "Fotos del taller" y lo que siga, de la pág. 7 a la 14.
+  - { pieza: 2026-10-resena-foreign-tongues, desde: 3 }
+  - { pieza: 2026-10-en-vivo-en-la-escandon, desde: 5 }
 contraportada:
   texto: "Bujía Project Music — Texcoco, MX"
+  creditos:
+    - "Edy Yáñez"
+    - "Texto: Mrk Inthehat · Fotos y pies de foto: @sailor.mauveilleux_"
 impreso:
   multimedia: qr
-# Publicado sin listar mientras se completan las págs. 7–14 y la portada.
+# Publicado sin listar: noindex, fuera de /fanzine, /volumenes y el sitemap,
+# sin tarjeta de descarga (se comparte por enlace).
 sin_listar: true
+# Oculta sólo el crédito de la mascota / arte de la casa (issue #37). Los
+# créditos de las colaboraciones siempre se ven. En true vuelve a aparecer.
+mostrar_credito_mascota: false
+draft: false
