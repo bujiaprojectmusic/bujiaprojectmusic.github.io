@@ -2,6 +2,11 @@
 //   npm run print                       → todos los volúmenes publicables
 //   node scripts/print/build.mjs --fixture tests/print/fixtures/x.mdx   → un fixture
 //   node scripts/print/build.mjs --dos-veces                           → compila 2 veces y compara sha256
+//   node scripts/print/build.mjs --sin-cache                           → compila todos aunque no hayan cambiado
+// Caché por volumen (cache.mjs): si la huella de un volumen (su JSON
+// exportado + los archivos que nombra + el motor) ya está en print/cache/,
+// se restauran sus PDF y su entrada del manifest y NO se compila. Sólo se
+// compila el volumen que cambió; si cambia el motor, se compilan todos.
 // Pasos por volumen: export (tsx) → variantes (sharp) → typst compile
 // pantalla e imprenta → TrimBox/BleedBox (pdf-lib) → chequeos (check.mjs)
 // → print/build/manifest.json + print/build/resumen.md (para el job summary).
@@ -16,11 +21,14 @@ import { typstBin, verificarFuentes, compilar, cajasImprenta } from './build-pru
 import { variantes } from './variantes.mjs';
 import * as C from './check.mjs';
 import * as Q from './cuadernillo.mjs';
+import { huellaVolumen, restaurar, guardar, podar } from './cache.mjs';
 
 const BUILD = path.join(RAIZ, 'print', 'build');
 const args = process.argv.slice(2);
 const fixture = args.includes('--fixture') ? args[args.indexOf('--fixture') + 1] : null;
 const dosVeces = args.includes('--dos-veces');
+// Los fixtures (tests) siempre se compilan: prueban el motor, no el contenido.
+const usarCache = !args.includes('--sin-cache') && !fixture;
 const quiet = args.includes('--quiet');
 const log = (...a) => { if (!quiet) console.log(...a); };
 
@@ -188,7 +196,9 @@ async function construirVolumen(bin, jsonPath) {
 
 function resumenMd(resultados, segundos) {
   const l = [];
+  const enCache = resultados.filter((r) => r.cache).map((r) => r.slug);
   l.push(`## Impreso (Typst ${fs.readFileSync(path.join(RAIZ, 'print', 'TYPST_VERSION'), 'utf8').trim()}) — ${resultados.length} volumen(es), ${segundos.toFixed(1)} s, SOURCE_DATE_EPOCH=${EPOCH}`, '');
+  l.push(enCache.length ? `Sin cambios, desde la caché (no se compilaron): ${enCache.join(', ')}. Compilados: ${resultados.filter((r) => !r.cache).map((r) => r.slug).join(', ') || 'ninguno'}.` : 'Compilados todos los volúmenes.', '');
   l.push('| Archivo | Páginas | Hoja | Cajas (imprenta) | ppi mínimo | Peso | Avisos |', '|---|---|---|---|---|---|---|');
   for (const r of resultados) {
     const i = r.pdfs.imprenta;
@@ -221,19 +231,39 @@ async function main() {
   fs.mkdirSync(BUILD, { recursive: true });
   const jsons = exportar();
   const resultados = [];
+  const vigentes = [];
+  let compilados = 0;
   for (const j of jsons) {
-    const r = await construirVolumen(bin, j);
+    const dir = path.dirname(j);
+    const clave = path.basename(dir);
+    vigentes.push(clave);
+    // La huella se calcula sobre el JSON recién exportado, antes de variantes.mjs.
+    const huella = usarCache ? huellaVolumen(j) : null;
+    const guardado = huella ? restaurar(clave, huella, dir) : null;
+    let r;
+    if (guardado) {
+      r = { ...guardado, cache: true };
+      log(`↺ ${r.slug}: sin cambios (huella ${huella.slice(0, 12)}): PDF y chequeos desde la caché, no se compila`);
+    } else {
+      r = await construirVolumen(bin, j);
+      compilados++;
+      if (huella) {
+        const archivos = [...Object.values(r.pdfs).map((p) => path.join(RAIZ, p.ruta)), path.join(RAIZ, r.cuadernillo.miniaturas)];
+        guardar(clave, huella, dir, archivos, r);
+      }
+    }
     resultados.push(r);
-    log(`✔ ${r.slug}: ${r.pdfs.pantalla.archivo} (${r.pdfs.pantalla.paginas} págs, ${(r.pdfs.pantalla.bytes / 1024 / 1024).toFixed(2)} MB) · ${r.pdfs.imprenta.archivo} (${(r.pdfs.imprenta.bytes / 1024 / 1024).toFixed(2)} MB) · ppi mín ${r.ppi_min ?? '—'} · ligas pantalla ${r.ligas.pantalla.links}, imprenta ${r.ligas.imprenta.links} · marcadores ${r.ligas.pantalla.marcadores}`);
+    log(`${r.cache ? '  ' : ''}✔ ${r.slug}: ${r.pdfs.pantalla.archivo} (${r.pdfs.pantalla.paginas} págs, ${(r.pdfs.pantalla.bytes / 1024 / 1024).toFixed(2)} MB) · ${r.pdfs.imprenta.archivo} (${(r.pdfs.imprenta.bytes / 1024 / 1024).toFixed(2)} MB) · ppi mín ${r.ppi_min ?? '—'} · ligas pantalla ${r.ligas.pantalla.links}, imprenta ${r.ligas.imprenta.links} · marcadores ${r.ligas.pantalla.marcadores}`);
     log(`  cuadernillo ${r.pdfs.cuadernillo.paginas} caras (${(r.pdfs.cuadernillo.bytes / 1024 / 1024).toFixed(2)} MB), orden ${r.cuadernillo.orden.ok ? '✔' : '✖'} ${JSON.stringify(r.cuadernillo.caras)} · xerox ${r.pdfs.xerox.paginas} págs gris ✔ (máx |R−G| ${r.xerox.gris.maxRG}) · cuadernillo-xerox ${r.pdfs.cuadernilloXerox.paginas} caras · tóner máx ${Math.max(...r.xerox.toner.map((t) => t.pct))} % · como-imprimir ${r.pdfs.comoImprimir.paginas} pág`);
     for (const a of r.avisos) log(`  ⚠ ${a}`);
   }
+  if (usarCache) podar(vigentes);
   const segundos = (Date.now() - t0) / 1000;
   if (!fixture) {
-    const manifest = { version: 1, generado_con: `typst ${fs.readFileSync(path.join(RAIZ, 'print', 'TYPST_VERSION'), 'utf8').trim()}`, epoch: EPOCH, segundos, volumenes: resultados };
+    const manifest = { version: 1, generado_con: `typst ${fs.readFileSync(path.join(RAIZ, 'print', 'TYPST_VERSION'), 'utf8').trim()}`, epoch: EPOCH, segundos, compilados, desde_cache: resultados.length - compilados, volumenes: resultados };
     fs.writeFileSync(path.join(BUILD, 'manifest.json'), JSON.stringify(manifest, null, 2));
     fs.writeFileSync(path.join(BUILD, 'resumen.md'), resumenMd(resultados, segundos));
-    log(`✔ print/build/manifest.json y resumen.md (${segundos.toFixed(1)} s)`);
+    log(`✔ print/build/manifest.json y resumen.md (${segundos.toFixed(1)} s · ${compilados} compilado(s), ${resultados.length - compilados} desde la caché)`);
   } else {
     fs.writeFileSync(path.join(BUILD, 'fixtures', path.basename(fixture, '.mdx'), 'resultado.json'), JSON.stringify(resultados[0], null, 2));
   }

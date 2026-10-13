@@ -7,6 +7,9 @@
 // componente (print/build/kit/typst/<Nombre>.png, para /fanzine/kit y el
 // montaje web vs Typst) → print/build/kit/manifest-kit.json.
 // Los PDF y PNG no se commitean: copy-dist.mjs los lleva a dist/fanzine/kit/.
+// Caché (cache.mjs): si la huella del kit (su volumen.json + los archivos que
+// nombra + el motor) no cambió, se restauran los PDF, las miniaturas y el
+// manifest desde print/cache/kit/ sin compilar. --sin-cache la ignora.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -17,10 +20,12 @@ import { typstBin, verificarFuentes } from './build-prueba.mjs';
 import { variantes } from './variantes.mjs';
 import * as C from './check.mjs';
 import * as Q from './cuadernillo.mjs';
+import { huellaVolumen, restaurar, guardar } from './cache.mjs';
 
 const BUILD = path.join(RAIZ, 'print', 'build');
 const DIR = path.join(BUILD, 'kit');
 const quiet = process.argv.includes('--quiet');
+const usarCache = !process.argv.includes('--sin-cache');
 const log = (...a) => { if (!quiet) console.log(...a); };
 const rel = (p) => path.relative(RAIZ, p).split(path.sep).join('/');
 const sha = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
@@ -51,6 +56,14 @@ export async function construirKit() {
   log(r.stdout.trim());
   const jsonPath = path.join(DIR, 'volumen.json');
   const jsonRel = '/' + rel(jsonPath);
+  // Caché: el kit sólo se recompila si cambió el registro, sus fotos demo o el motor.
+  const huella = usarCache ? huellaVolumen(jsonPath) : null;
+  const guardado = huella ? restaurar('kit', huella, DIR) : null;
+  if (guardado) {
+    fs.writeFileSync(path.join(DIR, 'manifest-kit.json'), JSON.stringify(guardado, null, 2));
+    log(`↺ kit: sin cambios (huella ${huella.slice(0, 12)}): PDF y miniaturas desde la caché, no se compila`);
+    return { ...guardado, cache: true };
+  }
   // 2) variantes de fotos
   const { vol } = await variantes(jsonPath);
   const errores = [];
@@ -101,6 +114,7 @@ export async function construirKit() {
     componentes, avisos: vol.avisos,
   };
   fs.writeFileSync(path.join(DIR, 'manifest-kit.json'), JSON.stringify(manifest, null, 2));
+  if (huella) guardar('kit', huella, DIR, [...Object.values(SALIDAS), ...componentes.map((c) => path.join(DIR, c.png))], manifest);
   return manifest;
 }
 
