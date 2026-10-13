@@ -200,6 +200,15 @@ const pages = defineCollection({
     subtitle: z.string().optional(),
     credit: z.string().optional(),
     colorScheme: z.enum(colorSchemeNames).default('rosa'),
+    // Estado vacío de un listado (issue #40, /fanzine): qué se muestra si
+    // todavía no hay nada público. Sólo lo usa fanzine-indice.mdx.
+    vacio: z
+      .object({
+        titulo: z.string(),
+        texto: z.string(),
+        enlace: z.string().default('Colabora con el fanzine →'),
+      })
+      .optional(),
   }),
 });
 

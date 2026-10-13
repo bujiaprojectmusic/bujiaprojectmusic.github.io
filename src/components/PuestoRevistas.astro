@@ -1,0 +1,411 @@
+---
+// Índice del fanzine como puesto de revistas (issue #40): las portadas de
+// los volúmenes en una repisa sobre pegboard, del más reciente al más
+// antiguo, ladeadas, con copias encimadas detrás y un sticker "Vol. XX"
+// en amarillo, rosa o negro (los colores de la portada del vol. 01).
+// Recibe la lista YA filtrada (listarVolumenesPublicos: sin prueba,
+// sin_listar ni borradores) y no decide visibilidad. Si la lista viene
+// vacía pinta el estado vacío con el texto de src/content/pages/fanzine-indice.mdx.
+import OptimizedImage from './OptimizedImage.astro';
+import SelloGoma from './fanzine/SelloGoma.astro';
+import type { VolumenListado } from '../utils/volumenes';
+
+interface Vacio {
+  titulo: string;
+  texto: string;
+  enlace: string;
+}
+interface Props {
+  volumenes: VolumenListado[];
+  vacio: Vacio;
+  /** Ruta a la página de colaboración (con base). */
+  colabora: string;
+  base?: string;
+}
+const { volumenes, vacio, colabora, base = '' } = Astro.props;
+
+const fmt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' });
+const num = (n: number) => String(n).padStart(2, '0');
+// Giros fijos (no aleatorios): el mismo HTML en cada build.
+const GIROS = [-3, 2.5, -1.5, 3.5, -2.5, 1.5];
+const STICKERS = ['amarillo', 'rosa', 'negro'] as const;
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+{volumenes.length > 0 ? (
+  <ul class="fz-puesto" role="list">
+    {volumenes.map((v, i) => (
+      <li class="fz-puesto__item" style={`--giro:${GIROS[i % GIROS.length]}deg`}>
+        <a class="fz-puesto__link" href={`${base}/fanzine/${v.slug}`}>
+          <span class="fz-puesto__estante">
+            <span class="fz-puesto__portada">
+              <span class="fz-puesto__papel tx-grain">
+                {v.cover ? (
+                  <OptimizedImage
+                    src={v.cover}
+                    alt={`Portada del Vol. ${num(v.numero)}: ${v.titulo}`}
+                    widths={[240, 360, 480, 640]}
+                    sizes="(max-width: 640px) 44vw, 250px"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={i === 0 ? 'high' : undefined}
+                    print={false}
+                    context={`/fanzine: portada de ${v.slug}`}
+                  />
+                ) : (
+                  <span class="fz-puesto__sin-portada" role="img" aria-label={`Portada del Vol. ${num(v.numero)}: ${v.titulo}`}>
+                    <span>{v.titulo}</span>
+                  </span>
+                )}
+              </span>
+              <span class="fz-puesto__cinta" aria-hidden="true"></span>
+              <span class={`fz-puesto__vol fz-puesto__vol--${STICKERS[i % STICKERS.length]}`} aria-hidden="true">
+                <span class="fz-puesto__vol-txt">Vol.</span>
+                <span class="fz-puesto__vol-num">{num(v.numero)}</span>
+              </span>
+            </span>
+          </span>
+          <span class="fz-puesto__info">
+            <span class="fz-puesto__titulo">{v.titulo}</span>
+            <span class="fz-puesto__meta">
+              Vol. {num(v.numero)} · <time datetime={iso(v.fecha)}>{fmt.format(v.fecha)}</time>
+            </span>
+            {v.descripcion && <span class="fz-puesto__desc">{v.descripcion}</span>}
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+) : (
+  <section class="fz-vacio" aria-labelledby="fz-vacio-titulo">
+    <div class="fz-vacio__repisa" aria-hidden="true">
+      <span class="fz-vacio__hueco">
+        <span class="fz-puesto__cinta"></span>
+        <span class="fz-puesto__vol fz-puesto__vol--amarillo">
+          <span class="fz-puesto__vol-txt">Vol.</span>
+          <span class="fz-puesto__vol-num">??</span>
+        </span>
+        <SelloGoma texto="En camino" color="rojo" angulo={-12} class="fz-vacio__sello" />
+      </span>
+    </div>
+    <div class="fz-vacio__texto">
+      <h2 id="fz-vacio-titulo" class="fz-vacio__titulo">{vacio.titulo}</h2>
+      <p>{vacio.texto}</p>
+      <a class="fz-vacio__boton" href={colabora}>{vacio.enlace}</a>
+    </div>
+  </section>
+)}
+
+<style>
+  /* ── Repisa ───────────────────────────────────────────────────────── */
+  .fz-puesto {
+    --gx: 1.75rem;
+    --repisa: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 1.75rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 3rem var(--gx);
+  }
+  .fz-puesto__link {
+    display: block;
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 2px;
+  }
+  .fz-puesto__link:focus-visible {
+    outline: 3px dashed var(--ink);
+    outline-offset: 10px;
+  }
+  /* Cada portada lleva su tramo de repisa; los tramos se tocan en el hueco
+     de la cuadrícula y forman una repisa continua por fila. */
+  .fz-puesto__estante {
+    position: relative;
+    display: block;
+    padding-bottom: calc(var(--repisa) + 0.35rem);
+  }
+  .fz-puesto__estante::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--gx) / -2);
+    right: calc(var(--gx) / -2);
+    bottom: 0;
+    height: var(--repisa);
+    background: linear-gradient(#3a3a3a, #111 45%, #000);
+    border-top: 2px solid #5c5c5c;
+    box-shadow: 0 6px 8px -4px rgb(0 0 0 / 0.45);
+  }
+
+  /* ── Portada: ladeada, con una copia encimada detrás ────────────────── */
+  .fz-puesto__portada {
+    position: relative;
+    display: block;
+    transform: rotate(var(--giro, -2deg));
+    transform-origin: 50% 100%;
+    transition: transform 0.18s ease;
+  }
+  .fz-puesto__portada::before {
+    /* La siguiente copia del mismo número, asomando atrás. */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--paper, #fff);
+    border: 2px solid var(--ink);
+    transform: rotate(calc(var(--giro, -2deg) * -1.4)) translate(6px, 3px);
+    box-shadow: 4px 6px 10px rgb(0 0 0 / 0.22);
+    z-index: 0;
+  }
+  .fz-puesto__papel {
+    position: relative;
+    z-index: 1;
+    display: block;
+    aspect-ratio: 8 / 11;
+    overflow: hidden;
+    background: #fff;
+    border: 2px solid var(--ink);
+    box-shadow:
+      2px 3px 0 rgb(0 0 0 / 0.35),
+      8px 14px 22px rgb(0 0 0 / 0.28);
+    --tx-grain: 0.25;
+  }
+  .fz-puesto__papel :global(picture),
+  .fz-puesto__papel :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* Volumen sin portada: cartel rosa de medio tono con el título en un recorte blanco. */
+  .fz-puesto__sin-portada {
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 1rem 0.8rem;
+    background-color: #ff2f92;
+    background-image: radial-gradient(rgb(0 0 0 / 0.28) 1.4px, transparent 1.6px);
+    background-size: 9px 9px;
+    font-family: 'Anton', var(--font-head);
+    font-size: 1.35rem;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: #111;
+  }
+  .fz-puesto__sin-portada span {
+    background: #fff;
+    border: 2px solid #111;
+    padding: 0.15em 0.35em;
+    transform: rotate(-3deg);
+    box-shadow: 3px 3px 0 #111;
+  }
+  /* Cinta que "pega" la portada a la repisa. */
+  .fz-puesto__cinta {
+    position: absolute;
+    z-index: 2;
+    top: -10px;
+    right: 16%;
+    width: 64px;
+    height: 20px;
+    background: rgb(214 190 140 / 0.82);
+    transform: rotate(7deg);
+    clip-path: polygon(0 12%, 6% 0, 12% 14%, 20% 2%, 30% 12%, 42% 0, 54% 10%, 66% 0, 78% 12%, 88% 2%, 100% 10%, 97% 88%, 90% 100%, 80% 88%, 68% 100%, 56% 90%, 44% 100%, 32% 88%, 20% 100%, 10% 90%, 2% 100%);
+  }
+
+  /* ── Sticker "Vol. XX" ─────────────────────────────────────────────── */
+  .fz-puesto__vol {
+    position: absolute;
+    z-index: 3;
+    top: -0.9rem;
+    left: -0.75rem;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25em;
+    padding: 0.15em 0.55em 0.1em;
+    font-family: 'Anton', var(--font-head);
+    text-transform: uppercase;
+    line-height: 1;
+    border: 3px solid #111;
+    transform: rotate(-9deg);
+    box-shadow: 4px 4px 0 #111;
+  }
+  .fz-puesto__vol-txt {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+  }
+  .fz-puesto__vol-num {
+    font-size: 2rem;
+  }
+  .fz-puesto__vol--amarillo {
+    background: #ffe600;
+    color: #111;
+    box-shadow: 4px 4px 0 #ff2f92;
+  }
+  .fz-puesto__vol--rosa {
+    background: #ff2f92;
+    color: #111;
+  }
+  .fz-puesto__vol--negro {
+    background: #111;
+    color: #ffe600;
+    border-color: #ffe600;
+    box-shadow: 4px 4px 0 #ff2f92;
+  }
+
+  /* ── Datos bajo la repisa ──────────────────────────────────────────── */
+  .fz-puesto__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.9rem;
+  }
+  .fz-puesto__titulo {
+    font-family: 'Anton', var(--font-head);
+    font-size: 1.3rem;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  .fz-puesto__meta {
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .fz-puesto__desc {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .fz-puesto__link:hover .fz-puesto__titulo,
+  .fz-puesto__link:focus-visible .fz-puesto__titulo {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-decoration-color: #ff2f92;
+    text-underline-offset: 3px;
+  }
+
+  /* Hover / foco: la portada se endereza y se levanta de la repisa. */
+  .fz-puesto__link:hover .fz-puesto__portada,
+  .fz-puesto__link:focus-visible .fz-puesto__portada {
+    transform: rotate(0deg) translateY(-8px);
+  }
+
+  /* Móvil: dos portadas por fila (una en pantallas muy angostas). */
+  @media (max-width: 640px) {
+    .fz-puesto {
+      --gx: 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem var(--gx);
+    }
+    .fz-puesto__titulo {
+      font-size: 1.05rem;
+    }
+    .fz-puesto__vol {
+      left: -0.4rem;
+    }
+    .fz-puesto__vol-num {
+      font-size: 1.55rem;
+    }
+    .fz-puesto__cinta {
+      width: 48px;
+      height: 16px;
+    }
+  }
+  @media (max-width: 340px) {
+    .fz-puesto {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ── Estado vacío: un hueco en la repisa ───────────────────────────── */
+  .fz-vacio {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2.5rem;
+    align-items: center;
+    padding: 2rem 0 0.5rem;
+  }
+  .fz-vacio__repisa {
+    position: relative;
+    padding-bottom: calc(12px + 0.35rem);
+  }
+  .fz-vacio__repisa::after {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    right: -1rem;
+    bottom: 0;
+    height: 12px;
+    background: linear-gradient(#3a3a3a, #111 45%, #000);
+    border-top: 2px solid #5c5c5c;
+    box-shadow: 0 6px 8px -4px rgb(0 0 0 / 0.45);
+  }
+  .fz-vacio__hueco {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 8 / 11;
+    border: 3px dashed var(--ink);
+    background: rgb(255 255 255 / 0.55);
+    transform: rotate(-2deg);
+  }
+  .fz-vacio__hueco :global(.fz-vacio__sello) {
+    font-size: 0.95rem;
+  }
+  .fz-vacio__titulo {
+    font-family: 'Anton', var(--font-head);
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    line-height: 1;
+    margin: 0 0 0.75rem;
+  }
+  .fz-vacio__texto p {
+    margin: 0 0 1.25rem;
+    line-height: 1.6;
+  }
+  .fz-vacio__boton {
+    display: inline-block;
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    color: #111;
+    background: #ffe600;
+    border: 3px solid #111;
+    padding: 0.6em 1em;
+    box-shadow: 4px 4px 0 #ff2f92;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .fz-vacio__boton:hover,
+  .fz-vacio__boton:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #ff2f92;
+  }
+  .fz-vacio__boton:focus-visible {
+    outline: 3px dashed var(--ink);
+    outline-offset: 4px;
+  }
+  @media (max-width: 640px) {
+    .fz-vacio {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      justify-items: center;
+      text-align: center;
+    }
+    .fz-vacio__repisa {
+      width: min(180px, 60vw);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fz-puesto__portada,
+    .fz-vacio__boton {
+      transition: none;
+    }
+  }
+</style>
