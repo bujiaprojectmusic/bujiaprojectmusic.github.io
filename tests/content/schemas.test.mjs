@@ -19,6 +19,23 @@ test('pieza válida pasa y rellena defaults', () => {
   assert.equal(r.data.licencia, 'permiso-no-exclusivo');
   assert.deepEqual(r.data.fotos, []);
   assert.equal(r.data.draft, false);
+  assert.equal(r.data.template, 'pieza');
+});
+
+test('template poema exige instagram, medium y credito_video', () => {
+  const basePoema = { ...base, template: 'poema', seccion: 'poema' };
+  const malo = pieza.safeParse(basePoema);
+  assert.equal(malo.success, false);
+  const msgs = mensajes(malo);
+  assert.ok(msgs.some((m) => /instagram/.test(m) && /poema/.test(m)), msgs.join(' | '));
+  const ok = pieza.safeParse({
+    ...basePoema,
+    instagram: 'https://instagram.com/autora',
+    medium: 'https://medium.com/autora',
+    credito_video: 'Video: Alguien',
+  });
+  assert.ok(ok.success, JSON.stringify(ok.error?.issues));
+  assert.equal(ok.data.template, 'poema');
 });
 
 for (const [nombre, datos, esperado] of [

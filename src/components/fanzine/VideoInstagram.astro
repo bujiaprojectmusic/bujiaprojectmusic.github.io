@@ -1,0 +1,60 @@
+---
+// Reel o post de Instagram con fachada. Hasta el clic no hay iframe, ni
+// script, ni petición a Instagram: el botón sólo guarda la URL del embed.
+// Después del clic se mete el iframe oficial (/embed), sin autoplay.
+// El enlace "abrir en Instagram" y el crédito se quedan siempre.
+import { embedInstagram, urlPublicaInstagram } from '../../utils/poema';
+
+interface Props {
+  /** URL del reel, post o IGTV. Vacía = el build falla. */
+  url: string;
+  /** Crédito del video, siempre visible. */
+  credito: string;
+  /** Leyenda visible y nombre accesible del botón. */
+  leyenda: string;
+}
+const url = String(Astro.props.url ?? '');
+const credito = String(Astro.props.credito ?? '').trim();
+const leyenda = String(Astro.props.leyenda ?? '').trim();
+if (!url.trim()) throw new Error('<VideoInstagram> tiene url vacía.');
+if (!credito) throw new Error('<VideoInstagram> tiene credito vacío.');
+if (!leyenda) throw new Error('<VideoInstagram> tiene leyenda vacía.');
+const publica = urlPublicaInstagram(url);
+const embed = embedInstagram(url);
+---
+
+<figure class="fz-video-ig">
+  <div class="fz-video-ig__marco">
+    <button
+      type="button"
+      class="fz-video-ig__cargar"
+      data-embed={embed}
+      data-title={leyenda}
+      aria-label={`Cargar el video de Instagram: ${leyenda}`}
+    >
+      <span class="fz-video-ig__play" aria-hidden="true">▶</span>
+      <span>Cargar video</span>
+    </button>
+  </div>
+  <a class="fz-video-ig__abrir" href={publica} rel="noreferrer noopener">abrir en Instagram</a>
+  <figcaption class="fz-video-ig__credito">{credito}</figcaption>
+  <p class="fz-video-ig__leyenda">{leyenda}</p>
+</figure>
+
+<script is:inline>
+  if (!window.__fzVideoIg) {
+    window.__fzVideoIg = true;
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      var b = t && t.closest ? t.closest('button.fz-video-ig__cargar[data-embed]') : null;
+      if (!b) return;
+      var f = document.createElement('iframe');
+      f.src = b.getAttribute('data-embed');
+      f.title = b.getAttribute('data-title') || 'Video de Instagram';
+      f.setAttribute('allow', 'clipboard-write; encrypted-media; picture-in-picture; web-share');
+      f.setAttribute('allowfullscreen', '');
+      f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+      b.replaceWith(f);
+    });
+  }
+</script>

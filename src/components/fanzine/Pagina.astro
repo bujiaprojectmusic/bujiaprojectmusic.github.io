@@ -9,6 +9,7 @@ import Pliego from './Pliego.astro';
 import { getPiezaActual } from '../../utils/piezaActual';
 // Estilos en src/styles/fotos-pieza.css (ver ahí por qué no van en <style>).
 import '../../styles/fotos-pieza.css';
+import geo from '../../../print/componentes.json';
 import type { ColorSchemeName } from '../../config/site';
 
 interface Props {
@@ -27,10 +28,36 @@ if (!Number.isInteger(n) || n < 1 || n > total) {
 }
 const final = desde + n - 1;
 const esquema = (scheme ?? pieza.data.scheme ?? schemeVol) as ColorSchemeName | undefined;
+const poema = pieza.data.template === 'poema';
+const P = geo.poema;
+const estiloPoema = poema
+  ? `--fz-poema-titulo:${P.titulo_pt}pt;--fz-poema-giro:${P.giro_grados}deg;--fz-poema-cuerpo:${P.cuerpo_pt}pt;--fz-poema-verso:${P.verso_pt}pt`
+  : undefined;
+if (poema && n === total) {
+  const { instagram, medium, credito_video: creditoVideo } = pieza.data;
+  if (!instagram || !medium || !creditoVideo) {
+    throw new Error(`${pieza.id}: template poema sin instagram, medium o credito_video.`);
+  }
+}
 ---
 
 <Pliego n={final} scheme={esquema} bleed={bleed ?? false} bleedAlt={bleedAlt}>
-  <slot />
+  {poema ? (
+    <div class="fz-poema" style={estiloPoema}>
+      {n === 1 && <h1 class="fz-poema-titulo">{pieza.data.titulo}</h1>}
+      <slot />
+      {n === total && (
+        <footer class="fz-poema-creditos">
+          <p>{pieza.data.autor}</p>
+          <p><a href={pieza.data.instagram} rel="noreferrer noopener">Instagram</a></p>
+          <p><a href={pieza.data.medium} rel="noreferrer noopener">Medium</a></p>
+          <p>{pieza.data.credito_video}</p>
+        </footer>
+      )}
+    </div>
+  ) : (
+    <slot />
+  )}
   {n === total && (
     <p class="fz-credito"><span>{pieza.data.credito}</span>{pieza.data.bio && <span class="fz-credito__bio"> · {pieza.data.bio}</span>}</p>
   )}

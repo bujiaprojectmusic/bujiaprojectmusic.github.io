@@ -245,5 +245,20 @@
     "marco_alto_max_pct": 70,
     "oscurecer_pct": 80,
     "inset_pt": 14
+  },
+  "poema": {
+    "titulo_pt": 32,
+    "giro_grados": -1.5,
+    "verso_pt": 22,
+    "borde_ext_pt": 2.25,
+    "borde_int_pt": 0.75,
+    "separacion_pt": 3,
+    "fallas_paso_pt": 5,
+    "fallas_punto_pt": 0.55,
+    "cuerpo_pt": 9.5
+  },
+  "instagram": {
+    "qr_cm": 2.5,
+    "leyenda": "mira el video"
   }
 }

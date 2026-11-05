@@ -242,6 +242,35 @@ import FotoCita from '../../../components/fanzine/FotoCita.astro';
   Geometría en `print/componentes.json` → `foto_cita`; gemelo
   `imagenes.typ#foto-cita`. Fixture: `tests/print/fixtures/fotos-editoriales.mdx`.
 
+## 2d. Poema (`template: poema`)
+
+En el frontmatter: `template: poema`, más `instagram`, `medium` y
+`credito_video`. El layout pone el título en Anton (sello / xerox) y, al
+pie, autora, los dos links y el crédito del video. El cuerpo va en un
+bloque `poema` para no justificarlo ni refluirlo: cada renglón es un verso,
+la línea en blanco separa estrofas y la sangría es la del original.
+
+~~~~mdx
+<VersoDestacado verso="la lija canta bajito" />
+
+```poema
+la lija canta bajito
+en la mesa del taller
+
+  y el verso sangrado
+queda donde estaba
+```
+
+<VideoInstagram url="https://www.instagram.com/reel/CpruebaJira/" credito="Video: Taller de prueba" leyenda="Reel de prueba" />
+~~~~
+
+- **`VersoDestacado`** — banda sólida, el verso también queda en el cuerpo.
+  Si no aparece tal cual, el build falla. En papel, Anton ≥ 9 pt.
+- **`VideoInstagram`** — fachada: el iframe oficial se crea al clic, sin
+  autoplay. Siempre hay enlace «abrir en Instagram» y crédito. `url` vacía
+  rompe el build. En papel, QR ≥ 2,5 cm con zona de silencio, leyenda
+  «mira el video» y crédito ≥ 7 pt.
+
 ## 3. Encabezados (h2/h3/h4)
 
 No hace falta ningún componente — escribí `##`, `###` o `####` normal en
@@ -622,6 +651,8 @@ a un volumen.
 | `VideoCinema` | Video y playlists (fachadas) | `content/VideoCinema.astro` | `componentes/video.typ#video-poster` | aprobado (vol. 00) |
 | `VideoPoster` | Video y playlists (fachadas) | `content/VideoPoster.astro` | `componentes/video.typ#video-poster` | aprobado (vol. 00) |
 | `Playlist` | Video y playlists (fachadas) | `content/Playlist.astro` | `componentes/video.typ#video-poster` | aprobado (vol. 01) |
+| `VersoDestacado` | Bloques de texto | `fanzine/VersoDestacado.astro` | `componentes/poema.typ#verso-destacado` | aprobado |
+| `VideoInstagram` | Video y playlists (fachadas) | `fanzine/VideoInstagram.astro` | `componentes/video.typ#video-instagram` | aprobado |
 | `Fachada` | Video y playlists (fachadas) | `content/Fachada.astro` | sólo web: es la mecánica web del clic; en papel los videos son QR (video.typ) u omitidos | aprobado (vol. 01) |
 | `Sticker` | Marca: stickers, cintas, texturas | `fanzine/Sticker.astro` | `componentes/marca.typ#sticker` | aprobado (vol. 00) |
 | `Cinta` | Marca: stickers, cintas, texturas | `fanzine/Cinta.astro` | `componentes/marca.typ#cinta` | aprobado (vol. 00) |
