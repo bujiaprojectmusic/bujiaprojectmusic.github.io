@@ -57,7 +57,7 @@
 .fz-poema-verso {
   display: block;
   font-size: inherit;
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .fz-verso-destacado {

@@ -17,7 +17,15 @@ if (typeof verso !== 'string' || verso.length === 0) {
 }
 const { pieza } = getPiezaActual('VersoDestacado');
 if (!pieza.id.startsWith('kit/')) {
-  const archivo = path.join(process.cwd(), 'src', 'content', 'piezas', pieza.id, 'index.mdx');
+  // El id de la colección es "<carpeta>/index.mdx"; el del kit es la carpeta.
+  const base = path.join(process.cwd(), 'src', 'content', 'piezas');
+  const candidatos = [
+    path.join(base, pieza.id),
+    path.join(base, pieza.id.replace(/\/index\.mdx$/, ''), 'index.mdx'),
+    path.join(base, pieza.id, 'index.mdx'),
+  ];
+  const archivo = candidatos.find((c) => fs.existsSync(c) && fs.statSync(c).isFile());
+  if (!archivo) throw new Error(`<VersoDestacado>: no encuentro el MDX de la pieza "${pieza.id}".`);
   const src = fs.readFileSync(archivo, 'utf8');
   const cuerpo = cuerpoDePoema(src);
   if (!cuerpo.includes(verso)) {

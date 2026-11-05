@@ -37,7 +37,13 @@
     if linea == "" {
       v(pt(e.interlinea_pt))
     } else {
-      block(above: 0pt, below: entre, breakable: false, text(linea.replace(" ", "\u{00A0}")))
+      // La sangría del original se queda (espacios duros). El resto puede
+      // partirse al ancho de la caja: un verso largo no se come el margen.
+      let i = 0
+      while i < linea.len() and linea.at(i) == " " { i += 1 }
+      let sangria = linea.slice(0, i).replace(" ", "\u{00A0}")
+      let resto = linea.slice(i)
+      block(above: 0pt, below: entre, breakable: false)[#sangria#resto]
     }
   }
 }
@@ -57,15 +63,28 @@
     }))
 }
 
+// Parte una URL larga en el último tramo, sin guion de corte: si no, Typst
+// parte en el "-" de la URL y el enlace impreso queda con un guion de más.
+#let url-en-lineas(u) = {
+  let partes = u.split("/")
+  let ultima = partes.last()
+  if ultima == "" or u.len() < 48 { u }
+  else {
+    let cabeza = partes.slice(0, partes.len() - 1).join("/") + "/"
+    [#cabeza#linebreak()#ultima]
+  }
+}
+
 #let creditos-poema(ctx, n) = {
   block(width: 100%, above: 10pt, below: 2pt, inset: (top: 6pt), stroke: (top: 0.8pt + negro),
     texto("cuerpo_2col", quien: "créditos del poema", {
       set par(justify: false)
+      set text(hyphenate: false)
       strong(n.autora)
       linebreak()
-      [Instagram: #n.instagram]
+      [Instagram: #url-en-lineas(n.instagram)]
       linebreak()
-      [Medium: #n.medium]
+      [Medium: #url-en-lineas(n.medium)]
       linebreak()
       n.credito_video
     }))
