@@ -52,12 +52,14 @@ import CintaCanela from '../../components/fanzine/CintaCanela.astro';
 import SelloGoma from '../../components/fanzine/SelloGoma.astro';
 import TituloRescate from '../../components/fanzine/TituloRescate.astro';
 import CollageXerox from '../../components/fanzine/CollageXerox.astro';
+import VersoDestacado from '../../components/fanzine/VersoDestacado.astro';
+import VideoInstagram from '../../components/fanzine/VideoInstagram.astro';
 
 const MAPA: Record<string, any> = {
   Pliego, Pagina, Foto, FotoCita, Relleno, Portada, Indice, Contraportada, DatosTaller, DescargaPdf, SectionTitle, PostCover, StickerTitle, SectionLabel,
   Columnas, Quote, Note, Divider, ImageFull, ImageSide, Polaroid, PhotoOld, Xerox, Gallery, BeforeAfter, OptimizedImage, MissingImage,
   VideoOldTV, VideoCinema, VideoPoster, Playlist, Sticker, Cinta, Parche, PunkButton,
-  CintaCanela, SelloGoma, TituloRescate, CollageXerox,
+  CintaCanela, SelloGoma, TituloRescate, CollageXerox, VersoDestacado, VideoInstagram,
 };
 
 // Manifest del kit impreso (npm run print:kit); sin él, las miniaturas dicen "no disponible".
@@ -115,9 +117,10 @@ const conteo = { total: todos.length, aprobados: aprobados.length, propuestos: p
           <a href="/fanzine/kit/jirafa-kit.pdf">jirafa-kit.pdf</a> ({manifest.pdfs.pantalla.paginas} págs, {mb(manifest.pdfs.pantalla.bytes)}) ·
           <a href="/fanzine/kit/jirafa-kit-bn.pdf">jirafa-kit-bn.pdf</a> (B/N, {mb(manifest.pdfs.bn.bytes)}) ·
           <a href="/fanzine/kit/fachadas">fixture de fachadas</a>
+          · <a href="/fanzine/kit/poema">poema de prueba</a>
         </p>
       ) : (
-        <p class="kit__pdfs">Catálogo impreso no disponible en este build (corré <code>npm run print:kit</code> antes de <code>npm run build</code>). · <a href="/fanzine/kit/fachadas">fixture de fachadas</a></p>
+        <p class="kit__pdfs">Catálogo impreso no disponible en este build (corré <code>npm run print:kit</code> antes de <code>npm run build</code>). · <a href="/fanzine/kit/fachadas">fixture de fachadas</a> · <a href="/fanzine/kit/poema">poema de prueba</a></p>
       )}
       <nav class="kit__toc" aria-label="Grupos">
         {grupos.map((g) => (

@@ -2126,6 +2126,80 @@
       "notas": "Aprobado para el vol. 01 (issue #17, propuesta 4). En papel las fotos van siempre en gris (variante bn), con marco blanco y cinta canela."
     },
     {
+      "nombre": "VersoDestacado",
+      "grupo": "bloques",
+      "tipo": "componente",
+      "descripcion": "Verso grande sobre banda sólida (Anton). El mismo texto tiene que aparecer tal cual en el bloque ```poema del cuerpo; si no, el build falla. En papel, ≥ 9 pt, sin justificar.",
+      "web": "src/components/fanzine/VersoDestacado.astro",
+      "typst": "print/lib/componentes/poema.typ#verso-destacado",
+      "props": [
+        {
+          "nombre": "verso",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Verso o versos (los saltos de línea se conservan) que ya están en el cuerpo"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "verso": "la lija canta bajito"
+        },
+        "hijos": null
+      },
+      "notas": "Sólo dentro de una pieza. En un poema el cuerpo es un bloque ```poema: ahí se busca el verso, no en el atributo."
+    },
+    {
+      "nombre": "VideoInstagram",
+      "grupo": "multimedia",
+      "tipo": "componente",
+      "descripcion": "Reel o post de Instagram. En la web, fachada con clic: ningún iframe, script ni cookie de Instagram antes; después, el embed oficial sin autoplay, más el enlace «abrir en Instagram» y el crédito. En papel, QR al reel de al menos 2,5 cm con zona de silencio, leyenda «mira el video» y crédito ≥ 7 pt. url vacía rompe el build.",
+      "web": "src/components/fanzine/VideoInstagram.astro",
+      "typst": "print/lib/componentes/video.typ#video-instagram",
+      "props": [
+        {
+          "nombre": "url",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "URL del reel, post o IGTV. Vacía = error de build"
+        },
+        {
+          "nombre": "credito",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Crédito del video, siempre visible"
+        },
+        {
+          "nombre": "leyenda",
+          "tipo": "string",
+          "default": null,
+          "obligatoria": true,
+          "que": "Leyenda visible y nombre accesible del botón"
+        }
+      ],
+      "estado": "aprobado",
+      "volumen": null,
+      "soloWeb": false,
+      "soloImpreso": false,
+      "mdx": true,
+      "demo": {
+        "props": {
+          "url": "https://www.instagram.com/reel/CpruebaJira/",
+          "credito": "Video: Taller de prueba",
+          "leyenda": "Reel de prueba"
+        },
+        "hijos": null
+      },
+      "notas": "El QR apunta al permalink del reel. El lado del SVG sale de print/componentes.json (instagram.qr_cm) más la zona de silencio que ya trae el SVG (margin 4)."
+    },
+    {
       "nombre": "PapelRoto",
       "grupo": "propuestos",
       "tipo": "componente",

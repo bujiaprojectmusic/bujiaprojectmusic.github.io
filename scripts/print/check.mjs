@@ -229,7 +229,7 @@ async function qrsDePagina(pdf, p, esperados = []) {
 /** Cada QR de video del volumen se decodifica a su URL en la página que toca. */
 export async function revisarQr(vol, pdf) {
   const filas = [], errores = [];
-  const videos = (nodos, acc) => { for (const n of nodos ?? []) { if (n.t === 'componente' && n.nombre === 'VideoPoster') acc.push(n.props.url); videos(n.hijos ?? (n.items ? n.items.flat() : []), acc); } return acc; };
+  const videos = (nodos, acc) => { for (const n of nodos ?? []) { if (n.t === 'componente' && (n.nombre === 'VideoPoster' || n.nombre === 'VideoInstagram')) acc.push(n.props.url); videos(n.hijos ?? (n.items ? n.items.flat() : []), acc); } return acc; };
   for (const p of vol.pliegos) {
     const urls = videos(p.nodos, []);
     if (!urls.length) continue;

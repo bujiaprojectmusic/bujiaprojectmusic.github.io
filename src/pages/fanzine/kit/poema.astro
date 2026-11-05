@@ -1,0 +1,40 @@
+---
+// Fixture noindex del poema en borrador (no está en ningún volumen).
+// Sirve para ver la fachada del video: el HTML no trae iframe hasta el clic.
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+import { z } from 'astro/zod';
+import FanzineLayout from '../../../layouts/FanzineLayout.astro';
+import Volumen from '../../../components/fanzine/Volumen.astro';
+import Pagina from '../../../components/fanzine/Pagina.astro';
+import VersoDestacado from '../../../components/fanzine/VersoDestacado.astro';
+import VideoInstagram from '../../../components/fanzine/VideoInstagram.astro';
+import { setPiezaActual } from '../../../utils/piezaActual';
+import { piezaSchema } from '../../../content/schemas';
+import { bloquesLiterales, htmlPoema } from '../../../utils/poema';
+
+const id = '2026-11-poema-prueba';
+const archivo = path.resolve('src/content/piezas', id, 'index.mdx');
+const src = fs.readFileSync(archivo, 'utf8');
+const { data: crudo, content } = matter(src);
+const data = piezaSchema(() => z.string()).parse(crudo);
+const bloques = bloquesLiterales(content);
+setPiezaActual({ pieza: { id, data } as any, desde: 1, scheme: data.scheme, prueba: false });
+---
+
+<FanzineLayout title="Poema de prueba (borrador)" description="Pieza de prueba del template poema. No publicada." colorScheme={data.scheme ?? 'xerox'} noindex>
+  <article class="fz-volume-page post-body">
+    <Volumen>
+    <div class="fz-poema-creditos">Borrador · no publicado</div>
+    <Pagina n={1}>
+      {bloques.map((b) => {
+        if (b.tipo === 'verso') return <VersoDestacado verso={b.verso!} />;
+        if (b.tipo === 'cuerpo') return <Fragment set:html={htmlPoema(b.texto!)} />;
+        if (b.tipo === 'video') return <VideoInstagram url={b.url!} credito={b.credito!} leyenda={b.leyenda!} />;
+        return null;
+      })}
+    </Pagina>
+    </Volumen>
+  </article>
+</FanzineLayout>

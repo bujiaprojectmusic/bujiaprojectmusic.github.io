@@ -18,7 +18,9 @@ import { z } from 'astro/zod';
 import { colorSchemes } from '../config/site';
 import { toAssetPath } from '../utils/rutasAssets';
 
-export const SECCIONES = ['cronica-de-taller', 'entrevista', 'resena', 'fotoensayo', 'opinion', 'diy'] as const;
+export const SECCIONES = ['cronica-de-taller', 'entrevista', 'resena', 'fotoensayo', 'opinion', 'diy', 'poema'] as const;
+/** `pieza` es el texto corrido de siempre. `poema` fija título, cuerpo y créditos. */
+export const PLANTILLAS = ['pieza', 'poema'] as const;
 export const LICENCIAS = ['permiso-no-exclusivo', 'cc-by-nc-4.0', 'cc-by-sa-4.0', 'dominio-publico'] as const;
 export const RELLENOS = ['colabora', 'notas', 'taller'] as const;
 /** Páginas de pieza: 1…12 (piezas en 3…14 de un volumen de 16; con N mayor hay más lugar). */
@@ -74,9 +76,28 @@ export function piezaSchema(image: ImageFn) {
         .array(z.object({ tipo: z.enum(['video', 'playlist']), id: z.string().min(1), titulo: z.string().min(1) }).strict())
         .default([]),
       scheme: z.enum(colorSchemeNames).optional(),
+      /** `pieza` (default) no cambia el layout. `poema` exige instagram, medium y credito_video. */
+      template: z.enum(PLANTILLAS).default('pieza'),
+      /** Perfil de Instagram de la autora. Obligatorio si template es poema; sale en el pie. */
+      instagram: z.string().url().optional(),
+      /** Perfil o texto en Medium. Obligatorio si template es poema; sale en el pie. */
+      medium: z.string().url().optional(),
+      /** Crédito del video. Obligatorio si template es poema; siempre visible en el pie. */
+      credito_video: z.string().min(1).optional(),
       draft: z.boolean().default(false),
     })
-    .strict();
+    .strict()
+    .superRefine((data, ctx) => {
+      if (data.template !== 'poema') return;
+      const faltan: [keyof typeof data, string][] = [
+        ['instagram', 'el link de Instagram de la autora'],
+        ['medium', 'el link de Medium de la autora'],
+        ['credito_video', 'el crédito del video'],
+      ];
+      for (const [k, que] of faltan) {
+        if (!data[k]) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [k], message: `con template "poema" hace falta ${que}.` });
+      }
+    });
 }
 
 export function volumenSchema(image: ImageFn, reference: (c: 'piezas') => z.ZodTypeAny) {
@@ -134,4 +155,5 @@ export function volumenSchema(image: ImageFn, reference: (c: 'piezas') => z.ZodT
 }
 
 export type Seccion = (typeof SECCIONES)[number];
+export type Plantilla = (typeof PLANTILLAS)[number];
 export type Relleno = (typeof RELLENOS)[number];

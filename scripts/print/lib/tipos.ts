@@ -19,7 +19,10 @@ export type Nodo =
   | { t: 'bloque_codigo'; v: string }
   | { t: 'imagen'; foto: string; alt: string; pie?: string }
   | { t: 'html'; etiqueta: string; clase: string; hijos: Nodo[] }
-  | { t: 'componente'; nombre: string; props: Record<string, unknown>; hijos: Nodo[] };
+  | { t: 'componente'; nombre: string; props: Record<string, unknown>; hijos: Nodo[] }
+  | { t: 'titulo_poema'; v: string }
+  | { t: 'poema'; v: string }
+  | { t: 'creditos_poema'; autora: string; instagram: string; medium: string; credito_video: string };
 
 export interface Foto {
   id: string;

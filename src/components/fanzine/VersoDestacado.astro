@@ -1,0 +1,37 @@
+---
+// Verso grande sobre banda sólida. El mismo texto tiene que estar, tal cual,
+// en el cuerpo del poema (el bloque ```poema): si no, el build falla.
+// En el kit no hay pieza real y no se exige el cuerpo.
+import fs from 'node:fs';
+import path from 'node:path';
+import { getPiezaActual } from '../../utils/piezaActual';
+import { cuerpoDePoema } from '../../utils/poema';
+
+interface Props {
+  /** Verso o versos (saltos de línea se conservan). Tiene que aparecer igual en el cuerpo. */
+  verso: string;
+}
+const { verso } = Astro.props;
+if (typeof verso !== 'string' || verso.length === 0) {
+  throw new Error('<VersoDestacado> necesita verso="…" con el texto tal cual (no vacío).');
+}
+const { pieza } = getPiezaActual('VersoDestacado');
+if (!pieza.id.startsWith('kit/')) {
+  // El id de la colección es "<carpeta>/index.mdx"; el del kit es la carpeta.
+  const base = path.join(process.cwd(), 'src', 'content', 'piezas');
+  const candidatos = [
+    path.join(base, pieza.id),
+    path.join(base, pieza.id.replace(/\/index\.mdx$/, ''), 'index.mdx'),
+    path.join(base, pieza.id, 'index.mdx'),
+  ];
+  const archivo = candidatos.find((c) => fs.existsSync(c) && fs.statSync(c).isFile());
+  if (!archivo) throw new Error(`<VersoDestacado>: no encuentro el MDX de la pieza "${pieza.id}".`);
+  const src = fs.readFileSync(archivo, 'utf8');
+  const cuerpo = cuerpoDePoema(src);
+  if (!cuerpo.includes(verso)) {
+    throw new Error(`${archivo}: <VersoDestacado> — el verso no aparece tal cual en el cuerpo del poema:\n${verso}`);
+  }
+}
+---
+
+<blockquote class="fz-verso-destacado">{verso}</blockquote>

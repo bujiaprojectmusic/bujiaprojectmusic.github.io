@@ -1,0 +1,35 @@
+---
+# Pieza de prueba del template poema. Borrador: no entra a ningún volumen.
+# El texto es de relleno (no es el poema del issue de redacción).
+titulo: "Prueba de taller"
+seccion: poema
+template: poema
+autor: "Autora de prueba"
+credito: "Poema: Autora de prueba"
+instagram: "https://www.instagram.com/bujiaprojectmusic/"
+medium: "https://medium.com/autoradeprueba"
+credito_video: "Video: Taller de prueba"
+licencia: permiso-no-exclusivo
+consentimiento_ref: "2026-11-poema-prueba#puerta-1-2026-11-05"
+paginas: 1
+scheme: xerox
+draft: true
+---
+
+import Pagina from '../../../components/fanzine/Pagina.astro';
+import VersoDestacado from '../../../components/fanzine/VersoDestacado.astro';
+import VideoInstagram from '../../../components/fanzine/VideoInstagram.astro';
+
+<Pagina n={1}>
+  <VersoDestacado verso="la lija canta bajito" />
+
+```poema
+la lija canta bajito
+en la mesa del taller
+
+  y el verso sangrado
+queda donde estaba
+```
+
+  <VideoInstagram url="https://www.instagram.com/reel/CpruebaJira/" credito="Video: Taller de prueba" leyenda="Reel de prueba, sin publicar" />
+</Pagina>

@@ -6,7 +6,8 @@
 #import "/print/lib/componentes/imagenes.typ": image-full, image-side, gallery, polaroid, photo-old, xerox, before-after, optimized-image, foto, fotos-mitad, foto-cita
 #import "/print/lib/componentes/titulos.typ": section-title, post-cover
 #import "/print/lib/componentes/bloques.typ": columnas, quote, note, divider
-#import "/print/lib/componentes/video.typ": video-poster
+#import "/print/lib/componentes/video.typ": video-poster, video-instagram
+#import "/print/lib/componentes/poema.typ": titulo-poema, cuerpo-poema, verso-destacado, creditos-poema
 #import "/print/lib/componentes/taller.typ": datos-taller, sticker-title, section-label
 #import "/print/lib/componentes/marca.typ": sticker, cinta, parche
 #import "/print/lib/componentes/punk.typ": cinta-canela, sello-goma, titulo-rescate, collage-xerox
@@ -32,6 +33,8 @@
   Foto: foto,
   FotoCita: foto-cita,
   VideoPoster: video-poster,
+  VideoInstagram: video-instagram,
+  VersoDestacado: verso-destacado,
   DatosTaller: datos-taller,
   // #17: marca y piezas del taller. Playlist llega como VideoPoster desde el export.
   Sticker: sticker,
@@ -64,6 +67,9 @@
   else if t == "separador" { separador-md() }
   else if t == "bloque_codigo" { raw(n.v, block: true) }
   else if t == "html" { html(ctx, n) }
+  else if t == "titulo_poema" { titulo-poema(ctx, n.v) }
+  else if t == "poema" { cuerpo-poema(n.v) }
+  else if t == "creditos_poema" { creditos-poema(ctx, n) }
   else if t == "componente" {
     if n.nombre in ("Portada", "Indice", "Contraportada") {
       // Los pinta paginas.typ al armar la página; acá no va nada.

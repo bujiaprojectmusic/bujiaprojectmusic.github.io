@@ -14,6 +14,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import type { Nodo } from './tipos.ts';
+import { normalizarCuerpo } from '../../../src/utils/poema.ts';
 
 // ── Catálogo (issue #17): src/components/fanzine/registro.json ────────────
 // Un componente entra al impreso sólo si está en el registro, `aprobado` y
@@ -185,7 +186,9 @@ export function convertir(ctx: Contexto, n: any): Nodo[] | null {
       return [{ t: 'lista', ordenada: !!n.ordered, inicio: n.start ?? 1, items: n.children.map((li: any) => convertirHijos(ctx, li.children)) }];
     case 'blockquote': return [{ t: 'cita', hijos: convertirHijos(ctx, n.children) }];
     case 'thematicBreak': return [{ t: 'separador' }];
-    case 'code': return [{ t: 'bloque_codigo', v: n.value }];
+    case 'code':
+      if (n.lang === 'poema') return [{ t: 'poema', v: normalizarCuerpo(n.value) }];
+      return [{ t: 'bloque_codigo', v: n.value }];
     case 'html':
       throw new ErrorExport(`${donde(ctx, n)}: HTML crudo no soportado en el impreso.`);
     case 'link': {

@@ -1,0 +1,171 @@
+/* Poema (template: "poema") y sus componentes. CSS global: ComponerPiezas
+   pinta el MDX con slots.render y no propaga <style>. Lo importa
+   FanzineLayout, así que está en toda página del fanzine. Medidas por
+   defecto = print/componentes.json (poema); Pagina las pisa con variables. */
+
+.fz-poema-titulo {
+  display: block;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.5rem auto 1.15rem;
+  padding: 0.28em 0.5em 0.2em;
+  font-family: 'Anton', sans-serif;
+  font-weight: 400;
+  font-size: var(--fz-poema-titulo, 32pt);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+  transform: rotate(var(--fz-poema-giro, -1.5deg));
+  text-shadow: 1px 0 0 var(--accent);
+  overflow-wrap: break-word;
+  -webkit-mask-image: radial-gradient(circle, transparent 0.7px, #000 1.15px);
+  mask-image: radial-gradient(circle, transparent 0.7px, #000 1.15px);
+  -webkit-mask-size: 5px 5px;
+  mask-size: 5px 5px;
+}
+
+.fz-poema,
+.fz-poema-cuerpo,
+.fz-poema-estrofa,
+.fz-poema-verso,
+.fz-verso-destacado,
+.fz-poema-creditos,
+.fz-video-ig {
+  text-align: left;
+  hyphens: manual;
+}
+
+.fz-poema .fz-poema-estrofa {
+  margin: 0 0 0.95em;
+}
+
+.fz-poema-cuerpo {
+  font-family: 'Space Mono', ui-monospace, monospace;
+  font-size: var(--fz-poema-cuerpo, 9.5pt);
+  line-height: 1.42;
+  margin: 0.9rem 0 1.1rem;
+  overflow-x: auto;
+}
+
+.fz-poema-verso {
+  display: block;
+  font-size: inherit;
+  white-space: pre-wrap;
+}
+
+.fz-verso-destacado {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 1rem 0;
+  padding: 0.45em 0.7em;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Anton', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: var(--fz-poema-verso, 22pt);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.fz-poema-creditos {
+  font-family: 'Space Mono', ui-monospace, monospace;
+  font-size: 9pt;
+  line-height: 1.5;
+  margin: 1.4rem 0 0;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--ink);
+}
+
+.fz-poema-creditos p {
+  margin: 0;
+}
+
+.fz-poema-creditos a {
+  color: inherit;
+}
+
+.fz-video-ig {
+  margin: 1.15rem 0;
+  font-family: 'Space Mono', ui-monospace, monospace;
+}
+
+.fz-video-ig__marco {
+  position: relative;
+  display: block;
+  width: min(100%, 22rem);
+  aspect-ratio: 9 / 16;
+  max-height: 32rem;
+  margin-inline: auto;
+  background: #111;
+  overflow: hidden;
+}
+
+.fz-video-ig__cargar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 10px, rgba(255, 255, 255, 0.05) 10px 20px),
+    #111;
+  font-family: inherit;
+  font-size: 9.5pt;
+}
+
+.fz-video-ig__cargar:focus-visible {
+  outline: 3px solid var(--accent, #f5c518);
+  outline-offset: -6px;
+}
+
+.fz-video-ig__play {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--accent, #f5c518);
+  color: var(--ink, #111);
+  font-size: 1.15rem;
+  padding-left: 0.15rem;
+}
+
+.fz-video-ig__marco iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.fz-video-ig__abrir,
+.fz-video-ig__credito,
+.fz-video-ig__leyenda {
+  margin: 0.4rem 0 0;
+  font-size: 9pt;
+  line-height: 1.4;
+}
+
+.fz-video-ig__abrir {
+  display: inline-block;
+  color: inherit;
+}

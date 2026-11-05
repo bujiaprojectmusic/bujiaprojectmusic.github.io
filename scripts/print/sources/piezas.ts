@@ -14,6 +14,8 @@ import { componer, slugVolumen, type EntradaVolumen } from '../../../src/utils/c
 import { parsearMdx, leerImports, convertirHijos, props as leerProps, ErrorExport, type Contexto } from '../lib/mdx.ts';
 import type { Nodo } from '../lib/tipos.ts';
 import { toAssetPath } from '../../../src/utils/rutasAssets.ts';
+import { validarContenido } from '../lib/validar-poema.ts';
+import { ErrorPoema } from '../../../src/utils/poema.ts';
 
 export interface VolumenCompuestoFuente {
   slug: string;
@@ -106,6 +108,16 @@ export function listarVolumenesCompuestos(raiz: string, datosTaller: Map<string,
         mapa.set(rel, { hijos, esquema: pr.scheme ? String(pr.scheme) : p.data.scheme ?? null, props: pr, linea: (n.position?.start?.line ?? 0) + p.lineaBase });
       }
       if (mapa.size !== p.data.paginas) throw new ErrorExport(`${p.archivo}: tiene ${mapa.size} <Pagina> y el frontmatter dice paginas: ${p.data.paginas}.`);
+      if (p.data.template === 'poema') {
+        try { validarContenido(p.cuerpo, p.data, p.archivo); }
+        catch (e) { throw new ErrorExport(e instanceof ErrorPoema || e instanceof Error ? e.message : String(e)); }
+        const { instagram, medium, credito_video } = p.data;
+        if (!instagram || !medium || !credito_video) throw new ErrorExport(`${p.archivo}: template poema sin instagram, medium o credito_video.`);
+        const primera = mapa.get(1);
+        if (primera) primera.hijos.unshift({ t: 'titulo_poema', v: p.data.titulo });
+        const ultima = mapa.get(p.data.paginas);
+        if (ultima) ultima.hijos.push({ t: 'creditos_poema', autora: p.data.autor, instagram, medium, credito_video });
+      }
       paginasPorPieza.set(p.id, mapa);
     }
     for (const pg of comp.paginas) {

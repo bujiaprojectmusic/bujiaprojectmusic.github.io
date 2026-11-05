@@ -224,6 +224,32 @@ function resumenMd(resultados, segundos) {
   return l.join('\n') + '\n';
 }
 
+/** PDF de una página del poema draft. No entra al manifest ni a dist/. */
+async function compilarPoemaPrueba(bin) {
+  const r = spawnSync('npx', ['tsx', path.join(RAIZ, 'scripts', 'print', 'poema-prueba.ts')], { cwd: RAIZ, encoding: 'utf8' });
+  if (r.status !== 0) throw new C.ErrorBuild((r.stderr || r.stdout || '').trim());
+  log(r.stdout.trim());
+  const dir = path.join(BUILD, 'poema-prueba');
+  const jsonPath = path.join(dir, 'poema.json');
+  const pdf = path.join(dir, 'poema-prueba.pdf');
+  const comp = spawnSync(bin, ['compile', '--root', RAIZ, '--font-path', path.join(RAIZ, 'print', 'fonts'), '--ignore-system-fonts', '--creation-timestamp', EPOCH, '--input', 'variante=pantalla', path.join(RAIZ, 'print', 'poema-prueba.typ'), pdf], { cwd: RAIZ, encoding: 'utf8' });
+  if (comp.status !== 0) throw new C.ErrorBuild(`poema-prueba: Typst falló:\n${comp.stderr.replace(/\x1b\[[0-9;]*m/g, '').trim()}`);
+  const info = C.pdfinfo(pdf);
+  if (info.pages !== 1) throw new C.ErrorBuild(`poema-prueba: el poema ocupó ${info.pages} páginas; tiene que caber en una.`);
+  const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+  const qr = await C.revisarQr({ pliegos: [{ n: 1, nodos: data.nodos }] }, pdf);
+  if (qr.errores.length) throw new C.ErrorBuild(`poema-prueba:\n  - ${qr.errores.join('\n  - ')}`);
+  const fuentes = C.pdffonts(pdf);
+  const raras = fuentes.filter((f) => !/^(Anton|SpaceMono)-/.test(f.nombre) || f.emb !== 'yes');
+  if (raras.length) throw new C.ErrorBuild(`poema-prueba: fuentes inesperadas: ${raras.map((f) => f.nombre).join(', ')}`);
+  const tamanos = await C.tamanosDeLetra(pdf);
+  const chicos = tamanos.filter((t) => t.pt < 7);
+  const cuerpo = tamanos.filter((t) => /SpaceMono/.test(t.fuente) && t.pt >= 9);
+  if (chicos.length) throw new C.ErrorBuild(`poema-prueba: hay texto bajo 7 pt: ${chicos.map((t) => `${t.fuente} ${t.pt}`).join(', ')}`);
+  if (!cuerpo.length) throw new C.ErrorBuild('poema-prueba: no hay Space Mono ≥ 9 pt.');
+  log(`✔ poema-prueba: ${path.relative(RAIZ, pdf)} (1 pág, QR ${qr.filas.map((f) => f.url).join(', ')})`);
+}
+
 async function main() {
   const t0 = Date.now();
   const bin = typstBin();
@@ -258,6 +284,7 @@ async function main() {
     for (const a of r.avisos) log(`  ⚠ ${a}`);
   }
   if (usarCache) podar(vigentes);
+  if (!fixture) await compilarPoemaPrueba(bin);
   const segundos = (Date.now() - t0) / 1000;
   if (!fixture) {
     const manifest = { version: 1, generado_con: `typst ${fs.readFileSync(path.join(RAIZ, 'print', 'TYPST_VERSION'), 'utf8').trim()}`, epoch: EPOCH, segundos, compilados, desde_cache: resultados.length - compilados, volumenes: resultados };

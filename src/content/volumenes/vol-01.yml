@@ -10,7 +10,7 @@ fecha: 2026-10-01
 publishDate: 2026-10-01
 # La portada aprobada es rosa.
 colorScheme: rosa
-descripcion: "Reseña de “Foreign Tongues” y en vivo en la Escandón."
+descripcion: "Reseña de “Foreign Tongues”, en vivo en la Escandón y el poema “Tranquilo, no es contra ti.”"
 portada:
   # Portada aprobada en la Puerta 2 (1162 × 1600, copia byte a byte de
   # volumenes/vol-01/portada_vol1_final.jpg del repo de redacción).
@@ -20,15 +20,21 @@ portada:
   completa: true
   # Sin crédito de portada aparte: el arte es de la casa y su crédito es el de
   # la mascota (@olafh_ace), apagado con mostrar_credito_mascota.
-# Reseña págs. 3–4 (2), en vivo págs. 5–10 (2 de texto + 4 de fotos). Cierra en 12.
+# Reseña págs. 3–4 (2), en vivo págs. 5–10 (6), poema págs. 11–16 (6).
+# N crece a 20: huecos 17–18 con relleno, Fin 19, contraportada 20.
 piezas:
   - { pieza: 2026-10-resena-foreign-tongues, desde: 3 }
   - { pieza: 2026-10-en-vivo-en-la-escandon, desde: 5 }
+  - { pieza: 2026-10-tranquilo-no-es-contra-ti, desde: 11 }
+  - { relleno: colabora, desde: 17 }
+  - { relleno: notas, desde: 18 }
 contraportada:
   texto: "Bujía Project Music — Texcoco, MX"
   creditos:
     - "Edy Yáñez"
     - "Texto: Mrk Inthehat · Fotos y pies de foto: @sailor.mauveilleux_"
+    - "Poema: Hun Cib (@la.huncib)"
+    - "Video: @clh_capturandolahistoria"
 impreso:
   multimedia: qr
 # Publicado sin listar: noindex, fuera de /fanzine, /volumenes y el sitemap,

@@ -16,6 +16,7 @@ import type { Volumen, Pliego, Foto, Nodo } from './lib/tipos.ts';
 import { colorSchemes, taller as sitioTaller } from '../../src/config/site.ts';
 import * as taller from '../../src/data/taller.ts';
 import { letrasRescate } from '../../src/utils/rescate.ts';
+import { ladoQrCm, urlPublicaInstagram, ErrorPoema } from '../../src/utils/poema.ts';
 
 export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const reglas = JSON.parse(fs.readFileSync(path.join(RAIZ, 'print', 'reglas.json'), 'utf8'));
@@ -201,12 +202,15 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
   const multimedia: 'qr' | 'omitir' = fm.impreso?.multimedia === 'omitir' ? 'omitir' : 'qr';
   const fotos = new Map<string, Foto>();
   const qrs: Volumen['qrs'] = [];
+  const svgQr = new Map<string, string>();
   fs.mkdirSync(path.join(salidaDir, 'qr'), { recursive: true });
   const qr = async (url: string) => {
     const id = crypto.createHash('sha1').update(url).digest('hex').slice(0, 12);
     if (!qrs.some((q) => q.id === id)) {
       const archivo = path.join(salidaDir, 'qr', `${id}.svg`);
-      fs.writeFileSync(archivo, await QRCode.toString(url, { type: 'svg', errorCorrectionLevel: 'M', margin: 4, color: { dark: '#000000', light: '#ffffff' } }));
+      const svg = await QRCode.toString(url, { type: 'svg', errorCorrectionLevel: 'M', margin: 4, color: { dark: '#000000', light: '#ffffff' } });
+      fs.writeFileSync(archivo, svg);
+      svgQr.set(id, svg);
       qrs.push({ id, url, archivo: '/' + rel(archivo) });
     }
     return id;
@@ -220,6 +224,21 @@ export async function exportar(fuente: FuenteVolumen | FuenteCompuesta, salidaDi
     for (const nodo of nodos) {
       if (nodo.t === 'componente') {
         const props = { ...nodo.props } as Record<string, any>;
+        if (nodo.nombre === 'VideoInstagram') {
+          const cruda = String(props.url ?? '');
+          if (!cruda.trim()) throw new ErrorExport(`${fuente.archivo} pág. ${n}: <VideoInstagram> tiene url vacía.`);
+          let url: string;
+          try { url = urlPublicaInstagram(cruda); }
+          catch (e) { throw new ErrorExport(`${fuente.archivo} pág. ${n}: ${e instanceof ErrorPoema ? e.message : e}`); }
+          if (multimedia === 'omitir') { avisos.push(`pág. ${n}: <VideoInstagram> omitido (impreso.multimedia = "omitir").`); continue; }
+          const id = await qr(url);
+          props.url = url;
+          props.qr = id;
+          props.lado_cm = ladoQrCm(svgQr.get(id)!);
+          props.credito = String(props.credito ?? '');
+          out.push({ ...nodo, props, hijos: [] });
+          continue;
+        }
         if (VIDEOS.includes(nodo.nombre)) {
           if (multimedia === 'omitir') { avisos.push(`pág. ${n}: <${nodo.nombre} id="${props.id}"> omitido (impreso.multimedia = "omitir").`); continue; }
           if (nodo.nombre === 'Playlist') { props.kind = 'playlist'; props.title = props.titulo; }
