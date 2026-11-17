@@ -20,6 +20,6 @@ test('listVolumenesOcultos: sin_listar o prueba → /fanzine/vol-NN; ignora _pla
   assert.deepEqual(listVolumenesOcultos(dir), ['/fanzine/vol-01', '/fanzine/vol-02']);
 });
 
-test('listVolumenesOcultos: el repo oculta vol-01 (sin_listar: true)', () => {
-  assert.ok(listVolumenesOcultos().includes('/fanzine/vol-01'));
+test('listVolumenesOcultos: vol-01 publicado no queda fuera del sitemap', () => {
+  assert.equal(listVolumenesOcultos().includes('/fanzine/vol-01'), false);
 });
