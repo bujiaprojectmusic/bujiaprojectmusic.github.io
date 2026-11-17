@@ -7,7 +7,7 @@ numero: 1
 # Masthead de la portada aprobada (el arte dice "Jirafa Elektrika").
 titulo: "La Jirafa Elektrika"
 fecha: 2026-10-01
-publishDate: 2026-10-01
+publishDate: 2026-11-16
 # La portada aprobada es rosa.
 colorScheme: rosa
 descripcion: "Reseña de “Foreign Tongues”, en vivo en la Escandón y el poema “Tranquilo, no es contra ti.”"
@@ -37,9 +37,9 @@ contraportada:
     - "Video: @clh_capturandolahistoria"
 impreso:
   multimedia: qr
-# Publicado sin listar: noindex, fuera de /fanzine, /volumenes y el sitemap,
-# sin tarjeta de descarga (se comparte por enlace).
-sin_listar: true
+# Listado desde el 2026-11-16: en /fanzine, /volumenes y el sitemap, con
+# tarjeta de descarga. fecha sigue siendo el mes del volumen (octubre).
+sin_listar: false
 # Oculta sólo el crédito de la mascota / arte de la casa (issue #37). Los
 # créditos de las colaboraciones siempre se ven. En true vuelve a aparecer.
 mostrar_credito_mascota: false
